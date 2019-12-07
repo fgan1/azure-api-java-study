@@ -1,3 +1,6 @@
 .idea
 azure-api-java-study.iml
 target/
+
+src/main/resources/
+!src/main/resources/*.properties.example
