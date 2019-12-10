@@ -1,6 +1,6 @@
 package com.fgan.azure;
 
-import com.fgan.azure.api.Compute;
+import com.fgan.azure.api.ComputeApi;
 import com.fgan.azure.api.IdentityApi;
 import com.fgan.azure.api.NetworkApi;
 import com.microsoft.azure.PagedList;
@@ -41,16 +41,16 @@ public class App {
                 NetworkApi.printInformation(azure);
                 break;
             case PRINT_COMPUTE_INFORMATION:
-                Compute.printInformation(azure);
+                ComputeApi.printInformation(azure);
                 break;
             case LIST_IMAGE:
-                PagedList<VirtualMachineImage> vmImages = Compute.getVMImages(azure);
+                PagedList<VirtualMachineImage> vmImages = ComputeApi.getVMImages(azure);
                 break;
             case GET_NETWORK_INTERFACE:
-                Compute.getNetworkIntefaces(azure);
+                ComputeApi.getNetworkIntefaces(azure);
                 break;
             case RUN_COMPUTE_SAMPLE_ONE:
-                Compute.runSambleOne(azure);
+                ComputeApi.runSambleOne(azure);
                 break;
             default:
                 System.out.println("No Option chosen");

@@ -11,11 +11,11 @@ import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.sun.istack.internal.Nullable;
 
-public class Compute {
+public class ComputeApi {
 
     private static final String VM_NAME_DEFAULT = Constants.PREFIX + "virtual-machine";
     private static final String OS_USER_NAME_DEFAULT = "azure";
-    private static final String OS_USER_PASSWORD_DEFAULT = "azure";
+    private static final String OS_USER_PASSWORD_DEFAULT = "4zUre-";
     private static final Region REGION_DEFAULT = Region.US_EAST;
 
     // This VirtualMachine size is available to free tier access
@@ -85,7 +85,9 @@ public class Compute {
                 .withRootUsername(OS_USER_NAME_DEFAULT)
                 .withRootPassword(OS_USER_PASSWORD_DEFAULT)
                 .withComputerName(VM_NAME_DEFAULT)
+                .withCustomData("")
                 .withSize(VIRTUAL_MACHINE_SIZE_FREE_TIER)
+                .withOSDiskName("")
                 .create();
     }
 
