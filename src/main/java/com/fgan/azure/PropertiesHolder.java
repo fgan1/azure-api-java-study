@@ -1,10 +1,15 @@
 package com.fgan.azure;
 
 import com.sun.istack.internal.Nullable;
+import org.apache.commons.codec.binary.Base64;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Properties;
+import java.util.stream.Stream;
 
 public class PropertiesHolder {
 
@@ -12,6 +17,7 @@ public class PropertiesHolder {
 
     private static final String NETWORK_INTEFACE_ID_PROPS = "network_interface_id";
     private static final String RESOURCE_GROUP_NAME_PROPS = "resource_group_name";
+    private static final String CLOUD_INIT_PATH_PROPS = "cloud_init_path";
 
     private static Properties properties;
 
@@ -34,6 +40,14 @@ public class PropertiesHolder {
         return properties.getProperty(RESOURCE_GROUP_NAME_PROPS);
     }
 
+    public static String getUserData() {
+        Properties properties = getInstance();
+        String cloudInitPath = properties.getProperty(CLOUD_INIT_PATH_PROPS);
+        String cloudInitContent = getFileContent(cloudInitPath);
+        return new String(Base64.encodeBase64(cloudInitContent.getBytes(StandardCharsets.UTF_8),
+                false, false), StandardCharsets.UTF_8);
+    }
+
     private static Properties getProperties() {
         try {
             String generalPropertiesPath = System.getenv(GENERAL_PROPERTIES_ENV);
@@ -45,6 +59,16 @@ public class PropertiesHolder {
         } catch (IOException e) {
             throw new Error("There is no possible ** the properties", e);
         }
+    }
+
+    private static String getFileContent(String filePath) {
+        StringBuilder contentBuilder = new StringBuilder();
+        try (Stream<String> stream = Files.lines(Paths.get(filePath), StandardCharsets.UTF_8)) {
+            stream.forEach(s -> contentBuilder.append(s).append("\n"));
+        } catch (IOException e) {
+            throw new Error("There is no possible get the file content", e);
+        }
+        return contentBuilder.toString();
     }
 
 }

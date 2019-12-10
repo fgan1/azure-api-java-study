@@ -1,2 +1,4 @@
 network_interface_id=<network-interface-id>
 resource_group_name=<resource-group-name>
+
+cloud_init_path=<cloud-init-path>
