@@ -2,6 +2,7 @@ package com.fgan.azure;
 
 import com.fgan.azure.api.Compute;
 import com.fgan.azure.api.Identity;
+import com.fgan.azure.api.NetworkApi;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.VirtualMachineImage;
@@ -26,14 +27,19 @@ public class App {
         }
     }
 
+    // TODO (fgan) - move to another class file
     private enum Option {
         LIST_IMAGE, GET_NETWORK_INTERFACE,
         RUN_COMPUTE_SAMPLE_ONE,
-        PRINT_COMPUTE_INFORMATION
+        PRINT_COMPUTE_INFORMATION, PRINT_NETWORK_INFORMATION
     }
 
+    // TODO (fgan) - move to another class file
     private static void run(Azure azure, Option option) {
         switch (option) {
+            case PRINT_NETWORK_INFORMATION:
+                NetworkApi.printInformation(azure);
+                break;
             case PRINT_COMPUTE_INFORMATION:
                 Compute.printInformation(azure);
                 break;

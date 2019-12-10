@@ -3,11 +3,31 @@ package com.fgan.azure;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.compute.VirtualMachineImage;
 import com.microsoft.azure.management.compute.VirtualMachineSize;
+import com.microsoft.azure.management.network.Network;
+import com.microsoft.azure.management.network.NetworkInterface;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class PrintHolder {
+
+    public static void printNetworksLines(PagedList<Network> networks) {
+        PrintHolder.printSet(objects -> {
+            for (Object object: objects) {
+                Network network = (Network) object;
+                PrintHolder.printLines(network::name, network::id, network::regionName);
+            }
+        } , networks);
+    }
+
+    public static void printNetworkInterfacessLines(PagedList<NetworkInterface> networkInterfaces) {
+        PrintHolder.printSet(objects -> {
+            for (Object object: objects) {
+                NetworkInterface networkInterface = (NetworkInterface) object;
+                PrintHolder.printLines(networkInterface::name, networkInterface::id, networkInterface::key);
+            }
+        } , networkInterfaces);
+    }
 
     public static void printVirtualMachineImageLines(PagedList<VirtualMachineImage> vmImages) {
         PrintHolder.printSet(objects -> {
@@ -43,4 +63,5 @@ public class PrintHolder {
         }
         System.out.println(stringBuilder.toString());
     }
+
 }

@@ -9,6 +9,7 @@ import com.microsoft.azure.management.compute.*;
 import com.microsoft.azure.management.network.NetworkInterface;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
+import com.sun.istack.internal.Nullable;
 
 public class Compute {
 
@@ -30,7 +31,7 @@ public class Compute {
         String networkInterfaceId = PropertiesHolder.getNetworkInterfaceIdProp();
         String resourceGroupName = PropertiesHolder.getResourceGroupNameProp();
 
-        NetworkInterface networkInterface = getNetworkInterface(azure, networkInterfaceId);
+        NetworkInterface networkInterface = NetworkApi.getNetworkInterface(azure, networkInterfaceId);
         ResourceGroup resourceGroup = getResourceGroup(azure, resourceGroupName);
         createVirtualMachine(azure, networkInterface, resourceGroup);
     }
@@ -63,12 +64,9 @@ public class Compute {
         return sizes.listByRegion(REGION_DEFAULT);
     }
 
+    @Nullable
     private static AvailabilitySet getAvailabilitySet(Azure azure, String id) {
         return azure.availabilitySets().getById(id);
-    }
-
-    private static NetworkInterface getNetworkInterface(Azure azure, String id) {
-        return azure.networkInterfaces().getById(id);
     }
 
     private static ResourceGroup getResourceGroup(Azure azure, String name) {
