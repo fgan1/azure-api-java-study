@@ -2,17 +2,53 @@ package com.fgan.azure;
 
 import com.fgan.azure.api.Compute;
 import com.fgan.azure.api.Identity;
+import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.Azure;
+import com.microsoft.azure.management.compute.VirtualMachineImage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 1. You must export environment variables.
+ * export AZURE_AUTH_LOCATION=src/main/resources/azureauth.properties
+ * export AZURE_AUTH_LOCATION=src/main/resources/general.properties
+ */
 public class App {
     private static Logger LOGGER = LoggerFactory.getLogger(App.class);
 
     public static void main( String[] args ) throws Exception {
         LOGGER.info("Hello Azure!");
-
         Azure azure = Identity.getAzure();
-        Compute.runSambleOne(azure);
+
+        Option[] options = new Option[] { Option.RUN_COMPUTE_SAMPLE_ONE };
+        for (int i = 0; i < options.length; i++) {
+            run(azure, options[i]);
+        }
     }
+
+    private enum Option {
+        LIST_IMAGE, GET_NETWORK_INTERFACE,
+        RUN_COMPUTE_SAMPLE_ONE,
+        PRINT_COMPUTE_INFORMATION
+    }
+
+    private static void run(Azure azure, Option option) {
+        switch (option) {
+            case PRINT_COMPUTE_INFORMATION:
+                Compute.printInformation(azure);
+                break;
+            case LIST_IMAGE:
+                PagedList<VirtualMachineImage> vmImages = Compute.getVMImages(azure);
+                break;
+            case GET_NETWORK_INTERFACE:
+                Compute.getNetworkIntefaces(azure);
+                break;
+            case RUN_COMPUTE_SAMPLE_ONE:
+                Compute.runSambleOne(azure);
+                break;
+            default:
+                System.out.println("No Option chosen");
+        }
+    }
+
 }

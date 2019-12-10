@@ -20,6 +20,7 @@ public class Identity {
 
         // TODO(fgan): refactor to a method; move to Utils class
         String azureAuthLocation = getAzureAuthLocation();
+        azureAuthLocation = "src/main/resources/azureauth.properties"; // TODO(fgan): remove this
         final File credFile = new File(azureAuthLocation);
         if (!credFile.exists()) {
             String errorMsg = String.format("There is no file on path: %s", azureAuthLocation);
