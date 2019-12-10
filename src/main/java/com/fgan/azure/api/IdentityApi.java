@@ -9,8 +9,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 
-public class Identity {
-    private static Logger LOGGER = LoggerFactory.getLogger(Identity.class);
+public class IdentityApi {
+    private static Logger LOGGER = LoggerFactory.getLogger(IdentityApi.class);
 
     private final static String AZURE_AUTH_LOCATION = "AZURE_AUTH_LOCATION";
 

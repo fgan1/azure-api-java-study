@@ -1,7 +1,7 @@
 package com.fgan.azure;
 
 import com.fgan.azure.api.Compute;
-import com.fgan.azure.api.Identity;
+import com.fgan.azure.api.IdentityApi;
 import com.fgan.azure.api.NetworkApi;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.Azure;
@@ -19,7 +19,7 @@ public class App {
 
     public static void main( String[] args ) throws Exception {
         LOGGER.info("Hello Azure!");
-        Azure azure = Identity.getAzure();
+        Azure azure = IdentityApi.getAzure();
 
         Option[] options = new Option[] { Option.RUN_COMPUTE_SAMPLE_ONE };
         for (int i = 0; i < options.length; i++) {
