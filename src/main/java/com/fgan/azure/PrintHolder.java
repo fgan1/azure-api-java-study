@@ -2,6 +2,7 @@ package com.fgan.azure;
 
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.compute.VirtualMachineImage;
+import com.microsoft.azure.management.compute.VirtualMachinePublisher;
 import com.microsoft.azure.management.compute.VirtualMachineSize;
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.network.NetworkInterface;
@@ -47,6 +48,17 @@ public class PrintHolder {
         }, virtualMachineSizes);
     }
 
+    public static void printVirtualMachinePublishersLines(
+            PagedList<VirtualMachinePublisher> virtualMachinePublishers) {
+
+        PrintHolder.printSet(objects -> {
+            for (Object object: objects) {
+                VirtualMachinePublisher virtualMachinePublisher = (VirtualMachinePublisher) object;
+                PrintHolder.printLines(virtualMachinePublisher::name);
+            }
+        }, virtualMachinePublishers);
+    }
+
     private static void printSet(Consumer<PagedList<? extends Object>> consumer,
                                 PagedList<? extends Object> list) {
         System.out.println("-------------------------");
@@ -63,5 +75,4 @@ public class PrintHolder {
         }
         System.out.println(stringBuilder.toString());
     }
-
 }

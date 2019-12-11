@@ -2,10 +2,9 @@ package com.fgan.azure;
 
 import com.fgan.azure.api.ComputeApi;
 import com.fgan.azure.api.IdentityApi;
+import com.fgan.azure.api.ImageApi;
 import com.fgan.azure.api.NetworkApi;
-import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.Azure;
-import com.microsoft.azure.management.compute.VirtualMachineImage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +20,7 @@ public class App {
         LOGGER.info("Hello Azure!");
         Azure azure = IdentityApi.getAzure();
 
-        Option[] options = new Option[] { Option.RUN_COMPUTE_SAMPLE_ONE };
+        Option[] options = new Option[] { Option.PRINT_VIRTUAL_MACHINE_PUBLISHERS };
         for (int i = 0; i < options.length; i++) {
             run(azure, options[i]);
         }
@@ -29,7 +28,7 @@ public class App {
 
     // TODO (fgan) - move to another class file
     private enum Option {
-        LIST_IMAGE, GET_NETWORK_INTERFACE,
+        PRINT_VIRTUAL_MACHINE_PUBLISHERS, GET_NETWORK_INTERFACE,
         RUN_COMPUTE_SAMPLE_ONE,
         PRINT_COMPUTE_INFORMATION, PRINT_NETWORK_INFORMATION
     }
@@ -43,8 +42,8 @@ public class App {
             case PRINT_COMPUTE_INFORMATION:
                 ComputeApi.printInformation(azure);
                 break;
-            case LIST_IMAGE:
-                PagedList<VirtualMachineImage> vmImages = ComputeApi.getVMImages(azure);
+            case PRINT_VIRTUAL_MACHINE_PUBLISHERS:
+                ImageApi.printInformation(azure);
                 break;
             case GET_NETWORK_INTERFACE:
                 ComputeApi.getNetworkIntefaces(azure);

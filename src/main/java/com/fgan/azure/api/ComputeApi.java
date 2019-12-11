@@ -5,10 +5,12 @@ import com.fgan.azure.PrintHolder;
 import com.fgan.azure.PropertiesHolder;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.Azure;
-import com.microsoft.azure.management.compute.*;
+import com.microsoft.azure.management.compute.AvailabilitySet;
+import com.microsoft.azure.management.compute.VirtualMachine;
+import com.microsoft.azure.management.compute.VirtualMachineSize;
+import com.microsoft.azure.management.compute.VirtualMachineSizes;
 import com.microsoft.azure.management.network.NetworkInterface;
 import com.microsoft.azure.management.resources.ResourceGroup;
-import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.sun.istack.internal.Nullable;
 
 public class ComputeApi {
@@ -16,7 +18,6 @@ public class ComputeApi {
     private static final String VM_NAME_DEFAULT = Constants.PREFIX + "virtual-machine";
     private static final String OS_USER_NAME_DEFAULT = "azure";
     private static final String OS_USER_PASSWORD_DEFAULT = "4zUre-";
-    private static final Region REGION_DEFAULT = Region.US_EAST;
 
     // This VirtualMachine size is available to free tier access
     private static final String VIRTUAL_MACHINE_SIZE_FREE_TIER = "Standard_B1s";
@@ -38,19 +39,12 @@ public class ComputeApi {
     }
 
     public static void printInformation(Azure azure) {
-//        PagedList<VirtualMachineImage> vmImages = getVMImages(azure);
-//        PrintHolder.printVirtualMachineImageLines(vmImages);
-
         PagedList<VirtualMachineSize> virtualMachineSizes = getVirtualMachineSizes(azure);
         PrintHolder.printVirtualMachineSizeLines(virtualMachineSizes);
     }
 
     public static PagedList<NetworkInterface> getNetworkIntefaces(Azure azure) {
         return azure.networkInterfaces().list();
-    }
-
-    public static PagedList<VirtualMachineImage> getVMImages(Azure azure) {
-        return azure.virtualMachineImages().listByRegion(REGION_DEFAULT);
     }
 
     /**
@@ -62,7 +56,7 @@ public class ComputeApi {
      */
     public static PagedList<VirtualMachineSize> getVirtualMachineSizes(Azure azure) {
         VirtualMachineSizes sizes = azure.virtualMachines().sizes();
-        return sizes.listByRegion(REGION_DEFAULT);
+        return sizes.listByRegion(Constants.REGION_DEFAULT);
     }
 
     @Nullable
@@ -81,7 +75,7 @@ public class ComputeApi {
 
         return azure.virtualMachines()
                 .define(VM_NAME_DEFAULT)
-                .withRegion(REGION_DEFAULT)
+                .withRegion(Constants.REGION_DEFAULT)
                 .withExistingResourceGroup(resourceGroup)
                 .withExistingPrimaryNetworkInterface(networkInterface)
                 .withLatestLinuxImage(IMAGE_PUBLISHED_DEFAULT, IMAGE_OFFER_DEFAULT, IMAGE_SKU_DEFAULT)
