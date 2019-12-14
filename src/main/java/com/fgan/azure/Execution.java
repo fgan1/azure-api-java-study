@@ -6,45 +6,45 @@ import com.fgan.azure.api.VolumeApi;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.Disk;
 
-public class TestsExecution {
+public class Execution {
 
-    private static TestsExecution instance = new TestsExecution();
+    private static Execution instance = new Execution();
 
-    public static TestsExecution run() {
+    public static Execution start() {
         System.out.println("||||||||||||| Starting Test |||||||||||||");
         return instance;
     }
 
-    public TestsExecution finish() {
+    public Execution finish() {
         System.out.println("||||||||||||| Ending Test |||||||||||||");
         return this.instance;
     }
 
     // NETWORK test
-    public TestsExecution printNetworkInformation(Azure azure) {
+    public Execution printNetworkInformation(Azure azure) {
         NetworkApi.printInformation(azure);
         return this.instance;
     }
 
     // COMPUTE tests
-    public TestsExecution runComputeSampleOne(Azure azure) {
+    public Execution runComputeSampleOne(Azure azure) {
         ComputeApi.runSambleOne(azure);
         return this.instance;
     }
 
-    public TestsExecution printComputeInformation(Azure azure) {
+    public Execution printComputeInformation(Azure azure) {
         ComputeApi.printMostInformation(azure);
         return this.instance;
     }
 
-    public TestsExecution printVirtualMachineAlreadyCreatedInformation(Azure azure, String id)
+    public Execution printVirtualMachineAlreadyCreatedInformation(Azure azure, String id)
             throws Exception {
 
         ComputeApi.printVmInformation(azure, id);
         return this.instance;
     }
 
-    public TestsExecution deleteVirtualMachineAlreadyCreatedInformation(Azure azure, String id)
+    public Execution deleteVirtualMachineAlreadyCreatedInformation(Azure azure, String id)
             throws Exception {
 
         ComputeApi.deleteVm(azure, id);
@@ -55,18 +55,18 @@ public class TestsExecution {
 
     // Volume
 
-    public TestsExecution printVolumeInformation(Azure azure) {
+    public Execution printVolumeInformation(Azure azure) {
         VolumeApi.printMostInformation(azure);
         return this.instance;
     }
 
-    public TestsExecution printDiskCreatedInformation(Azure azure, String id) {
+    public Execution printDiskCreatedInformation(Azure azure, String id) {
         Disk disk = VolumeApi.getDisk(azure, id);
         PrintHolder.printLines(disk::name, disk::id);
         return this.instance;
     }
 
-    public TestsExecution deleteDiskCreatedInformation(Azure azure, String id) {
+    public Execution deleteDiskCreatedInformation(Azure azure, String id) {
         VolumeApi.deleteDisk(azure, id);
         return this.instance;
     }

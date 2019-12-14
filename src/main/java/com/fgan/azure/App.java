@@ -15,7 +15,7 @@ public class App {
         Azure azure = IdentityApi.getAzure();
 
         String id = "";
-        TestsExecution.run()
+        Execution.start()
                 // Compute
 //                .runComputeSampleOne(azure)
 //                .printComputeInformation(azure)
