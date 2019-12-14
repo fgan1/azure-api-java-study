@@ -16,11 +16,17 @@ public class App {
 
         String id = "";
         TestsExecution.run()
+                // Compute
 //                .runComputeSampleOne(azure)
 //                .printComputeInformation(azure)
-                .printVirtualMachineAlreadyCreatedInformation(azure, id)
-                .deleteVirtualMachineAlreadyCreatedInformation(azure, id)
+//                .printVirtualMachineAlreadyCreatedInformation(azure, id)
+//                .deleteVirtualMachineAlreadyCreatedInformation(azure, id)
+                // network
 //                .printNetworkInformation(azure)
+                // Volume
+//                .printVolumeInformation(azure)
+//                .printDiskCreatedInformation(azure, id)
+//                .deleteDiskCreatedInformation(azure, id)
                 .finish();
     }
 

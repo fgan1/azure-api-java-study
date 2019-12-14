@@ -1,10 +1,7 @@
 package com.fgan.azure;
 
 import com.microsoft.azure.PagedList;
-import com.microsoft.azure.management.compute.VirtualMachine;
-import com.microsoft.azure.management.compute.VirtualMachineImage;
-import com.microsoft.azure.management.compute.VirtualMachinePublisher;
-import com.microsoft.azure.management.compute.VirtualMachineSize;
+import com.microsoft.azure.management.compute.*;
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.network.NetworkInterface;
 
@@ -69,11 +66,21 @@ public class PrintHolder {
         }, virtualMachinePublishers);
     }
 
-    private static void printSet(Consumer<PagedList<? extends Object>> consumer,
+    public static void printDisksLines(PagedList<Disk> disks) {
+        PrintHolder.printSet(objects -> {
+            for (Object object: objects) {
+                Disk disk = (Disk) object;
+                PrintHolder.printLines(disk::name, disk::id);
+            }
+        }, disks);
+    }
+
+    private static void printSet(Consumer<PagedList<? extends Object>> functionConsumer,
                                 PagedList<? extends Object> list) {
-        System.out.println("-------------------------");
-        consumer.accept(list);
-        System.out.println("-------------------------");
+
+        System.out.println("--------------------------");
+        functionConsumer.accept(list);
+        System.out.println("--------------------------");
     }
 
     public static void printLines(Supplier<? extends Object>... suppliers) {

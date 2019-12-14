@@ -43,11 +43,11 @@ public class ComputeApi {
                 virtualMachine::size);
     }
 
-    public static void deleteVm(Azure azure, String virtualMachineId) throws Exception {
+    public static void deleteVm(Azure azure, String virtualMachineId) {
         deleteVirtualMachine(azure, virtualMachineId);
     }
 
-    public static void printVmInformation(Azure azure, String virtualMachineId) throws Exception {
+    public static void printVmInformation(Azure azure, String virtualMachineId) {
         VirtualMachine virtualMachine = getVirtualMachine(azure, virtualMachineId);
         PrintHolder.printLines(virtualMachine::id,
                 virtualMachine::vmId,

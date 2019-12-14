@@ -2,7 +2,9 @@ package com.fgan.azure;
 
 import com.fgan.azure.api.ComputeApi;
 import com.fgan.azure.api.NetworkApi;
+import com.fgan.azure.api.VolumeApi;
 import com.microsoft.azure.management.Azure;
+import com.microsoft.azure.management.compute.Disk;
 
 public class TestsExecution {
 
@@ -49,8 +51,27 @@ public class TestsExecution {
         return this.instance;
     }
 
+    //    ComputeApi.printInformation(azure);
+
+    // Volume
+
+    public TestsExecution printVolumeInformation(Azure azure) {
+        VolumeApi.printMostInformation(azure);
+        return this.instance;
+    }
+
+    public TestsExecution printDiskCreatedInformation(Azure azure, String id) {
+        Disk disk = VolumeApi.getDisk(azure, id);
+        PrintHolder.printLines(disk::name, disk::id);
+        return this.instance;
+    }
+
+    public TestsExecution deleteDiskCreatedInformation(Azure azure, String id) {
+        VolumeApi.deleteDisk(azure, id);
+        return this.instance;
+    }
+
     // TODO(chico) - finish refactoring
-//    ComputeApi.printInformation(azure);
 //    ImageApi.printInformation(azure);
 //    ComputeApi.getNetworkIntefaces(azure);
 
