@@ -1,5 +1,7 @@
 package com.fgan.azure.api;
 
+import com.microsoft.azure.AzureEnvironment;
+import com.microsoft.azure.credentials.UserTokenCredentials;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.rest.LogLevel;
 import com.sun.istack.internal.Nullable;
@@ -31,6 +33,16 @@ public class IdentityApi {
         } catch (IOException e) {
             throw new Exception("Is not possible get Azure object", e);
         }
+    }
+
+    public static void authenticate(String clientId, String tenantId, String username, String password) {
+        UserTokenCredentials credentials = new UserTokenCredentials(
+                clientId,
+                tenantId,
+                username,
+                password,
+                AzureEnvironment.AZURE);
+        Azure.Authenticated authenticate = Azure.authenticate(credentials);
     }
 
     // TODO(fgan): move to Utils class
