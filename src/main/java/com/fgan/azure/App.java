@@ -1,9 +1,6 @@
 package com.fgan.azure;
 
-import com.fgan.azure.api.ComputeApi;
 import com.fgan.azure.api.IdentityApi;
-import com.fgan.azure.api.ImageApi;
-import com.fgan.azure.api.NetworkApi;
 import com.microsoft.azure.management.Azure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,40 +17,9 @@ public class App {
         LOGGER.info("Hello Azure!");
         Azure azure = IdentityApi.getAzure();
 
-        Option[] options = new Option[] { Option.PRINT_VIRTUAL_MACHINE_PUBLISHERS };
-        for (int i = 0; i < options.length; i++) {
-            run(azure, options[i]);
-        }
-    }
-
-    // TODO (fgan) - move to another class file
-    private enum Option {
-        PRINT_VIRTUAL_MACHINE_PUBLISHERS, GET_NETWORK_INTERFACE,
-        RUN_COMPUTE_SAMPLE_ONE,
-        PRINT_COMPUTE_INFORMATION, PRINT_NETWORK_INFORMATION
-    }
-
-    // TODO (fgan) - move to another class file
-    private static void run(Azure azure, Option option) {
-        switch (option) {
-            case PRINT_NETWORK_INFORMATION:
-                NetworkApi.printInformation(azure);
-                break;
-            case PRINT_COMPUTE_INFORMATION:
-                ComputeApi.printInformation(azure);
-                break;
-            case PRINT_VIRTUAL_MACHINE_PUBLISHERS:
-                ImageApi.printInformation(azure);
-                break;
-            case GET_NETWORK_INTERFACE:
-                ComputeApi.getNetworkIntefaces(azure);
-                break;
-            case RUN_COMPUTE_SAMPLE_ONE:
-                ComputeApi.runSambleOne(azure);
-                break;
-            default:
-                System.out.println("No Option chosen");
-        }
+        TestsExecution.run()
+                .printNetworkInformation(azure)
+                .finish();
     }
 
 }

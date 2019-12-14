@@ -35,7 +35,11 @@ public class ComputeApi {
         NetworkInterface networkInterface = NetworkApi.getNetworkInterface(azure, networkInterfaceId);
         String userData = PropertiesHolder.getUserData();
         ResourceGroup resourceGroup = getResourceGroup(azure, resourceGroupName);
-        createVirtualMachine(azure, networkInterface, userData, resourceGroup);
+        VirtualMachine virtualMachine = createVirtualMachine(azure, networkInterface, userData, resourceGroup);
+        PrintHolder.printLines(virtualMachine::id,
+                virtualMachine::vmId,
+                virtualMachine::computerName,
+                virtualMachine::size);
     }
 
     public static void printInformation(Azure azure) {
@@ -66,6 +70,10 @@ public class ComputeApi {
 
     private static ResourceGroup getResourceGroup(Azure azure, String name) {
         return azure.resourceGroups().getByName(name);
+    }
+
+    private static VirtualMachine getVirtualMachine(Azure azure, String id) {
+        return azure.virtualMachines().getById(id);
     }
 
     private static VirtualMachine createVirtualMachine(Azure azure,
