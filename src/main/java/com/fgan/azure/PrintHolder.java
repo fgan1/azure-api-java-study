@@ -1,6 +1,7 @@
 package com.fgan.azure;
 
 import com.microsoft.azure.PagedList;
+import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.compute.VirtualMachineImage;
 import com.microsoft.azure.management.compute.VirtualMachinePublisher;
 import com.microsoft.azure.management.compute.VirtualMachineSize;
@@ -37,6 +38,15 @@ public class PrintHolder {
                 PrintHolder.printLines(vmImage::publisherName);
             }
         } , vmImages);
+    }
+
+    public static void printVirtualMachinesLines(PagedList<VirtualMachine> virtualMachine) {
+        PrintHolder.printSet(objects -> {
+            for (Object object: objects) {
+                VirtualMachine vm = (VirtualMachine) object;
+                PrintHolder.printLines(vm::name, vm::id, vm::size);
+            }
+        }, virtualMachine);
     }
 
     public static void printVirtualMachineSizeLines(PagedList<VirtualMachineSize> virtualMachineSizes) {

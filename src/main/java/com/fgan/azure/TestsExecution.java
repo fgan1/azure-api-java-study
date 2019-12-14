@@ -6,26 +6,47 @@ import com.microsoft.azure.management.Azure;
 
 public class TestsExecution {
 
-    private static TestsExecution testsExecution = new TestsExecution();
+    private static TestsExecution instance = new TestsExecution();
 
     public static TestsExecution run() {
         System.out.println("||||||||||||| Starting Test |||||||||||||");
-        return testsExecution;
+        return instance;
     }
 
     public TestsExecution finish() {
         System.out.println("||||||||||||| Ending Test |||||||||||||");
-        return this.testsExecution;
+        return this.instance;
     }
 
+    // NETWORK test
     public TestsExecution printNetworkInformation(Azure azure) {
         NetworkApi.printInformation(azure);
-        return this.testsExecution;
+        return this.instance;
     }
 
+    // COMPUTE tests
     public TestsExecution runComputeSampleOne(Azure azure) {
         ComputeApi.runSambleOne(azure);
-        return this.testsExecution;
+        return this.instance;
+    }
+
+    public TestsExecution printComputeInformation(Azure azure) {
+        ComputeApi.printMostInformation(azure);
+        return this.instance;
+    }
+
+    public TestsExecution printVirtualMachineAlreadyCreatedInformation(Azure azure, String id)
+            throws Exception {
+
+        ComputeApi.printVmInformation(azure, id);
+        return this.instance;
+    }
+
+    public TestsExecution deleteVirtualMachineAlreadyCreatedInformation(Azure azure, String id)
+            throws Exception {
+
+        ComputeApi.deleteVm(azure, id);
+        return this.instance;
     }
 
     // TODO(chico) - finish refactoring

@@ -3,20 +3,16 @@ package com.fgan.azure.api;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.rest.LogLevel;
 import com.sun.istack.internal.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 
 public class IdentityApi {
-    private static Logger LOGGER = LoggerFactory.getLogger(IdentityApi.class);
-
     private final static String AZURE_AUTH_LOCATION = "AZURE_AUTH_LOCATION";
 
     // TODO(fgan): think about change to singleton pattern
     public static Azure getAzure() throws Exception {
-        LOGGER.debug("Getting azure object");
+        System.out.println("Getting azure object");
 
         // TODO(fgan): refactor to a method; move to Utils class
         String azureAuthLocation = getAzureAuthLocation();

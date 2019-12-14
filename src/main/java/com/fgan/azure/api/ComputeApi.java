@@ -21,7 +21,8 @@ public class ComputeApi {
 
     // This VirtualMachine size is available to free tier access
     private static final String VIRTUAL_MACHINE_SIZE_FREE_TIER = "Standard_B1s";
-    private static final String IMAGE_PUBLISHED_DEFAULT = "Canonical";
+    // Publisher returned in the AZURE CLI fetch
+    private static final String IMAGE_PUBLISHER_DEFAULT = "Canonical";
     private static final String IMAGE_OFFER_DEFAULT = "UbuntuServer";
     private static final String IMAGE_SKU_DEFAULT = "18.04-LTS";
 
@@ -42,12 +43,27 @@ public class ComputeApi {
                 virtualMachine::size);
     }
 
-    public static void printInformation(Azure azure) {
+    public static void deleteVm(Azure azure, String virtualMachineId) throws Exception {
+        deleteVirtualMachine(azure, virtualMachineId);
+    }
+
+    public static void printVmInformation(Azure azure, String virtualMachineId) throws Exception {
+        VirtualMachine virtualMachine = getVirtualMachine(azure, virtualMachineId);
+        PrintHolder.printLines(virtualMachine::id,
+                virtualMachine::vmId,
+                virtualMachine::computerName,
+                virtualMachine::size);
+    }
+
+    public static void printMostInformation(Azure azure) {
+        PagedList<VirtualMachine> virtualMachines = getVirtualMachines(azure);
+        PrintHolder.printVirtualMachinesLines(virtualMachines);
+
         PagedList<VirtualMachineSize> virtualMachineSizes = getVirtualMachineSizes(azure);
         PrintHolder.printVirtualMachineSizeLines(virtualMachineSizes);
     }
 
-    public static PagedList<NetworkInterface> getNetworkIntefaces(Azure azure) {
+    private static PagedList<NetworkInterface> getNetworkIntefaces(Azure azure) {
         return azure.networkInterfaces().list();
     }
 
@@ -58,7 +74,7 @@ public class ComputeApi {
      * Virtual Machine Size is the flavor
      * Amount of vCPU and Memory
      */
-    public static PagedList<VirtualMachineSize> getVirtualMachineSizes(Azure azure) {
+    private static PagedList<VirtualMachineSize> getVirtualMachineSizes(Azure azure) {
         VirtualMachineSizes sizes = azure.virtualMachines().sizes();
         return sizes.listByRegion(Constants.REGION_DEFAULT);
     }
@@ -76,6 +92,22 @@ public class ComputeApi {
         return azure.virtualMachines().getById(id);
     }
 
+    private static PagedList<VirtualMachine> getVirtualMachines(Azure azure) {
+        return azure.virtualMachines().list();
+    }
+
+    /**
+     * Delete virtual machine by synchronous operation.
+     * Notes: It might spend minutes
+     */
+    private static void deleteVirtualMachine(Azure azure, String virtualMachineId) {
+        azure.virtualMachines().deleteById(virtualMachineId);
+    }
+
+    /**
+     * Create virtual machine by synchronous operation.
+     * Notes: It might spend minutes
+     */
     private static VirtualMachine createVirtualMachine(Azure azure,
                                                        NetworkInterface networkInterface,
                                                        String userData,
@@ -86,7 +118,7 @@ public class ComputeApi {
                 .withRegion(Constants.REGION_DEFAULT)
                 .withExistingResourceGroup(resourceGroup)
                 .withExistingPrimaryNetworkInterface(networkInterface)
-                .withLatestLinuxImage(IMAGE_PUBLISHED_DEFAULT, IMAGE_OFFER_DEFAULT, IMAGE_SKU_DEFAULT)
+                .withLatestLinuxImage(IMAGE_PUBLISHER_DEFAULT, IMAGE_OFFER_DEFAULT, IMAGE_SKU_DEFAULT)
                 .withRootUsername(OS_USER_NAME_DEFAULT)
                 .withRootPassword(OS_USER_PASSWORD_DEFAULT)
                 .withComputerName(VM_NAME_DEFAULT)
