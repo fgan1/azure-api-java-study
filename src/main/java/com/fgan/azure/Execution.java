@@ -57,7 +57,15 @@ public class Execution {
         return this.instance;
     }
 
-    public Execution deleteVirtualMachineAlreadyCreatedAsync(Azure azure, String id)
+    public Execution deleteVirtualMachineAlreadyCreatedByNameAsync(Azure azure, String name)
+            throws Exception {
+
+        String virtualMachineId = AzureIDBuilder.buildVirtualMachineId(name);
+        ComputeApi.deleteVmAsync(azure, virtualMachineId);
+        return this.instance;
+    }
+
+    public Execution deleteVirtualMachineAlreadyCreatedByIdAsync(Azure azure, String id)
             throws Exception {
 
         ComputeApi.deleteVmAsync(azure, id);

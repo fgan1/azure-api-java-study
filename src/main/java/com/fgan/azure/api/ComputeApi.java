@@ -19,7 +19,7 @@ import rx.Observable;
 
 public class ComputeApi {
 
-    private static final String VM_NAME_DEFAULT = Constants.PREFIX + "virtual-machine";
+    public static final String VM_NAME_DEFAULT = Constants.PREFIX + "virtual-machine";
     private static final String OS_USER_NAME_DEFAULT = "azure";
     private static final String OS_USER_PASSWORD_DEFAULT = "4zUre-";
 

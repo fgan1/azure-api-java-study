@@ -1,5 +1,6 @@
 package com.fgan.azure;
 
+import com.fgan.azure.api.ComputeApi;
 import com.fgan.azure.api.IdentityApi;
 import com.microsoft.azure.management.Azure;
 
@@ -21,14 +22,15 @@ public class App {
         String name = "";
         Execution.start()
                 /**
-                 * Compute
+                 * Compute(Fogbow naming) / Virtual Machine(Azure naming)
                  */
 //                .runComputeSampleOne(azure)
 //                .createComputeStyleFogbow(azure)
 //                .printComputeInformation(azure)
 //                .printVirtualMachineAlreadyCreatedInformation(azure, id)
 //                .deleteVirtualMachineAlreadyCreated(azure, id)
-//                .deleteVirtualMachineAlreadyCreatedAsync(azure, id)
+//                .deleteVirtualMachineAlreadyCreatedByIdAsync(azure, id)
+                .deleteVirtualMachineAlreadyCreatedByNameAsync(azure, name)
                 /**
                  * Network
                  */
