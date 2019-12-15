@@ -28,7 +28,13 @@ public class Execution {
 
     // COMPUTE tests
     public Execution runComputeSampleOne(Azure azure) {
-        ComputeApi.runSambleOne(azure);
+        ComputeApi.runSambleOneSync(azure);
+        return this.instance;
+    }
+
+    // COMPUTE tests
+    public Execution createComputeStyleFogbow(Azure azure) throws InterruptedException {
+        ComputeApi.createComputeFogbowWithObservebla(azure);
         return this.instance;
     }
 
@@ -44,10 +50,17 @@ public class Execution {
         return this.instance;
     }
 
-    public Execution deleteVirtualMachineAlreadyCreatedInformation(Azure azure, String id)
+    public Execution deleteVirtualMachineAlreadyCreated(Azure azure, String id)
             throws Exception {
 
-        ComputeApi.deleteVm(azure, id);
+        ComputeApi.deleteVmSync(azure, id);
+        return this.instance;
+    }
+
+    public Execution deleteVirtualMachineAlreadyCreatedAsync(Azure azure, String id)
+            throws Exception {
+
+        ComputeApi.deleteVmAsync(azure, id);
         return this.instance;
     }
 
@@ -66,8 +79,19 @@ public class Execution {
         return this.instance;
     }
 
-    public Execution deleteDiskCreatedInformation(Azure azure, String id) {
-        VolumeApi.deleteDisk(azure, id);
+    public Execution deleteDiskCreatedByName(Azure azure, String name) {
+        String diskId = AzureIDBuilder.buildDiskId(name);
+        VolumeApi.deleteDisk(azure, diskId);
+        return this.instance;
+    }
+
+    public Execution deleteDiskCreatedById(Azure azure, String diskId) {
+        VolumeApi.deleteDisk(azure, diskId);
+        return this.instance;
+    }
+
+    public Execution deleteDiskByVirtualMachine(Azure azure, String virtualMachineId) {
+        VolumeApi.deleteDiskByVirtualMachine(azure, virtualMachineId);
         return this.instance;
     }
 

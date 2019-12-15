@@ -41,7 +41,7 @@ public class PrintHolder {
         PrintHolder.printSet(objects -> {
             for (Object object: objects) {
                 VirtualMachine vm = (VirtualMachine) object;
-                PrintHolder.printLines(vm::name, vm::id, vm::size);
+                PrintHolder.printLines(vm::name, vm::id, vm::size, vm::osDiskId);
             }
         }, virtualMachine);
     }

@@ -1,5 +1,6 @@
 package com.fgan.azure.api;
 
+import com.fgan.azure.AzureIDBuilder;
 import com.fgan.azure.Constants;
 import com.fgan.azure.PrintHolder;
 import com.fgan.azure.PropertiesHolder;
@@ -11,7 +12,10 @@ import com.microsoft.azure.management.compute.VirtualMachineSize;
 import com.microsoft.azure.management.compute.VirtualMachineSizes;
 import com.microsoft.azure.management.network.NetworkInterface;
 import com.microsoft.azure.management.resources.ResourceGroup;
+import com.microsoft.azure.management.resources.fluentcore.model.Indexable;
 import com.sun.istack.internal.Nullable;
+import rx.Completable;
+import rx.Observable;
 
 public class ComputeApi {
 
@@ -28,29 +32,92 @@ public class ComputeApi {
 
     /**
      * Create Virtual Machine.
+     * Sample to firts tests.
      */
-    public static void runSambleOne(Azure azure) {
+    public static void runSambleOneSync(Azure azure) {
         String networkInterfaceId = PropertiesHolder.getNetworkInterfaceIdProp();
         String resourceGroupName = PropertiesHolder.getResourceGroupNameProp();
 
         NetworkInterface networkInterface = NetworkApi.getNetworkInterface(azure, networkInterfaceId);
         String userData = PropertiesHolder.getUserData();
         ResourceGroup resourceGroup = getResourceGroup(azure, resourceGroupName);
-        VirtualMachine virtualMachine = createVirtualMachine(azure, networkInterface, userData, resourceGroup);
+        VirtualMachine virtualMachine = createVirtualMachineSync(azure, networkInterface, userData, resourceGroup);
         PrintHolder.printLines(virtualMachine::id,
                 virtualMachine::vmId,
                 virtualMachine::computerName,
                 virtualMachine::size);
     }
 
-    public static void deleteVm(Azure azure, String virtualMachineId) {
+    /**
+     * Create compute asynchronously.
+     * Reactive Programming is applied.
+     *
+     * When Running:
+     * - States (powerState / provisioningState):
+     * -- (1) PowerState/starting|Creating
+     * -- (2) PowerState/running|Creating
+     * -- (3) PowerState/running|Succeeded
+     */
+    public static void createComputeFogbowWithObservebla(Azure azure) throws InterruptedException {
+        String networkInterfaceId = PropertiesHolder.getNetworkInterfaceIdProp();
+        String resourceGroupName = PropertiesHolder.getResourceGroupNameProp();
+
+        NetworkInterface networkInterface = NetworkApi.getNetworkInterface(azure, networkInterfaceId);
+        String userData = PropertiesHolder.getUserData();
+        ResourceGroup resourceGroup = getResourceGroup(azure, resourceGroupName);
+
+        Observable<Indexable> virtualMachineAsync =
+                createVirtualMachineAsync(azure, networkInterface, userData, resourceGroup);
+        virtualMachineAsync.subscribe(v -> {
+            System.out.println("Index" + v.key().toString());
+        }, err -> {
+            err.printStackTrace();
+        }, () -> {
+            System.out.println("Completed.");
+        });
+
+        String id = AzureIDBuilder.buildVirtualMachineId(ComputeApi.VM_NAME_DEFAULT);
+        verifyVMState(azure, id);
+    }
+
+    private static void verifyVMState(Azure azure, String virtualMachineId) throws InterruptedException {
+        final int SLEEP_TIME = 10000;
+        int count = 0;
+        while (count < 16) {
+            try {
+                VirtualMachine virtualMachine = ComputeApi.getVirtualMachine(azure, virtualMachineId);
+                System.out.println("VirtualMachine state:");
+                PrintHolder.printLines(virtualMachine::name, virtualMachine::powerState, virtualMachine::provisioningState);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            Thread.sleep(SLEEP_TIME);
+            count++;
+        }
+    }
+
+    public static void deleteVmSync(Azure azure, String virtualMachineId) {
         deleteVirtualMachine(azure, virtualMachineId);
+    }
+
+    public static void deleteVmAsync(Azure azure, String virtualMachineId) {
+        VirtualMachine virtualMachine = getVirtualMachine(azure, virtualMachineId);
+        String osDiskId = virtualMachine.osDiskId();
+        Completable completable = deleteVirtualMachineAsync(azure, virtualMachineId);
+        completable.subscribe(() -> {
+            System.out.println(String.format("Complete and Deleting disk %s", osDiskId));
+            VolumeApi.deleteDisk(azure, osDiskId);
+        }, (err) -> {
+            err.printStackTrace();
+        });
     }
 
     public static void printVmInformation(Azure azure, String virtualMachineId) {
         VirtualMachine virtualMachine = getVirtualMachine(azure, virtualMachineId);
-        PrintHolder.printLines(virtualMachine::id,
-                virtualMachine::vmId,
+        PrintHolder.printLines(virtualMachine::name,
+                virtualMachine::id,
+                virtualMachine::powerState,
+                virtualMachine::provisioningState,
                 virtualMachine::computerName,
                 virtualMachine::size);
     }
@@ -69,7 +136,7 @@ public class ComputeApi {
 
     /**
      * Get all Virtual Machine Sizes
-     *
+     * <p>
      * Meanings:
      * Virtual Machine Size is the flavor
      * Amount of vCPU and Memory
@@ -88,7 +155,7 @@ public class ComputeApi {
         return azure.resourceGroups().getByName(name);
     }
 
-    private static VirtualMachine getVirtualMachine(Azure azure, String id) {
+    public static VirtualMachine getVirtualMachine(Azure azure, String id) {
         return azure.virtualMachines().getById(id);
     }
 
@@ -104,14 +171,39 @@ public class ComputeApi {
         azure.virtualMachines().deleteById(virtualMachineId);
     }
 
+    private static Completable deleteVirtualMachineAsync(Azure azure, String virtualMachineId) {
+        return azure.virtualMachines().deleteByIdAsync(virtualMachineId);
+    }
+
+    private static Observable<Indexable> createVirtualMachineAsync(Azure azure,
+                                                                   NetworkInterface networkInterface,
+                                                                   String userData,
+                                                                   ResourceGroup resourceGroup) {
+
+        VirtualMachine.DefinitionStages.WithCreate virtualMachineContextCreation =
+                createVirtualMachineContextCreation(azure, networkInterface, userData, resourceGroup);
+        return virtualMachineContextCreation.createAsync();
+    }
+
     /**
      * Create virtual machine by synchronous operation.
      * Notes: It might spend minutes
      */
-    private static VirtualMachine createVirtualMachine(Azure azure,
-                                                       NetworkInterface networkInterface,
-                                                       String userData,
-                                                       ResourceGroup resourceGroup) {
+    private static VirtualMachine createVirtualMachineSync(Azure azure,
+                                                           NetworkInterface networkInterface,
+                                                           String userData,
+                                                           ResourceGroup resourceGroup) {
+
+        VirtualMachine.DefinitionStages.WithCreate virtualMachineContextCreation =
+                createVirtualMachineContextCreation(azure, networkInterface, userData, resourceGroup);
+        return virtualMachineContextCreation.create();
+    }
+
+    private static VirtualMachine.DefinitionStages.WithCreate createVirtualMachineContextCreation(
+            Azure azure,
+            NetworkInterface networkInterface,
+            String userData,
+            ResourceGroup resourceGroup) {
 
         return azure.virtualMachines()
                 .define(VM_NAME_DEFAULT)
@@ -123,8 +215,6 @@ public class ComputeApi {
                 .withRootPassword(OS_USER_PASSWORD_DEFAULT)
                 .withComputerName(VM_NAME_DEFAULT)
                 .withCustomData(userData)
-                .withSize(VIRTUAL_MACHINE_SIZE_FREE_TIER)
-                .create();
+                .withSize(VIRTUAL_MACHINE_SIZE_FREE_TIER);
     }
-
 }

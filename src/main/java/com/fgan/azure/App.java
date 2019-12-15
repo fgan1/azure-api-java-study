@@ -4,6 +4,9 @@ import com.fgan.azure.api.IdentityApi;
 import com.microsoft.azure.management.Azure;
 
 /**
+ * Project create in order to learn/test how to use Azure Java Api/JDK;
+ *
+ * Steps:
  * 1. You must export environment variables.
  * export AZURE_AUTH_LOCATION=src/main/resources/azureauth.properties
  * export AZURE_AUTH_LOCATION=src/main/resources/general.properties
@@ -11,23 +14,44 @@ import com.microsoft.azure.management.Azure;
 public class App {
 
     public static void main( String[] args ) throws Exception {
-        System.out.println("Hello Azure!");
+        System.out.println("Hello Azure Api!");
         Azure azure = IdentityApi.getAzure();
 
         String id = "";
+        String name = "";
         Execution.start()
-                // Compute
+                /**
+                 * Compute
+                 */
 //                .runComputeSampleOne(azure)
+//                .createComputeStyleFogbow(azure)
 //                .printComputeInformation(azure)
 //                .printVirtualMachineAlreadyCreatedInformation(azure, id)
-//                .deleteVirtualMachineAlreadyCreatedInformation(azure, id)
-                // network
+//                .deleteVirtualMachineAlreadyCreated(azure, id)
+//                .deleteVirtualMachineAlreadyCreatedAsync(azure, id)
+                /**
+                 * Network
+                 */
 //                .printNetworkInformation(azure)
-                // Volume
+                /**
+                 * Volume(Fogbow naming) / Disk(Azure namming)
+                 */
 //                .printVolumeInformation(azure)
 //                .printDiskCreatedInformation(azure, id)
-//                .deleteDiskCreatedInformation(azure, id)
+//                .deleteDiskCreatedById(azure, id)
+//                .deleteDiskCreatedByName(azure, name)
+//                .deleteDiskByVirtualMachine(azure, id)
                 .finish();
+
+        runningForever();
+    }
+
+    public static void runningForever() throws InterruptedException {
+        final int SLEEP_TIME = 30000;
+        while (true) {
+            Thread.sleep(SLEEP_TIME);
+            System.out.println("I am alive !!");
+        }
     }
 
 }

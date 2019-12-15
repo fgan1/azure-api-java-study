@@ -15,6 +15,7 @@ public class PropertiesHolder {
 
     private static final String GENERAL_PROPERTIES_ENV = "GENERAL_PROPERTIES_ENV";
 
+    private static final String SUBSCRIPTION_PROPS = "subscription";
     private static final String NETWORK_INTEFACE_ID_PROPS = "network_interface_id";
     private static final String RESOURCE_GROUP_NAME_PROPS = "resource_group_name";
     private static final String CLOUD_INIT_PATH_PROPS = "cloud_init_path";
@@ -26,6 +27,12 @@ public class PropertiesHolder {
             return properties;
         }
         return getProperties();
+    }
+
+    @Nullable
+    public static String getSubscriptionProp() {
+        Properties properties = getInstance();
+        return properties.getProperty(SUBSCRIPTION_PROPS);
     }
 
     @Nullable
