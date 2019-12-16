@@ -2,6 +2,7 @@ package com.fgan.azure;
 
 import com.fgan.azure.api.ComputeApi;
 import com.fgan.azure.api.NetworkApi;
+import com.fgan.azure.api.SecurityRuleApi;
 import com.fgan.azure.api.VolumeApi;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.Disk;
@@ -84,7 +85,6 @@ public class Execution {
     //    ComputeApi.printInformation(azure);
 
     // Volume
-
     public Execution printVolumeInformation(Azure azure) {
         VolumeApi.printMostInformation(azure);
         return this.instance;
@@ -109,6 +109,17 @@ public class Execution {
 
     public Execution deleteDiskByVirtualMachine(Azure azure, String virtualMachineId) {
         VolumeApi.deleteDiskByVirtualMachine(azure, virtualMachineId);
+        return this.instance;
+    }
+
+    // Security Rules
+    public Execution printSecurityRules(Azure azure) {
+        SecurityRuleApi.printSecurityRules(azure);
+        return this.instance;
+    }
+
+    public Execution addSecurityRules(Azure azure) {
+        SecurityRuleApi.addSecurityRules(azure);
         return this.instance;
     }
 

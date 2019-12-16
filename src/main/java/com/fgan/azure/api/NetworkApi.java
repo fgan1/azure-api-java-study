@@ -10,8 +10,8 @@ import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.network.NetworkInterface;
 import com.microsoft.azure.management.network.NetworkSecurityGroup;
 import com.microsoft.azure.management.resources.fluentcore.model.Indexable;
+import rx.Completable;
 import rx.Observable;
-import rx.functions.Action0;
 import rx.functions.Func1;
 
 /**
@@ -54,22 +54,19 @@ public class NetworkApi {
 
     public static void deleteNetworkAsync(Azure azure) {
         String securityGroupId = AzureIDBuilder.buildSecurityGroupId(SECURITY_GROUP_NAME_DEFAULT);
-        Observable<NetworkSecurityGroup> deleteSecurityGroupObservable =
-                azure.networkSecurityGroups().getByIdAsync(securityGroupId);
+        Completable deleteSecurityGroupObservable =
+                azure.networkSecurityGroups().deleteByIdAsync(securityGroupId);
 
         String networkId = AzureIDBuilder.buildNetworkId(NETWORK_NAME_DEFAULT);
-        Observable<Network> deleteNetworkObservable =
-                azure.networks().getByIdAsync(networkId);
+        Completable deleteNetworkObservable =
+                azure.networks().deleteByIdAsync(networkId);
 
-        Observable.merge(Observable.just(deleteSecurityGroupObservable, deleteNetworkObservable)).subscribe(
-                (v) -> {
-                    System.out.println("Delete network style Fogbow (Stream)" + v);
+        Completable.merge(deleteNetworkObservable, deleteSecurityGroupObservable).subscribe(
+                () -> {
+                    System.out.println("Delete network style Fogbow complete");
                 },
                 (err) -> {
                     err.printStackTrace();
-                },
-                () -> {
-                    System.out.println("Delete network style Fogbow complete");
                 }
         );
     }

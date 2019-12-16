@@ -35,7 +35,7 @@ public class App {
                  */
 //                .printNetworkInformation(azure)
 //                .createNetworkStyleFogbow(azure)
-                .deleteNetworkStyleFogbow(azure)
+//                .deleteNetworkStyleFogbow(azure)
                 /**
                  * Volume(Fogbow naming) / Disk(Azure namming)
                  */
@@ -44,6 +44,11 @@ public class App {
 //                .deleteDiskCreatedById(azure, id)
 //                .deleteDiskCreatedByName(azure, name)
 //                .deleteDiskByVirtualMachine(azure, id)
+                /**
+                 * Security Rules
+                 */
+                .addSecurityRules(azure)
+                .printSecurityRules(azure)
                 .finish();
 
         runningForever();
