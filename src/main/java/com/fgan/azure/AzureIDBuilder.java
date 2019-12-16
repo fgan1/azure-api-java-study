@@ -8,9 +8,23 @@ public class AzureIDBuilder {
     // /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/disks/{diskName}
     private static String DISK_STRUCTURE =
             "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/disks/%s";
+    // /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkSecurityGroups/{networkSecurityGroupName}
+    private static String NETWORK_SECURITY_GROUP_STRUCTURE =
+            "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/networkSecurityGroups/%s";
+    // /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks/{virtualNetworkName}
+    private static String NETWORK_STRUCTURE =
+            "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/virtualNetworks/%s";
 
     public static String buildVirtualMachineId(String name) {
         return buildId(VIRTUAL_MACHINE_STRUCTURE, name);
+    }
+
+    public static String buildSecurityGroupId(String name) {
+        return buildId(NETWORK_SECURITY_GROUP_STRUCTURE, name);
+    }
+
+    public static String buildNetworkId(String name) {
+        return buildId(NETWORK_STRUCTURE, name);
     }
 
     public static String buildDiskId(String name) {

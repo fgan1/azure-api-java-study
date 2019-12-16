@@ -26,13 +26,22 @@ public class Execution {
         return this.instance;
     }
 
+    public Execution createNetworkStyleFogbow(Azure azure) {
+        NetworkApi.createNetworkAsync(azure);
+        return this.instance;
+    }
+
+    public Execution deleteNetworkStyleFogbow(Azure azure) {
+        NetworkApi.deleteNetworkAsync(azure);
+        return this.instance;
+    }
+
     // COMPUTE tests
     public Execution runComputeSampleOne(Azure azure) {
         ComputeApi.runSambleOneSync(azure);
         return this.instance;
     }
 
-    // COMPUTE tests
     public Execution createComputeStyleFogbow(Azure azure) throws InterruptedException {
         ComputeApi.createComputeFogbowWithObservebla(azure);
         return this.instance;

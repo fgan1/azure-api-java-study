@@ -40,7 +40,7 @@ public class ComputeApi {
 
         NetworkInterface networkInterface = NetworkApi.getNetworkInterface(azure, networkInterfaceId);
         String userData = PropertiesHolder.getUserData();
-        ResourceGroup resourceGroup = getResourceGroup(azure, resourceGroupName);
+        ResourceGroup resourceGroup = ManagerApi.getResourceGroup(azure, resourceGroupName);
         VirtualMachine virtualMachine = createVirtualMachineSync(azure, networkInterface, userData, resourceGroup);
         PrintHolder.printLines(virtualMachine::id,
                 virtualMachine::vmId,
@@ -64,7 +64,7 @@ public class ComputeApi {
 
         NetworkInterface networkInterface = NetworkApi.getNetworkInterface(azure, networkInterfaceId);
         String userData = PropertiesHolder.getUserData();
-        ResourceGroup resourceGroup = getResourceGroup(azure, resourceGroupName);
+        ResourceGroup resourceGroup = ManagerApi.getResourceGroup(azure, resourceGroupName);
 
         Observable<Indexable> virtualMachineAsync =
                 createVirtualMachineAsync(azure, networkInterface, userData, resourceGroup);
@@ -100,6 +100,13 @@ public class ComputeApi {
         deleteVirtualMachine(azure, virtualMachineId);
     }
 
+    /**
+     * Delete VM; This operation is asynchronous.
+     *
+     * Fogbow Steps:
+     * - Delete VirtualMachine
+     * - Delete Disk
+     */
     public static void deleteVmAsync(Azure azure, String virtualMachineId) {
         VirtualMachine virtualMachine = getVirtualMachine(azure, virtualMachineId);
         String osDiskId = virtualMachine.osDiskId();
@@ -149,10 +156,6 @@ public class ComputeApi {
     @Nullable
     private static AvailabilitySet getAvailabilitySet(Azure azure, String id) {
         return azure.availabilitySets().getById(id);
-    }
-
-    private static ResourceGroup getResourceGroup(Azure azure, String name) {
-        return azure.resourceGroups().getByName(name);
     }
 
     public static VirtualMachine getVirtualMachine(Azure azure, String id) {

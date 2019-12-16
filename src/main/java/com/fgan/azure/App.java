@@ -1,6 +1,5 @@
 package com.fgan.azure;
 
-import com.fgan.azure.api.ComputeApi;
 import com.fgan.azure.api.IdentityApi;
 import com.microsoft.azure.management.Azure;
 
@@ -30,11 +29,13 @@ public class App {
 //                .printVirtualMachineAlreadyCreatedInformation(azure, id)
 //                .deleteVirtualMachineAlreadyCreated(azure, id)
 //                .deleteVirtualMachineAlreadyCreatedByIdAsync(azure, id)
-                .deleteVirtualMachineAlreadyCreatedByNameAsync(azure, name)
+//                .deleteVirtualMachineAlreadyCreatedByNameAsync(azure, name)
                 /**
                  * Network
                  */
 //                .printNetworkInformation(azure)
+//                .createNetworkStyleFogbow(azure)
+                .deleteNetworkStyleFogbow(azure)
                 /**
                  * Volume(Fogbow naming) / Disk(Azure namming)
                  */
