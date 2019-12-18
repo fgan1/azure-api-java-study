@@ -6,10 +6,7 @@ import com.fgan.azure.util.GeneralPrintUtil;
 import com.fgan.azure.util.PropertiesUtil;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.Azure;
-import com.microsoft.azure.management.compute.AvailabilitySet;
-import com.microsoft.azure.management.compute.VirtualMachine;
-import com.microsoft.azure.management.compute.VirtualMachineSize;
-import com.microsoft.azure.management.compute.VirtualMachineSizes;
+import com.microsoft.azure.management.compute.*;
 import com.microsoft.azure.management.network.NetworkInterface;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.fluentcore.model.Indexable;
@@ -85,7 +82,7 @@ public class ComputeApi {
         int count = 0;
         while (count < 16) {
             try {
-                VirtualMachine virtualMachine = ComputeApi.getVirtualMachine(azure, virtualMachineId);
+                VirtualMachine virtualMachine = ComputeApi.getVirtualMachineById(azure, virtualMachineId);
                 System.out.println("VirtualMachine state:");
                 GeneralPrintUtil.printLines(virtualMachine::name, virtualMachine::powerState, virtualMachine::provisioningState);
             } catch (Exception e) {
@@ -108,7 +105,7 @@ public class ComputeApi {
      * - Delete Disk
      */
     public static void deleteVmAsync(Azure azure, String virtualMachineId) {
-        VirtualMachine virtualMachine = getVirtualMachine(azure, virtualMachineId);
+        VirtualMachine virtualMachine = getVirtualMachineById(azure, virtualMachineId);
         String osDiskId = virtualMachine.osDiskId();
         Completable completable = deleteVirtualMachineAsync(azure, virtualMachineId);
         completable.subscribe(() -> {
@@ -120,7 +117,7 @@ public class ComputeApi {
     }
 
     public static void printVmInformation(Azure azure, String virtualMachineId) {
-        VirtualMachine virtualMachine = getVirtualMachine(azure, virtualMachineId);
+        VirtualMachine virtualMachine = getVirtualMachineById(azure, virtualMachineId);
         GeneralPrintUtil.printLines(virtualMachine::name,
                 virtualMachine::id,
                 virtualMachine::powerState,
@@ -158,8 +155,20 @@ public class ComputeApi {
         return azure.availabilitySets().getById(id);
     }
 
-    public static VirtualMachine getVirtualMachine(Azure azure, String id) {
-        return azure.virtualMachines().getById(id);
+    @Nullable
+    public static VirtualMachine getVirtualMachine(Azure azure) {
+        return getVirtualMachineByName(azure, VM_NAME_DEFAULT);
+    }
+
+    @Nullable
+    public static VirtualMachine getVirtualMachineByName(Azure azure, String virtualMachineName) {
+        String virtualMachineId = AzureIDBuilder.buildVirtualMachineId(virtualMachineName);
+        return azure.virtualMachines().getById(virtualMachineId);
+    }
+
+    @Nullable
+    public static VirtualMachine getVirtualMachineById(Azure azure, String virtualMachineId) {
+        return azure.virtualMachines().getById(virtualMachineId);
     }
 
     private static PagedList<VirtualMachine> getVirtualMachines(Azure azure) {

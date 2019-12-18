@@ -35,7 +35,7 @@ public class App {
                  */
 //                .printNetworkInformation(azure)
 //                .createNetworkStyleFogbow(azure)
-                .deleteNetworkStyleFogbow(azure)
+//                .deleteNetworkStyleFogbow(azure)
                 /**
                  * Volume(Fogbow naming) / Disk(Azure namming)
                  */
@@ -44,11 +44,17 @@ public class App {
 //                .deleteDiskCreatedById(azure, id)
 //                .deleteDiskCreatedByName(azure, name)
 //                .deleteDiskByVirtualMachine(azure, id)
+//                .createDiskSync(azure)
                 /**
                  * Security Rules
                  */
 //                .addSecurityRules(azure)
 //                .printSecurityRules(azure)
+                /**
+                 * Attachment
+                 */
+//                .attackDiskByNameFromDefaultVmSync(azure, name)
+//                .detackDiskByNameFromDefaultVmSync(azure, name)
                 .finish();
 
         runningForever();

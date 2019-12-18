@@ -1,9 +1,6 @@
 package com.fgan.azure;
 
-import com.fgan.azure.api.ComputeApi;
-import com.fgan.azure.api.NetworkApi;
-import com.fgan.azure.api.SecurityRuleApi;
-import com.fgan.azure.api.VolumeApi;
+import com.fgan.azure.api.*;
 import com.fgan.azure.util.AzureIDBuilder;
 import com.fgan.azure.util.GeneralPrintUtil;
 import com.microsoft.azure.management.Azure;
@@ -114,6 +111,11 @@ public class SampleExecution {
         return this.instance;
     }
 
+    public SampleExecution createDiskSync(Azure azure) {
+        VolumeApi.createDiskSync(azure);
+        return this.instance;
+    }
+
     // Security Rules
     public SampleExecution printSecurityRules(Azure azure) {
         SecurityRuleApi.printSecurityRules(azure);
@@ -122,6 +124,17 @@ public class SampleExecution {
 
     public SampleExecution addSecurityRules(Azure azure) {
         SecurityRuleApi.addSecurityRules(azure);
+        return this.instance;
+    }
+
+    // Attachment
+    public SampleExecution detackDiskByNameFromDefaultVmSync(Azure azure, String id) {
+        AttachmentApi.detackDiskByNameFromDefaultVmSync(azure, id);
+        return this.instance;
+    }
+
+    public SampleExecution attackDiskByNameFromDefaultVmSync(Azure azure, String id) {
+        AttachmentApi.attackDiskByNameFromDefaultVmSync(azure, id);
         return this.instance;
     }
 
