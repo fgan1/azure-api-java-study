@@ -35,7 +35,7 @@ public class App {
                  */
 //                .printNetworkInformation(azure)
 //                .createNetworkStyleFogbow(azure)
-//                .deleteNetworkStyleFogbow(azure)
+                .deleteNetworkStyleFogbow(azure)
                 /**
                  * Volume(Fogbow naming) / Disk(Azure namming)
                  */
@@ -47,8 +47,8 @@ public class App {
                 /**
                  * Security Rules
                  */
-                .addSecurityRules(azure)
-                .printSecurityRules(azure)
+//                .addSecurityRules(azure)
+//                .printSecurityRules(azure)
                 .finish();
 
         runningForever();

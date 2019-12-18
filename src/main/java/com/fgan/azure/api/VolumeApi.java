@@ -1,16 +1,21 @@
 package com.fgan.azure.api;
 
-import com.fgan.azure.PrintHolder;
+import com.fgan.azure.GeneralPrintUtil;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.Disk;
 import com.microsoft.azure.management.compute.VirtualMachine;
 
+/**
+ * Samples Disk operation:
+ * - https://github.com/Azure-Samples/managed-disk-java-convert-existing-virtual-machines-to-use-managed-disks
+ * - https://github.com/Azure-Samples/managed-disk-java-create-virtual-machine-using-custom-image
+ */
 public class VolumeApi {
 
     public static void printMostInformation(Azure azure) {
         PagedList<Disk> disks = getDisks(azure);
-        PrintHolder.printDisksLines(disks);
+        GeneralPrintUtil.printDisksLines(disks);
     }
 
     public static void deleteDiskByVirtualMachine(Azure azure, String virtualMachineId) {

@@ -32,8 +32,8 @@ public class AzureIDBuilder {
     }
 
     private static String buildId(String structure, String name) {
-        String subscription = PropertiesHolder.getSubscriptionProp();
-        String resourceGroupName = PropertiesHolder.getResourceGroupNameProp();
+        String subscription = PropertiesUtil.getSubscriptionProp();
+        String resourceGroupName = PropertiesUtil.getResourceGroupNameProp();
         return String.format(structure, subscription, resourceGroupName, name);
     }
 

@@ -2,8 +2,8 @@ package com.fgan.azure.api;
 
 import com.fgan.azure.AzureIDBuilder;
 import com.fgan.azure.Constants;
-import com.fgan.azure.PrintHolder;
-import com.fgan.azure.PropertiesHolder;
+import com.fgan.azure.GeneralPrintUtil;
+import com.fgan.azure.PropertiesUtil;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.network.Network;
@@ -28,15 +28,15 @@ public class NetworkApi {
 
     public static void printInformation(Azure azure) {
         PagedList<Network> networks = getNetworks(azure);
-        PrintHolder.printNetworksLines(networks);
+        GeneralPrintUtil.printNetworksLines(networks);
 
         PagedList<NetworkInterface> networkInterfaces = getNetworkInterfaces(azure);
-        PrintHolder.printNetworkInterfacessLines(networkInterfaces);
+        GeneralPrintUtil.printNetworkInterfacessLines(networkInterfaces);
     }
 
     public static void printSpecificNetworkInformationById(Azure azure, String networkId) {
         Network network = getNetwork(azure, networkId);
-        PrintHolder.printLines(network::name, network::regionName, network::id);
+        GeneralPrintUtil.printLines(network::name, network::regionName, network::id);
     }
 
     public static void printSpecificNetworkInformationByName(Azure azure, String networkName) {
@@ -72,7 +72,7 @@ public class NetworkApi {
     }
 
     public static void createNetworkAsync(Azure azure) {
-        String resourceGroupName = PropertiesHolder.getResourceGroupNameProp();
+        String resourceGroupName = PropertiesUtil.getResourceGroupNameProp();
 
         Observable<Indexable> securityGroupObservable = createSecurityGroup(azure);
         securityGroupObservable.flatMap(new Func1<Indexable, Observable<Indexable>>() {
@@ -104,7 +104,7 @@ public class NetworkApi {
     }
 
     private static Observable<Indexable> createSecurityGroup(Azure azure) {
-        String resourceGroupName = PropertiesHolder.getResourceGroupNameProp();
+        String resourceGroupName = PropertiesUtil.getResourceGroupNameProp();
 
         return azure.networkSecurityGroups().define(SECURITY_GROUP_NAME_DEFAULT)
                 .withRegion(Constants.REGION_DEFAULT)

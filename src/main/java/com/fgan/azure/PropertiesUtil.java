@@ -11,7 +11,7 @@ import java.nio.file.Paths;
 import java.util.Properties;
 import java.util.stream.Stream;
 
-public class PropertiesHolder {
+public class PropertiesUtil {
 
     private static final String GENERAL_PROPERTIES_ENV = "GENERAL_PROPERTIES_ENV";
 

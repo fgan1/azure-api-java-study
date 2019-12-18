@@ -92,7 +92,7 @@ public class Execution {
 
     public Execution printDiskCreatedInformation(Azure azure, String id) {
         Disk disk = VolumeApi.getDisk(azure, id);
-        PrintHolder.printLines(disk::name, disk::id);
+        GeneralPrintUtil.printLines(disk::name, disk::id);
         return this.instance;
     }
 

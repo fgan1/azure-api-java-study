@@ -1,7 +1,7 @@
 package com.fgan.azure.api;
 
 import com.fgan.azure.AzureIDBuilder;
-import com.fgan.azure.PrintHolder;
+import com.fgan.azure.GeneralPrintUtil;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.network.NetworkSecurityRule;
 
@@ -14,7 +14,7 @@ public class SecurityRuleApi {
         Map<String, NetworkSecurityRule> stringNetworkSecurityRuleMap =
                 azure.networkSecurityGroups().getById(securityGroupId).securityRules();
         for (NetworkSecurityRule networkSecurityRule : stringNetworkSecurityRuleMap.values()) {
-            PrintHolder.printLines(networkSecurityRule::sourcePortRange,
+            GeneralPrintUtil.printLines(networkSecurityRule::sourcePortRange,
                     networkSecurityRule::destinationPortRange,
                     networkSecurityRule::protocol,
                     networkSecurityRule::direction);

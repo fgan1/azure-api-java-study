@@ -8,49 +8,49 @@ import com.microsoft.azure.management.network.NetworkInterface;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class PrintHolder {
+public class GeneralPrintUtil {
 
     public static void printNetworksLines(PagedList<Network> networks) {
-        PrintHolder.printSet(objects -> {
+        GeneralPrintUtil.printSet(objects -> {
             for (Object object: objects) {
                 Network network = (Network) object;
-                PrintHolder.printLines(network::name, network::id, network::regionName);
+                GeneralPrintUtil.printLines(network::name, network::id, network::regionName);
             }
         } , networks);
     }
 
     public static void printNetworkInterfacessLines(PagedList<NetworkInterface> networkInterfaces) {
-        PrintHolder.printSet(objects -> {
+        GeneralPrintUtil.printSet(objects -> {
             for (Object object: objects) {
                 NetworkInterface networkInterface = (NetworkInterface) object;
-                PrintHolder.printLines(networkInterface::name, networkInterface::id, networkInterface::key);
+                GeneralPrintUtil.printLines(networkInterface::name, networkInterface::id, networkInterface::key);
             }
         } , networkInterfaces);
     }
 
     public static void printVirtualMachineImageLines(PagedList<VirtualMachineImage> vmImages) {
-        PrintHolder.printSet(objects -> {
+        GeneralPrintUtil.printSet(objects -> {
             for (Object object: objects) {
                 VirtualMachineImage vmImage = (VirtualMachineImage) object;
-                PrintHolder.printLines(vmImage::publisherName);
+                GeneralPrintUtil.printLines(vmImage::publisherName);
             }
         } , vmImages);
     }
 
     public static void printVirtualMachinesLines(PagedList<VirtualMachine> virtualMachine) {
-        PrintHolder.printSet(objects -> {
+        GeneralPrintUtil.printSet(objects -> {
             for (Object object: objects) {
                 VirtualMachine vm = (VirtualMachine) object;
-                PrintHolder.printLines(vm::name, vm::id, vm::size, vm::osDiskId);
+                GeneralPrintUtil.printLines(vm::name, vm::id, vm::size, vm::osDiskId);
             }
         }, virtualMachine);
     }
 
     public static void printVirtualMachineSizeLines(PagedList<VirtualMachineSize> virtualMachineSizes) {
-        PrintHolder.printSet(objects -> {
+        GeneralPrintUtil.printSet(objects -> {
             for (Object object: objects) {
                 VirtualMachineSize vmSizes = (VirtualMachineSize) object;
-                PrintHolder.printLines(vmSizes::name, vmSizes::numberOfCores, vmSizes::memoryInMB);
+                GeneralPrintUtil.printLines(vmSizes::name, vmSizes::numberOfCores, vmSizes::memoryInMB);
             }
         }, virtualMachineSizes);
     }
@@ -58,19 +58,19 @@ public class PrintHolder {
     public static void printVirtualMachinePublishersLines(
             PagedList<VirtualMachinePublisher> virtualMachinePublishers) {
 
-        PrintHolder.printSet(objects -> {
+        GeneralPrintUtil.printSet(objects -> {
             for (Object object: objects) {
                 VirtualMachinePublisher virtualMachinePublisher = (VirtualMachinePublisher) object;
-                PrintHolder.printLines(virtualMachinePublisher::name);
+                GeneralPrintUtil.printLines(virtualMachinePublisher::name);
             }
         }, virtualMachinePublishers);
     }
 
     public static void printDisksLines(PagedList<Disk> disks) {
-        PrintHolder.printSet(objects -> {
+        GeneralPrintUtil.printSet(objects -> {
             for (Object object: objects) {
                 Disk disk = (Disk) object;
-                PrintHolder.printLines(disk::name, disk::id);
+                GeneralPrintUtil.printLines(disk::name, disk::id);
             }
         }, disks);
     }

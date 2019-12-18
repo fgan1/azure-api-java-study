@@ -2,8 +2,8 @@ package com.fgan.azure.api;
 
 import com.fgan.azure.AzureIDBuilder;
 import com.fgan.azure.Constants;
-import com.fgan.azure.PrintHolder;
-import com.fgan.azure.PropertiesHolder;
+import com.fgan.azure.GeneralPrintUtil;
+import com.fgan.azure.PropertiesUtil;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.AvailabilitySet;
@@ -35,14 +35,14 @@ public class ComputeApi {
      * Sample to firts tests.
      */
     public static void runSambleOneSync(Azure azure) {
-        String networkInterfaceId = PropertiesHolder.getNetworkInterfaceIdProp();
-        String resourceGroupName = PropertiesHolder.getResourceGroupNameProp();
+        String networkInterfaceId = PropertiesUtil.getNetworkInterfaceIdProp();
+        String resourceGroupName = PropertiesUtil.getResourceGroupNameProp();
 
         NetworkInterface networkInterface = NetworkApi.getNetworkInterface(azure, networkInterfaceId);
-        String userData = PropertiesHolder.getUserData();
+        String userData = PropertiesUtil.getUserData();
         ResourceGroup resourceGroup = ManagerApi.getResourceGroup(azure, resourceGroupName);
         VirtualMachine virtualMachine = createVirtualMachineSync(azure, networkInterface, userData, resourceGroup);
-        PrintHolder.printLines(virtualMachine::id,
+        GeneralPrintUtil.printLines(virtualMachine::id,
                 virtualMachine::vmId,
                 virtualMachine::computerName,
                 virtualMachine::size);
@@ -59,11 +59,11 @@ public class ComputeApi {
      * -- (3) PowerState/running|Succeeded
      */
     public static void createComputeFogbowWithObservebla(Azure azure) throws InterruptedException {
-        String networkInterfaceId = PropertiesHolder.getNetworkInterfaceIdProp();
-        String resourceGroupName = PropertiesHolder.getResourceGroupNameProp();
+        String networkInterfaceId = PropertiesUtil.getNetworkInterfaceIdProp();
+        String resourceGroupName = PropertiesUtil.getResourceGroupNameProp();
 
         NetworkInterface networkInterface = NetworkApi.getNetworkInterface(azure, networkInterfaceId);
-        String userData = PropertiesHolder.getUserData();
+        String userData = PropertiesUtil.getUserData();
         ResourceGroup resourceGroup = ManagerApi.getResourceGroup(azure, resourceGroupName);
 
         Observable<Indexable> virtualMachineAsync =
@@ -87,7 +87,7 @@ public class ComputeApi {
             try {
                 VirtualMachine virtualMachine = ComputeApi.getVirtualMachine(azure, virtualMachineId);
                 System.out.println("VirtualMachine state:");
-                PrintHolder.printLines(virtualMachine::name, virtualMachine::powerState, virtualMachine::provisioningState);
+                GeneralPrintUtil.printLines(virtualMachine::name, virtualMachine::powerState, virtualMachine::provisioningState);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -121,7 +121,7 @@ public class ComputeApi {
 
     public static void printVmInformation(Azure azure, String virtualMachineId) {
         VirtualMachine virtualMachine = getVirtualMachine(azure, virtualMachineId);
-        PrintHolder.printLines(virtualMachine::name,
+        GeneralPrintUtil.printLines(virtualMachine::name,
                 virtualMachine::id,
                 virtualMachine::powerState,
                 virtualMachine::provisioningState,
@@ -131,10 +131,10 @@ public class ComputeApi {
 
     public static void printMostInformation(Azure azure) {
         PagedList<VirtualMachine> virtualMachines = getVirtualMachines(azure);
-        PrintHolder.printVirtualMachinesLines(virtualMachines);
+        GeneralPrintUtil.printVirtualMachinesLines(virtualMachines);
 
         PagedList<VirtualMachineSize> virtualMachineSizes = getVirtualMachineSizes(azure);
-        PrintHolder.printVirtualMachineSizeLines(virtualMachineSizes);
+        GeneralPrintUtil.printVirtualMachineSizeLines(virtualMachineSizes);
     }
 
     private static PagedList<NetworkInterface> getNetworkIntefaces(Azure azure) {
