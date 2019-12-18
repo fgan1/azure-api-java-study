@@ -1,4 +1,4 @@
-package com.fgan.azure;
+package com.fgan.azure.util;
 
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.compute.*;

@@ -1,4 +1,4 @@
-package com.fgan.azure;
+package com.fgan.azure.util;
 
 public class AzureIDBuilder {
 

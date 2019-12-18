@@ -1,4 +1,4 @@
-package com.fgan.azure;
+package com.fgan.azure.util;
 
 import com.sun.istack.internal.Nullable;
 import org.apache.commons.codec.binary.Base64;

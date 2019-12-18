@@ -1,7 +1,7 @@
 package com.fgan.azure.api;
 
-import com.fgan.azure.AzureIDBuilder;
-import com.fgan.azure.GeneralPrintUtil;
+import com.fgan.azure.util.AzureIDBuilder;
+import com.fgan.azure.util.GeneralPrintUtil;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.network.NetworkSecurityRule;
 

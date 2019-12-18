@@ -4,70 +4,72 @@ import com.fgan.azure.api.ComputeApi;
 import com.fgan.azure.api.NetworkApi;
 import com.fgan.azure.api.SecurityRuleApi;
 import com.fgan.azure.api.VolumeApi;
+import com.fgan.azure.util.AzureIDBuilder;
+import com.fgan.azure.util.GeneralPrintUtil;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.Disk;
 
-public class Execution {
+public class SampleExecution {
 
-    private static Execution instance = new Execution();
+    private static SampleExecution instance = new SampleExecution();
 
-    public static Execution start() {
+    public static SampleExecution start() {
         System.out.println("||||||||||||| Starting Test |||||||||||||");
         return instance;
     }
 
-    public Execution finish() {
+    public SampleExecution finish() {
         System.out.println("||||||||||||| Ending Test |||||||||||||");
         return this.instance;
     }
 
     // NETWORK test
-    public Execution printNetworkInformation(Azure azure) {
+    public SampleExecution printNetworkInformation(Azure azure) {
         NetworkApi.printInformation(azure);
         return this.instance;
     }
 
-    public Execution createNetworkStyleFogbow(Azure azure) {
+    public SampleExecution createNetworkStyleFogbow(Azure azure) {
         NetworkApi.createNetworkAsync(azure);
         return this.instance;
     }
 
-    public Execution deleteNetworkStyleFogbow(Azure azure) {
+    public SampleExecution deleteNetworkStyleFogbow(Azure azure) {
         NetworkApi.deleteNetworkAsync(azure);
         return this.instance;
     }
 
     // COMPUTE tests
-    public Execution runComputeSampleOne(Azure azure) {
+    public SampleExecution runComputeSampleOne(Azure azure) {
         ComputeApi.runSambleOneSync(azure);
         return this.instance;
     }
 
-    public Execution createComputeStyleFogbow(Azure azure) throws InterruptedException {
+    public SampleExecution createComputeStyleFogbow(Azure azure) throws InterruptedException {
         ComputeApi.createComputeFogbowWithObservebla(azure);
         return this.instance;
     }
 
-    public Execution printComputeInformation(Azure azure) {
+    public SampleExecution printComputeInformation(Azure azure) {
         ComputeApi.printMostInformation(azure);
         return this.instance;
     }
 
-    public Execution printVirtualMachineAlreadyCreatedInformation(Azure azure, String id)
+    public SampleExecution printVirtualMachineAlreadyCreatedInformation(Azure azure, String id)
             throws Exception {
 
         ComputeApi.printVmInformation(azure, id);
         return this.instance;
     }
 
-    public Execution deleteVirtualMachineAlreadyCreated(Azure azure, String id)
+    public SampleExecution deleteVirtualMachineAlreadyCreated(Azure azure, String id)
             throws Exception {
 
         ComputeApi.deleteVmSync(azure, id);
         return this.instance;
     }
 
-    public Execution deleteVirtualMachineAlreadyCreatedByNameAsync(Azure azure, String name)
+    public SampleExecution deleteVirtualMachineAlreadyCreatedByNameAsync(Azure azure, String name)
             throws Exception {
 
         String virtualMachineId = AzureIDBuilder.buildVirtualMachineId(name);
@@ -75,7 +77,7 @@ public class Execution {
         return this.instance;
     }
 
-    public Execution deleteVirtualMachineAlreadyCreatedByIdAsync(Azure azure, String id)
+    public SampleExecution deleteVirtualMachineAlreadyCreatedByIdAsync(Azure azure, String id)
             throws Exception {
 
         ComputeApi.deleteVmAsync(azure, id);
@@ -85,40 +87,40 @@ public class Execution {
     //    ComputeApi.printInformation(azure);
 
     // Volume
-    public Execution printVolumeInformation(Azure azure) {
+    public SampleExecution printVolumeInformation(Azure azure) {
         VolumeApi.printMostInformation(azure);
         return this.instance;
     }
 
-    public Execution printDiskCreatedInformation(Azure azure, String id) {
+    public SampleExecution printDiskCreatedInformation(Azure azure, String id) {
         Disk disk = VolumeApi.getDisk(azure, id);
         GeneralPrintUtil.printLines(disk::name, disk::id);
         return this.instance;
     }
 
-    public Execution deleteDiskCreatedByName(Azure azure, String name) {
+    public SampleExecution deleteDiskCreatedByName(Azure azure, String name) {
         String diskId = AzureIDBuilder.buildDiskId(name);
         VolumeApi.deleteDisk(azure, diskId);
         return this.instance;
     }
 
-    public Execution deleteDiskCreatedById(Azure azure, String diskId) {
+    public SampleExecution deleteDiskCreatedById(Azure azure, String diskId) {
         VolumeApi.deleteDisk(azure, diskId);
         return this.instance;
     }
 
-    public Execution deleteDiskByVirtualMachine(Azure azure, String virtualMachineId) {
+    public SampleExecution deleteDiskByVirtualMachine(Azure azure, String virtualMachineId) {
         VolumeApi.deleteDiskByVirtualMachine(azure, virtualMachineId);
         return this.instance;
     }
 
     // Security Rules
-    public Execution printSecurityRules(Azure azure) {
+    public SampleExecution printSecurityRules(Azure azure) {
         SecurityRuleApi.printSecurityRules(azure);
         return this.instance;
     }
 
-    public Execution addSecurityRules(Azure azure) {
+    public SampleExecution addSecurityRules(Azure azure) {
         SecurityRuleApi.addSecurityRules(azure);
         return this.instance;
     }

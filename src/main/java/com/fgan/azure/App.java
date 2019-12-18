@@ -19,7 +19,7 @@ public class App {
 
         String id = "";
         String name = "";
-        Execution.start()
+        SampleExecution.start()
                 /**
                  * Compute(Fogbow naming) / Virtual Machine(Azure naming)
                  */

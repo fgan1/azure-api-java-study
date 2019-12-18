@@ -1,9 +1,9 @@
 package com.fgan.azure.api;
 
-import com.fgan.azure.AzureIDBuilder;
+import com.fgan.azure.util.AzureIDBuilder;
 import com.fgan.azure.Constants;
-import com.fgan.azure.GeneralPrintUtil;
-import com.fgan.azure.PropertiesUtil;
+import com.fgan.azure.util.GeneralPrintUtil;
+import com.fgan.azure.util.PropertiesUtil;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.AvailabilitySet;
