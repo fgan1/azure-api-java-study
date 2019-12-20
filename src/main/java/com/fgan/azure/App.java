@@ -49,12 +49,17 @@ public class App {
                  * Security Rules
                  */
 //                .addSecurityRules(azure)
-//                .printSecurityRules(azure)
+//                .printSecurityRulesFromDefaultSecurityGroup(azure)
                 /**
                  * Attachment
                  */
 //                .attackDiskByNameFromDefaultVmSync(azure, name)
 //                .detackDiskByNameFromDefaultVmSync(azure, name)
+                /**
+                 * Identity
+                 */
+//                .checkAuthenticationByRequest()
+                .checkAuthenticationStyleFogbow()
                 .finish();
 
         runningForever();

@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class SecurityRuleApi {
 
-    public static void printSecurityRules(Azure azure) {
+    public static void printSecurityRulesFromDefaultSecurityGroup(Azure azure) {
         String securityGroupId = AzureIDBuilder.buildSecurityGroupId(NetworkApi.SECURITY_GROUP_NAME_DEFAULT);
         Map<String, NetworkSecurityRule> stringNetworkSecurityRuleMap =
                 azure.networkSecurityGroups().getById(securityGroupId).securityRules();
@@ -19,7 +19,6 @@ public class SecurityRuleApi {
                     networkSecurityRule::protocol,
                     networkSecurityRule::direction);
         }
-
     }
 
     public static void addSecurityRules(Azure azure) {
@@ -34,7 +33,5 @@ public class SecurityRuleApi {
                 .withAnyProtocol()
                 .withPriority(4000)
                 .attach().apply();
-
     }
-
 }

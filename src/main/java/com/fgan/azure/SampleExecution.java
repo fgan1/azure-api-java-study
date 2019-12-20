@@ -6,6 +6,8 @@ import com.fgan.azure.util.GeneralPrintUtil;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.Disk;
 
+import javax.naming.ServiceUnavailableException;
+
 public class SampleExecution {
 
     private static SampleExecution instance = new SampleExecution();
@@ -117,8 +119,8 @@ public class SampleExecution {
     }
 
     // Security Rules
-    public SampleExecution printSecurityRules(Azure azure) {
-        SecurityRuleApi.printSecurityRules(azure);
+    public SampleExecution printSecurityRulesFromDefaultSecurityGroup(Azure azure) {
+        SecurityRuleApi.printSecurityRulesFromDefaultSecurityGroup(azure);
         return this.instance;
     }
 
@@ -135,6 +137,17 @@ public class SampleExecution {
 
     public SampleExecution attackDiskByNameFromDefaultVmSync(Azure azure, String id) {
         AttachmentApi.attackDiskByNameFromDefaultVmSync(azure, id);
+        return this.instance;
+    }
+
+    // Identity
+    public SampleExecution checkAuthenticationByRequest() {
+        IdentityApi.checkAuthenticationByRequest();
+        return this.instance;
+    }
+
+    public SampleExecution checkAuthenticationStyleFogbow() throws ServiceUnavailableException {
+        IdentityApi.checkAuthentication();
         return this.instance;
     }
 

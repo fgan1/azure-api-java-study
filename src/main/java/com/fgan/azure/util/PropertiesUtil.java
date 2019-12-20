@@ -14,11 +14,17 @@ import java.util.stream.Stream;
 public class PropertiesUtil {
 
     private static final String GENERAL_PROPERTIES_ENV = "GENERAL_PROPERTIES_ENV";
+    private final static String AZURE_AUTH_LOCATION_PROPERTIES_ENV = "AZURE_AUTH_LOCATION";
 
     private static final String SUBSCRIPTION_PROPS = "subscription";
     private static final String NETWORK_INTEFACE_ID_PROPS = "network_interface_id";
     private static final String RESOURCE_GROUP_NAME_PROPS = "resource_group_name";
     private static final String CLOUD_INIT_PATH_PROPS = "cloud_init_path";
+    private static final String USER_NAME_PROPS = "user_name";
+    private static final String USER_PASSWORD_PROPS = "user_password";
+    private static final String CLIENT_ID_PROPS = "client";
+    private static final String TENTANT_ID_PROPS = "tenant";
+    private static final String GRAPH_URL_PROPS = "graphURL";
 
     private static Properties properties;
 
@@ -30,21 +36,54 @@ public class PropertiesUtil {
     }
 
     @Nullable
+    public static String getUserPasswordProps() {
+        return getProps(USER_PASSWORD_PROPS);
+    }
+
+    @Nullable
+    public static String getUserNameProps() {
+        return getProps(USER_NAME_PROPS);
+    }
+
+    @Nullable
     public static String getSubscriptionProp() {
-        Properties properties = getInstance();
-        return properties.getProperty(SUBSCRIPTION_PROPS);
+        return getProps(SUBSCRIPTION_PROPS);
     }
 
     @Nullable
     public static String getNetworkInterfaceIdProp() {
-        Properties properties = getInstance();
-        return properties.getProperty(NETWORK_INTEFACE_ID_PROPS);
+        return getProps(NETWORK_INTEFACE_ID_PROPS);
+    }
+
+    public static String getClientIdProps() {
+        return getProps(CLIENT_ID_PROPS);
+    }
+
+    /**
+     * Note: Graph Url is known as Resouce in some cases
+     */
+    public static String getGraphURLProps() {
+        return getProps(GRAPH_URL_PROPS);
+    }
+
+    public static String getTentantIdProps() {
+        return getProps(TENTANT_ID_PROPS);
     }
 
     @Nullable
     public static String getResourceGroupNameProp() {
+        return getProps(RESOURCE_GROUP_NAME_PROPS);
+    }
+
+    private static String getProps(String type) {
         Properties properties = getInstance();
-        return properties.getProperty(RESOURCE_GROUP_NAME_PROPS);
+        String value = properties.getProperty(type);
+        if (properties == null) {
+            String errorMsg = String.format("The propertie %s is null", type);
+            throw new Error(errorMsg);
+        }
+        System.out.println(String.format("Propertie %s / Value: %s", type, value));
+        return value;
     }
 
     public static String getUserData() {
@@ -56,22 +95,41 @@ public class PropertiesUtil {
     }
 
     private static Properties getProperties() {
+        String generalPropertiesPath = System.getenv(GENERAL_PROPERTIES_ENV);
+        Properties generalProperties = loadProperties(generalPropertiesPath);
+
+        String azuteAuthPropertiesPath = System.getenv(AZURE_AUTH_LOCATION_PROPERTIES_ENV);
+        Properties azureAuthProperties = loadProperties(azuteAuthPropertiesPath);
+
+        Properties properties = new Properties();
+        properties.putAll(generalProperties);
+        properties.putAll(azureAuthProperties);
+        return properties;
+    }
+
+    private static Properties loadProperties(String path) {
         try {
-            String generalPropertiesPath = System.getenv(GENERAL_PROPERTIES_ENV);
-            generalPropertiesPath = "/home/chico/git/azure-api-java-study/src/main/resources/general.properties"; // TODO(fgan): remove this
-            FileInputStream fileInputStream = new FileInputStream(generalPropertiesPath);
+            FileInputStream fileInputStream = new FileInputStream(path);
             Properties properties = new Properties();
             properties.load(fileInputStream);
             return properties;
         } catch (IOException e) {
-            throw new Error("There is no possible ** the properties", e);
+            String errorMsg = String.format("There is no possible lead the properties by the path: %s ", path);
+            throw new Error(errorMsg, e);
         }
+    }
+
+    @Nullable
+    public static String getAzureAuthLocationPath() {
+        return System.getenv(AZURE_AUTH_LOCATION_PROPERTIES_ENV);
     }
 
     private static String getFileContent(String filePath) {
         StringBuilder contentBuilder = new StringBuilder();
         try (Stream<String> stream = Files.lines(Paths.get(filePath), StandardCharsets.UTF_8)) {
-            stream.forEach(s -> contentBuilder.append(s).append("\n"));
+            stream.forEach(line -> contentBuilder
+                    .append(line)
+                    .append(System.getProperty("line.separator")));
         } catch (IOException e) {
             throw new Error("There is no possible get the file content", e);
         }
