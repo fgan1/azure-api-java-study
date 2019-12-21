@@ -5,13 +5,14 @@ import com.microsoft.azure.management.compute.*;
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.network.NetworkInterface;
 
+import java.util.Arrays;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class GeneralPrintUtil {
 
     public static void printNetworksLines(PagedList<Network> networks) {
-        GeneralPrintUtil.printSet(objects -> {
+        printSet(objects -> {
             for (Object object: objects) {
                 Network network = (Network) object;
                 GeneralPrintUtil.printLines(network::name, network::id, network::regionName);
@@ -20,7 +21,7 @@ public class GeneralPrintUtil {
     }
 
     public static void printNetworkInterfacessLines(PagedList<NetworkInterface> networkInterfaces) {
-        GeneralPrintUtil.printSet(objects -> {
+        printSet(objects -> {
             for (Object object: objects) {
                 NetworkInterface networkInterface = (NetworkInterface) object;
                 GeneralPrintUtil.printLines(networkInterface::name, networkInterface::id, networkInterface::key);
@@ -29,7 +30,7 @@ public class GeneralPrintUtil {
     }
 
     public static void printVirtualMachineImageLines(PagedList<VirtualMachineImage> vmImages) {
-        GeneralPrintUtil.printSet(objects -> {
+        printSet(objects -> {
             for (Object object: objects) {
                 VirtualMachineImage vmImage = (VirtualMachineImage) object;
                 GeneralPrintUtil.printLines(vmImage::publisherName);
@@ -38,7 +39,7 @@ public class GeneralPrintUtil {
     }
 
     public static void printVirtualMachinesLines(PagedList<VirtualMachine> virtualMachine) {
-        GeneralPrintUtil.printSet(objects -> {
+        printSet(objects -> {
             for (Object object: objects) {
                 VirtualMachine vm = (VirtualMachine) object;
                 GeneralPrintUtil.printLines(vm::name, vm::id, vm::size, vm::osDiskId);
@@ -47,7 +48,7 @@ public class GeneralPrintUtil {
     }
 
     public static void printVirtualMachineSizeLines(PagedList<VirtualMachineSize> virtualMachineSizes) {
-        GeneralPrintUtil.printSet(objects -> {
+        printSet(objects -> {
             for (Object object: objects) {
                 VirtualMachineSize vmSizes = (VirtualMachineSize) object;
                 GeneralPrintUtil.printLines(vmSizes::name, vmSizes::numberOfCores, vmSizes::memoryInMB);
@@ -58,7 +59,7 @@ public class GeneralPrintUtil {
     public static void printVirtualMachinePublishersLines(
             PagedList<VirtualMachinePublisher> virtualMachinePublishers) {
 
-        GeneralPrintUtil.printSet(objects -> {
+        printSet(objects -> {
             for (Object object: objects) {
                 VirtualMachinePublisher virtualMachinePublisher = (VirtualMachinePublisher) object;
                 GeneralPrintUtil.printLines(virtualMachinePublisher::name);
@@ -67,12 +68,26 @@ public class GeneralPrintUtil {
     }
 
     public static void printDisksLines(PagedList<Disk> disks) {
-        GeneralPrintUtil.printSet(objects -> {
+        printSet(objects -> {
             for (Object object: objects) {
                 Disk disk = (Disk) object;
                 GeneralPrintUtil.printLines(disk::name, disk::id);
             }
         }, disks);
+    }
+
+    public static void printComputeUsages(PagedList<ComputeUsage> computeUsages) {
+        printSet(objects -> {
+            for (Object object: objects) {
+                ComputeUsage computeUsage = (ComputeUsage) object;
+                UsageName usageName = computeUsage.name();
+                GeneralPrintUtil.printLines(usageName::value,
+                        usageName::localizedValue,
+                        computeUsage::currentValue,
+                        computeUsage::limit,
+                        computeUsage::unit);
+            }
+        }, computeUsages);
     }
 
     private static void printSet(Consumer<PagedList<? extends Object>> functionConsumer,

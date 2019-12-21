@@ -151,6 +151,12 @@ public class SampleExecution {
         return this.instance;
     }
 
+    // Quota
+    public SampleExecution printQuotaSync(Azure azure) {
+        QuotaApi.printQuotasSync(azure);
+        return this.instance;
+    }
+
     // TODO(chico) - finish refactoring
 //    ImageApi.printInformation(azure);
 //    ComputeApi.getNetworkIntefaces(azure);

@@ -59,7 +59,11 @@ public class App {
                  * Identity
                  */
 //                .checkAuthenticationByRequest()
-                .checkAuthenticationStyleFogbow()
+//                .checkAuthenticationStyleFogbow()
+                /**
+                 * Quota
+                 */
+//                .printQuotaSync(azure)
                 .finish();
 
         runningForever();
