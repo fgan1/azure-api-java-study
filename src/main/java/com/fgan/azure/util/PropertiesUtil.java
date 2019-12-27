@@ -13,8 +13,8 @@ import java.util.stream.Stream;
 
 public class PropertiesUtil {
 
-    private static final String GENERAL_PROPERTIES_ENV = "GENERAL_PROPERTIES_ENV";
-    private final static String AZURE_AUTH_LOCATION_PROPERTIES_ENV = "AZURE_AUTH_LOCATION";
+    public static final String GENERAL_PROPERTIES_ENV = "GENERAL_PROPERTIES_ENV";
+    public final static String AZURE_AUTH_LOCATION_PROPERTIES_ENV = "AZURE_AUTH_LOCATION";
 
     private static final String SUBSCRIPTION_PROPS = "subscription";
     private static final String NETWORK_INTEFACE_ID_PROPS = "network_interface_id";
@@ -28,7 +28,7 @@ public class PropertiesUtil {
 
     private static Properties properties;
 
-    private static Properties getInstance() {
+    public static Properties getInstance() {
         if (properties != null) {
             return properties;
         }

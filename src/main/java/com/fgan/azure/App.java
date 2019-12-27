@@ -34,7 +34,7 @@ public class App {
                  * Network
                  */
 //                .printNetworkInformation(azure)
-//                .createNetworkStyleFogbow(azure)
+                .createNetworkStyleFogbow(azure)
 //                .deleteNetworkStyleFogbow(azure)
                 /**
                  * Volume(Fogbow naming) / Disk(Azure namming)

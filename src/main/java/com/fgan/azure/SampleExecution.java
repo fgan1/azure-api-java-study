@@ -1,6 +1,7 @@
 package com.fgan.azure;
 
 import com.fgan.azure.api.*;
+import com.fgan.azure.api.network.NetworkApiSample;
 import com.fgan.azure.util.AzureIDBuilder;
 import com.fgan.azure.util.GeneralPrintUtil;
 import com.microsoft.azure.management.Azure;
@@ -13,32 +14,36 @@ public class SampleExecution {
     private static SampleExecution instance = new SampleExecution();
 
     public static SampleExecution start() {
-        System.out.println("||||||||||||| Starting Test |||||||||||||");
+        System.out.println("**||||||||||||| Starting Sample Main Thread |||||||||||||**");
         return instance;
     }
 
     public SampleExecution finish() {
-        System.out.println("||||||||||||| Ending Test |||||||||||||");
+        System.out.println("**||||||||||||| Ending Sample Main Thread |||||||||||||**");
         return this.instance;
     }
 
-    // NETWORK test
+    /**
+     * Network Samples
+     */
     public SampleExecution printNetworkInformation(Azure azure) {
-        NetworkApi.printInformation(azure);
+        NetworkApiSample.build(azure).printInformation();
         return this.instance;
     }
 
     public SampleExecution createNetworkStyleFogbow(Azure azure) {
-        NetworkApi.createNetworkAsync(azure);
+        NetworkApiSample.build(azure).createNetworkCreationFogbowStyle();
         return this.instance;
     }
 
     public SampleExecution deleteNetworkStyleFogbow(Azure azure) {
-        NetworkApi.deleteNetworkAsync(azure);
+        NetworkApiSample.build(azure).deleteNetworkFogbowStyle();
         return this.instance;
     }
 
-    // COMPUTE tests
+    /**
+     * Compute Samples
+     */
     public SampleExecution runComputeSampleOne(Azure azure) {
         ComputeApi.runSambleOneSync(azure);
         return this.instance;

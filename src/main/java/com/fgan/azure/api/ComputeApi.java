@@ -1,12 +1,16 @@
 package com.fgan.azure.api;
 
-import com.fgan.azure.util.AzureIDBuilder;
 import com.fgan.azure.Constants;
+import com.fgan.azure.api.network.NetworkApi;
+import com.fgan.azure.util.AzureIDBuilder;
 import com.fgan.azure.util.GeneralPrintUtil;
 import com.fgan.azure.util.PropertiesUtil;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.Azure;
-import com.microsoft.azure.management.compute.*;
+import com.microsoft.azure.management.compute.AvailabilitySet;
+import com.microsoft.azure.management.compute.VirtualMachine;
+import com.microsoft.azure.management.compute.VirtualMachineSize;
+import com.microsoft.azure.management.compute.VirtualMachineSizes;
 import com.microsoft.azure.management.network.NetworkInterface;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.fluentcore.model.Indexable;
@@ -35,7 +39,7 @@ public class ComputeApi {
         String networkInterfaceId = PropertiesUtil.getNetworkInterfaceIdProp();
         String resourceGroupName = PropertiesUtil.getResourceGroupNameProp();
 
-        NetworkInterface networkInterface = NetworkApi.getNetworkInterface(azure, networkInterfaceId);
+        NetworkInterface networkInterface = new NetworkApi(azure).getNetworkInterface(azure, networkInterfaceId);
         String userData = PropertiesUtil.getUserData();
         ResourceGroup resourceGroup = ManagerApi.getResourceGroup(azure, resourceGroupName);
         VirtualMachine virtualMachine = createVirtualMachineSync(azure, networkInterface, userData, resourceGroup);
@@ -59,7 +63,7 @@ public class ComputeApi {
         String networkInterfaceId = PropertiesUtil.getNetworkInterfaceIdProp();
         String resourceGroupName = PropertiesUtil.getResourceGroupNameProp();
 
-        NetworkInterface networkInterface = NetworkApi.getNetworkInterface(azure, networkInterfaceId);
+        NetworkInterface networkInterface = new NetworkApi(azure).getNetworkInterface(azure, networkInterfaceId);
         String userData = PropertiesUtil.getUserData();
         ResourceGroup resourceGroup = ManagerApi.getResourceGroup(azure, resourceGroupName);
 
