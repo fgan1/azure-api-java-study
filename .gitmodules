@@ -1,0 +1,8 @@
+[submodule "vendor/ras"]
+	path = vendor/ras
+	url = https://github.com/fogbow/resource-allocation-service.git
+	branch = develop
+[submodule "vendor/common"]
+	path = vendor/common
+	url = https://github.com/fogbow/common.git
+	branch = develop

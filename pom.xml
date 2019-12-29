@@ -98,7 +98,14 @@
       <artifactId>fogbow-ras</artifactId>
       <version>0.0.1-SNAPSHOT</version>
       <scope>system</scope>
-      <systemPath>${project.basedir}/vendor/target/fogbow-ras-0.0.1-SNAPSHOT.jar</systemPath>
+      <systemPath>${project.basedir}/vendor/ras/target/fogbow-ras-0.0.1-SNAPSHOT.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>fogbow</groupId>
+      <artifactId>common</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/vendor/common/target/common-0.0.1-SNAPSHOT.jar</systemPath>
     </dependency>
   </dependencies>
 
