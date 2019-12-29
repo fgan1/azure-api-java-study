@@ -1,4 +1,4 @@
-package com.fgan.azure.rx;
+package com.fgan.azure.rx.model;
 
 import rx.Completable;
 import rx.Observable;
@@ -7,7 +7,7 @@ import rx.Subscriber;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static com.fgan.azure.rx.Utils.sleepOneSecond;
+import static com.fgan.azure.rx.util.Utils.sleepOneSecond;
 
 public class ObservablesCreator {
 
@@ -58,7 +58,7 @@ public class ObservablesCreator {
 
         public void execute(Request request, Subscriber<? super Response> emitter) {
             this.executor.submit(() -> {
-                com.fgan.azure.rx.Response response = request.execute();
+                Response response = request.execute();
                 emitter.onNext(response);
                 emitter.onCompleted();
                 emitter.unsubscribe();

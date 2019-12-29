@@ -1,8 +1,8 @@
-package com.fgan.azure.rx;
+package com.fgan.azure.rx.model;
 
 import java.util.Random;
 
-import static com.fgan.azure.rx.Utils.*;
+import static com.fgan.azure.rx.util.Utils.*;
 
 public class Request {
     private static int count = 1;

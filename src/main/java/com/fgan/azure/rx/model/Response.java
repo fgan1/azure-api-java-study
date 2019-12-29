@@ -1,4 +1,4 @@
-package com.fgan.azure.rx;
+package com.fgan.azure.rx.model;
 
 public class Response {
     private String result;

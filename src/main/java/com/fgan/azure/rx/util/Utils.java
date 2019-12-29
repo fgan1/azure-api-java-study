@@ -1,15 +1,15 @@
-package com.fgan.azure.rx;
+package com.fgan.azure.rx.util;
 
 public class Utils {
 
-    protected static void print(String information, Class classObj, Thread thread) {
+    public static void print(String information, Class classObj, Thread thread) {
         String className = classObj.getSimpleName();
         String threadName = thread.getName();
         String message = String.format("Class(%s) - %s - Thread(%s)", className, information, threadName);
         System.out.println(message);
     }
 
-    protected static void sleepOneSecond() {
+    public static void sleepOneSecond() {
         final int MILLISECONDS = 1000;
         sleep(MILLISECONDS);
     }

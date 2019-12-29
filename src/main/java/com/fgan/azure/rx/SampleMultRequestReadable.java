@@ -1,10 +1,12 @@
 package com.fgan.azure.rx;
 
+import com.fgan.azure.rx.model.ObservablesCreator;
+import com.fgan.azure.rx.model.Response;
 import rx.Observable;
 import rx.schedulers.Schedulers;
 
-import static com.fgan.azure.rx.Utils.print;
-import static com.fgan.azure.rx.Utils.sleepOneSecond;
+import static com.fgan.azure.rx.util.Utils.print;
+import static com.fgan.azure.rx.util.Utils.sleepOneSecond;
 /*
 Sample:
 - Made 3 requests when 2 depends on the previous response.
