@@ -3,15 +3,23 @@ package com.fgan.azure.rx;
 import rx.Observable;
 import rx.schedulers.Schedulers;
 
-import static com.fgan.azure.rx.Utils.*;
+import static com.fgan.azure.rx.Utils.print;
+import static com.fgan.azure.rx.Utils.sleepOneSecond;
 
-public class SampleMultRequestTraditional {
+/*
+Sample:
+- Made 3 requests when 2 depends on the previous response.
+-- Using traditional way.
+-- Using flatMap.
+ */
+public class SampleMultRequestTradicional {
 
-    public static void main(String[] args) throws InterruptedException {
-        print("Start execution", SampleMultRequestTraditional.class, Thread.currentThread());
-//        runSampleSingleThread();
-        runSampleMultipleThread();
-        print("Finish execution", SampleMultRequestTraditional.class, Thread.currentThread());
+    public static void main(String[] args) {
+        print("Run execution before", SampleMultRequestTradicional.class, Thread.currentThread());
+        runSampleSingleThread();
+//        runSampleMultipleThread();
+        print("Run execution after", SampleMultRequestTradicional.class, Thread.currentThread());
+        sleepOneSecond();
     }
 
     /*
@@ -30,11 +38,10 @@ public class SampleMultRequestTraditional {
         obsevableTest
                 .subscribeOn(Schedulers.newThread())
                 .subscribe();
-        sleepOneSecond();
     }
 
     public static Observable<Response> createObsevable() {
-        Observable<Response> firstRequestObservable = ObservablesCreator.createRequestObservable("One");
+        Observable<Response> firstRequestObservable = ObservablesCreator.createRequestObservable("First Request");
         return firstRequestObservable.flatMap((firstResponse) -> {
 
             String firstResponseStr = firstResponse.getResult();
