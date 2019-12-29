@@ -35,9 +35,64 @@ public class NetworkApiSampleTest extends TestUtil {
         this.networkApiSample = Mockito.spy(NetworkApiSample.build(azureMock));
     }
 
-    // test case:
+    @Test
+    public void buildNetworkDeletionFogbowCompletableFailWhenThrowExceptionOnSecondOne() {
+        // set up
+        Completable mockCompletable = createMockCompletable();
+        Completable mockCompletableError = createMockCompletableError();
+        Mockito.doReturn(mockCompletableError).when(this.networkApiSample).buildDeleteNetworkInterfaceCompletable();
+        Mockito.doReturn(mockCompletable).when(this.networkApiSample).buildDeleteNetworkCompletable();
+        Mockito.doReturn(mockCompletable).when(this.networkApiSample).buildDeleteSecurityGroupCompletable();
+
+        // execute
+        try {
+            Completable completable = this.networkApiSample.buildNetworkDeletionFogbowCompletable();
+            completable.await();
+        } catch (RuntimeException e) {
+            Assert.fail();
+        }
+
+        // verify
+        this.loggerAssertNetworkApiSample
+                .assertEqualsInOrder(Level.INFO, NetworkApiSample.NETWORK_DELETION_STEP_1)
+                .assertEqualsInOrder(Level.INFO, NetworkApiSample.NETWORK_DELETION_STEP_2)
+                .assertEqualsInOrder(Level.ERROR, NetworkApiSample.NETWORK_DELETION_ERROR)
+                .assertEqualsInOrder(Level.INFO, NetworkApiSample.NETWORK_DELETION_STEP_3)
+                .assertEqualsInOrder(Level.INFO, NetworkApiSample.NETWORK_DELETION_STEP_4)
+                .assertEqualsInOrder(Level.INFO, NetworkApiSample.NETWORK_DELETION_STEP_5);
+    }
+
+
+    @Test
+    public void buildNetworkDeletionFogbowCompletableFailWhenThrowExceptionOnSecondStep() {
+        // set up
+        Completable mockCompletable = createMockCompletable();
+        Mockito.doReturn(mockCompletable).when(this.networkApiSample).buildDeleteNetworkInterfaceCompletable();
+        Completable mockCompletableError = createMockCompletableError();
+        Mockito.doReturn(mockCompletableError).when(this.networkApiSample).buildDeleteNetworkCompletable();
+        Mockito.doReturn(mockCompletable).when(this.networkApiSample).buildDeleteSecurityGroupCompletable();
+
+        // execute
+        try {
+            Completable completable = this.networkApiSample.buildNetworkDeletionFogbowCompletable();
+            completable.await();
+        } catch (RuntimeException e) {
+            Assert.fail();
+        }
+
+        // verify
+        this.loggerAssertNetworkApiSample
+                .assertEqualsInOrder(Level.INFO, NetworkApiSample.NETWORK_DELETION_STEP_1)
+                .assertEqualsInOrder(Level.INFO, NetworkApiSample.NETWORK_DELETION_STEP_2)
+                .assertEqualsInOrder(Level.INFO, NetworkApiSample.NETWORK_DELETION_STEP_3)
+                .assertEqualsInOrder(Level.ERROR, NetworkApiSample.NETWORK_DELETION_ERROR)
+                .assertEqualsInOrder(Level.INFO, NetworkApiSample.NETWORK_DELETION_STEP_4)
+                .assertEqualsInOrder(Level.INFO, NetworkApiSample.NETWORK_DELETION_STEP_5);
+    }
+
     @Test
     public void testBuildNetworkCreationFogbowObservableSuccessful() {
+        // set up
         NetworkSecurityGroup networkSecurityGroup = Mockito.mock(NetworkSecurityGroup.class);
         Observable<Indexable> observableSecurityGroup = Observable.just(networkSecurityGroup);
         Mockito.doReturn(observableSecurityGroup).when(this.networkApiSample).createSecurityGroupDefaultValues();
@@ -69,7 +124,6 @@ public class NetworkApiSampleTest extends TestUtil {
                 .assertEqualsInOrder(Level.INFO, NetworkApiSample.NETWORK_CREATION_STEP_5);
     }
 
-    // test case:
     @Test
     public void testBuildNetworkCreationFogbowObservableFailWhenThrowNetworkException() {
         NetworkSecurityGroup networkSecurityGroup = Mockito.mock(NetworkSecurityGroup.class);
@@ -103,9 +157,9 @@ public class NetworkApiSampleTest extends TestUtil {
                 .assertEqualsInOrder(Level.INFO, NetworkApiSample.FINISH_CREATE_NETWORK_ROLLBACK);
     }
 
-    // test case:
     @Test
     public void testBuildNetworkCreationFogbowObservableFailWhenThrowNetworkInterfaceException() {
+        // set up
         NetworkSecurityGroup networkSecurityGroup = Mockito.mock(NetworkSecurityGroup.class);
         Observable<Indexable> observableSecurityGroup = Observable.just(networkSecurityGroup);
         Mockito.doReturn(observableSecurityGroup).when(this.networkApiSample).createSecurityGroupDefaultValues();
@@ -141,9 +195,11 @@ public class NetworkApiSampleTest extends TestUtil {
     }
 
     private Completable createMockCompletable() {
-        return Completable.create(a -> {
-            a.onCompleted();
-        });
+        return Completable.complete();
+    }
+
+    private Completable createMockCompletableError() {
+        return Completable.error(new RuntimeException());
     }
 
 }

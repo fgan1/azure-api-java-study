@@ -37,7 +37,7 @@ public class SampleExecution {
     }
 
     public SampleExecution deleteNetworkStyleFogbow(Azure azure) {
-        NetworkApiSample.build(azure).deleteNetworkFogbowStyle();
+        NetworkApiSample.build(azure).deleteNetworkFogbow();
         return this.instance;
     }
 

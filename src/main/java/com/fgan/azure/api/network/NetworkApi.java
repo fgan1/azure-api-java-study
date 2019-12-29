@@ -106,6 +106,10 @@ public class NetworkApi extends ApiAzure {
         return this.azure.networks().deleteByIdAsync(networkId);
     }
 
+    Completable deleteNetworkInterfaceByIdAsync(String networkInterfaceId) {
+        return this.azure.networkInterfaces().deleteByIdAsync(networkInterfaceId);
+    }
+
     /**
      *
      * @return

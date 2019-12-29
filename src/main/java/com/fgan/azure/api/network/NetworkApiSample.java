@@ -28,14 +28,25 @@ import rx.schedulers.Schedulers;
  */
 public class NetworkApiSample {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(NetworkApiSample.class);
     public static final String START_CREATE_NETWORK_ROLLBACK = "Start create network rollback";
     public static final String FINISH_CREATE_NETWORK_ROLLBACK = "End create network rollback";
-
     public static final String SECURITY_GROUP_NAME_DEFAULT = Constants.PREFIX + "security-group";
     public static final String NETWORK_NAME_DEFAULT = Constants.PREFIX + "network";
     public static final String NETWORK_INTERFACE_NAME_DEFAULT = Constants.PREFIX + "network-interface";
     public static final String SUBNET_NAME_DEFAULT = Constants.PREFIX + "subnet";
+    public static final String NETWORK_CREATION_STEP_1 = "Start network creation";
+    public static final String NETWORK_CREATION_STEP_2 = "Network Creation proccess - Security Group Created";
+    public static final String NETWORK_CREATION_STEP_3 = "Network Creation proccess - Network Created";
+    public static final String NETWORK_CREATION_STEP_4 = "Network Creation proccess - Network Interface Created";
+    public static final String NETWORK_CREATION_ERROR = "Error during the network creation";
+    public static final String NETWORK_CREATION_STEP_5 = "Finish network creation";
+    public static final String NETWORK_DELETION_STEP_1 = "Start network deletion 1";
+    public static final String NETWORK_DELETION_STEP_2 = "Start network deletion 2";
+    public static final String NETWORK_DELETION_STEP_3 = "Start network deletion 3";
+    public static final String NETWORK_DELETION_STEP_4 = "Start network deletion 4";
+    public static final String NETWORK_DELETION_ERROR = "Error during the network deletion";
+    public static final String NETWORK_DELETION_STEP_5 = "Start network deletion 5";
+    private final static Logger LOGGER = LoggerFactory.getLogger(NetworkApiSample.class);
     private static NetworkApiSample instance = new NetworkApiSample();
     private static NetworkApi networkApi;
 
@@ -79,14 +90,6 @@ public class NetworkApiSample {
                 .subscribeOn(Schedulers.newThread())
                 .subscribe();
     }
-
-    public static final String NETWORK_CREATION_STEP_1 = "Start network creation";
-    public static final String NETWORK_CREATION_STEP_2 = "Network Creation proccess - Security Group Created";
-    public static final String NETWORK_CREATION_STEP_3 = "Network Creation proccess - Network Created";
-    public static final String NETWORK_CREATION_STEP_4 = "Network Creation proccess - Network Interface Created";
-    public static final String NETWORK_CREATION_ERROR = "Error during the network creation";
-    public static final String NETWORK_CREATION_STEP_5 = "Finish network creation";
-
 
     @VisibleForTesting
     Observable<Indexable> buildNetworkCreationFogbowObservable() {
@@ -211,21 +214,69 @@ public class NetworkApiSample {
                 addressSpace, addressPrefix, subnetName, networkSecurityGroup);
     }
 
-    public void deleteNetworkFogbowStyle() {
+    public void deleteNetworkFogbow() {
+        Completable completableDeleteNetwork = buildNetworkDeletionFogbowCompletable();
+        completableDeleteNetwork
+                .subscribeOn(Schedulers.newThread())
+                .subscribe();
+    }
+
+    @VisibleForTesting
+    Completable buildNetworkDeletionFogbowCompletable() {
+        Completable deleteNetworkIntefacePure = buildDeleteNetworkInterfaceCompletable();
+        Completable deleteNetworkInterface = setCompletableBehaviourNetworkDelection(deleteNetworkIntefacePure,
+                NETWORK_DELETION_STEP_2,
+                NETWORK_DELETION_ERROR);
+
+        Completable deleteNetworkPure = buildDeleteNetworkCompletable();
+        Completable deleteNetwork = setCompletableBehaviourNetworkDelection(deleteNetworkPure,
+                NETWORK_DELETION_STEP_3,
+                NETWORK_DELETION_ERROR);
+
+        Completable deleteSecurityGroupPure = buildDeleteSecurityGroupCompletable();
+        Completable deleteSecurityGroup = setCompletableBehaviourNetworkDelection(deleteSecurityGroupPure,
+                NETWORK_DELETION_STEP_4,
+                NETWORK_DELETION_ERROR);
+
+        return Completable.concat(deleteNetworkInterface, deleteNetwork, deleteSecurityGroup)
+                .doOnSubscribe((a) -> {
+                    LOGGER.info(NETWORK_DELETION_STEP_1);
+                })
+                .doOnEach((c) -> {
+                    System.out.println("<<" + c);
+                })
+                .doOnCompleted(() -> {
+                    LOGGER.info(NETWORK_DELETION_STEP_5);
+                });
+    }
+
+    @VisibleForTesting
+    Completable buildDeleteSecurityGroupCompletable() {
         String securityGroupId = AzureIDBuilder.buildSecurityGroupId(SECURITY_GROUP_NAME_DEFAULT);
-        Completable deleteSecurityGroupObservable = networkApi.deleteSecurityGroupByIdAsync(securityGroupId);
+        return this.networkApi.deleteSecurityGroupByIdAsync(securityGroupId);
+    }
 
+    @VisibleForTesting
+    Completable buildDeleteNetworkCompletable() {
         String networkId = AzureIDBuilder.buildNetworkId(NETWORK_NAME_DEFAULT);
-        Completable deleteNetworkObservable = networkApi.deleteNetworkByIdAsync(networkId);
+        return this.networkApi.deleteNetworkByIdAsync(networkId);
+    }
 
-        Completable.merge(deleteNetworkObservable, deleteSecurityGroupObservable).subscribe(
-                () -> {
-                    System.out.println("Delete network style Fogbow complete");
-                },
-                (err) -> {
-                    err.printStackTrace();
-                }
-        );
+    @VisibleForTesting
+    Completable buildDeleteNetworkInterfaceCompletable() {
+        String networkInterfaceId = AzureIDBuilder.buildNetworkInterfaceId(NETWORK_INTERFACE_NAME_DEFAULT);
+        return this.networkApi.deleteNetworkInterfaceByIdAsync(networkInterfaceId);
+    }
+
+    Completable setCompletableBehaviourNetworkDelection(Completable completable, String logOnSubscribe, String logOnError) {
+        return completable
+                .doOnSubscribe((subscription) -> {
+                    LOGGER.info(logOnSubscribe);
+                })
+                .onErrorComplete((error) -> {
+                    LOGGER.error(logOnError, error);
+                    return true;
+                });
     }
 
 }

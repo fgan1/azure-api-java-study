@@ -15,6 +15,9 @@ public class AzureIDBuilder {
     private static String NETWORK_STRUCTURE =
             "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/virtualNetworks/%s";
 
+    private static String NETWORK_INTERFACE_STRUCTURE =
+            "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/virtualNetworks/%s";
+
     public static String buildVirtualMachineId(String name) {
         return buildId(VIRTUAL_MACHINE_STRUCTURE, name);
     }
@@ -27,6 +30,10 @@ public class AzureIDBuilder {
         return buildId(NETWORK_STRUCTURE, name);
     }
 
+    public static String buildNetworkInterfaceId(String name) {
+        return buildId(NETWORK_INTERFACE_STRUCTURE, name);
+    }
+
     public static String buildDiskId(String name) {
         return buildId(DISK_STRUCTURE, name);
     }
@@ -36,5 +43,4 @@ public class AzureIDBuilder {
         String resourceGroupName = PropertiesUtil.getResourceGroupNameProp();
         return String.format(structure, subscription, resourceGroupName, name);
     }
-
 }
