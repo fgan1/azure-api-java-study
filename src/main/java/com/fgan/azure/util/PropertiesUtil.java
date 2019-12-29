@@ -1,6 +1,5 @@
 package com.fgan.azure.util;
 
-import com.sun.istack.internal.Nullable;
 import org.apache.commons.codec.binary.Base64;
 
 import java.io.FileInputStream;
@@ -35,22 +34,22 @@ public class PropertiesUtil {
         return getProperties();
     }
 
-    @Nullable
+//    @Nullable
     public static String getUserPasswordProps() {
         return getProps(USER_PASSWORD_PROPS);
     }
 
-    @Nullable
+//    @Nullable
     public static String getUserNameProps() {
         return getProps(USER_NAME_PROPS);
     }
 
-    @Nullable
+//    @Nullable
     public static String getSubscriptionProp() {
         return getProps(SUBSCRIPTION_PROPS);
     }
 
-    @Nullable
+//    @Nullable
     public static String getNetworkInterfaceIdProp() {
         return getProps(NETWORK_INTEFACE_ID_PROPS);
     }
@@ -70,7 +69,7 @@ public class PropertiesUtil {
         return getProps(TENTANT_ID_PROPS);
     }
 
-    @Nullable
+//    @Nullable
     public static String getResourceGroupNameProp() {
         return getProps(RESOURCE_GROUP_NAME_PROPS);
     }
@@ -119,7 +118,7 @@ public class PropertiesUtil {
         }
     }
 
-    @Nullable
+//    @Nullable
     public static String getAzureAuthLocationPath() {
         return System.getenv(AZURE_AUTH_LOCATION_PROPERTIES_ENV);
     }

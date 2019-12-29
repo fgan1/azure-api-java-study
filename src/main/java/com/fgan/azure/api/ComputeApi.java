@@ -14,7 +14,6 @@ import com.microsoft.azure.management.compute.VirtualMachineSizes;
 import com.microsoft.azure.management.network.NetworkInterface;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.fluentcore.model.Indexable;
-import com.sun.istack.internal.Nullable;
 import rx.Completable;
 import rx.Observable;
 
@@ -154,23 +153,23 @@ public class ComputeApi {
         return sizes.listByRegion(Constants.REGION_DEFAULT);
     }
 
-    @Nullable
+//    @Nullable
     private static AvailabilitySet getAvailabilitySet(Azure azure, String id) {
         return azure.availabilitySets().getById(id);
     }
 
-    @Nullable
+//    @Nullable
     public static VirtualMachine getVirtualMachine(Azure azure) {
         return getVirtualMachineByName(azure, VM_NAME_DEFAULT);
     }
 
-    @Nullable
+//    @Nullable
     public static VirtualMachine getVirtualMachineByName(Azure azure, String virtualMachineName) {
         String virtualMachineId = AzureIDBuilder.buildVirtualMachineId(virtualMachineName);
         return azure.virtualMachines().getById(virtualMachineId);
     }
 
-    @Nullable
+//    @Nullable
     public static VirtualMachine getVirtualMachineById(Azure azure, String virtualMachineId) {
         return azure.virtualMachines().getById(virtualMachineId);
     }
