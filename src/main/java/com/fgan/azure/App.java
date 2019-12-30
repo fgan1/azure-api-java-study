@@ -34,7 +34,7 @@ public class App {
                  * Network
                  */
 //                .printNetworkInformation(azure)
-                .createNetworkStyleFogbow(azure)
+//                .createNetworkStyleFogbow(azure)
 //                .deleteNetworkStyleFogbow(azure)
                 /**
                  * Volume(Fogbow naming) / Disk(Azure namming)
@@ -70,7 +70,7 @@ public class App {
     }
 
     public static void runningForever() throws InterruptedException {
-        final int SLEEP_TIME = 30000;
+        final int SLEEP_TIME = 10000;
         while (true) {
             Thread.sleep(SLEEP_TIME);
             System.out.println("I am alive !!");

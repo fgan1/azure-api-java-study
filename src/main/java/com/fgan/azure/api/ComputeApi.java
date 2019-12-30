@@ -13,6 +13,7 @@ import com.microsoft.azure.management.compute.VirtualMachineSize;
 import com.microsoft.azure.management.compute.VirtualMachineSizes;
 import com.microsoft.azure.management.network.NetworkInterface;
 import com.microsoft.azure.management.resources.ResourceGroup;
+import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azure.management.resources.fluentcore.model.Indexable;
 import rx.Completable;
 import rx.Observable;
@@ -51,7 +52,7 @@ public class ComputeApi {
     /**
      * Create compute asynchronously.
      * Reactive Programming is applied.
-     *
+     * <p>
      * When Running:
      * - States (powerState / provisioningState):
      * -- (1) PowerState/starting|Creating
@@ -102,7 +103,7 @@ public class ComputeApi {
 
     /**
      * Delete VM; This operation is asynchronous.
-     *
+     * <p>
      * Fogbow Steps:
      * - Delete VirtualMachine
      * - Delete Disk
@@ -153,23 +154,23 @@ public class ComputeApi {
         return sizes.listByRegion(Constants.REGION_DEFAULT);
     }
 
-//    @Nullable
+    //    @Nullable
     private static AvailabilitySet getAvailabilitySet(Azure azure, String id) {
         return azure.availabilitySets().getById(id);
     }
 
-//    @Nullable
+    //    @Nullable
     public static VirtualMachine getVirtualMachine(Azure azure) {
         return getVirtualMachineByName(azure, VM_NAME_DEFAULT);
     }
 
-//    @Nullable
+    //    @Nullable
     public static VirtualMachine getVirtualMachineByName(Azure azure, String virtualMachineName) {
         String virtualMachineId = AzureIDBuilder.buildVirtualMachineId(virtualMachineName);
         return azure.virtualMachines().getById(virtualMachineId);
     }
 
-//    @Nullable
+    //    @Nullable
     public static VirtualMachine getVirtualMachineById(Azure azure, String virtualMachineId) {
         return azure.virtualMachines().getById(virtualMachineId);
     }
@@ -200,36 +201,78 @@ public class ComputeApi {
         return virtualMachineContextCreation.createAsync();
     }
 
+    public static Observable<Indexable> createVirtualMachineAsync(
+            Azure azure, String virtualMachineName, Region region,
+            ResourceGroup resourceGroup, NetworkInterface networkInterface,
+            String imagePublished, String imageOffer, String imageSku,
+            String osUserName, String osUserPassword, String osComputeName,
+            String userData, String size) {
+
+        VirtualMachine.DefinitionStages.WithCreate virtualMachineContextCreation =
+                createVirtualMachineContextCreation(azure, VM_NAME_DEFAULT, Constants.REGION_DEFAULT,
+                        resourceGroup, networkInterface, IMAGE_PUBLISHER_DEFAULT, IMAGE_OFFER_DEFAULT,
+                        IMAGE_SKU_DEFAULT, OS_USER_NAME_DEFAULT, OS_USER_PASSWORD_DEFAULT, VM_NAME_DEFAULT,
+                        userData, VIRTUAL_MACHINE_SIZE_FREE_TIER);
+        return virtualMachineContextCreation.createAsync();
+    }
+
     /**
      * Create virtual machine by synchronous operation.
      * Notes: It might spend minutes
      */
-    private static VirtualMachine createVirtualMachineSync(Azure azure,
-                                                           NetworkInterface networkInterface,
-                                                           String userData,
-                                                           ResourceGroup resourceGroup) {
+    public static VirtualMachine createVirtualMachineSync(Azure azure,
+                                                          NetworkInterface networkInterface,
+                                                          String userData,
+                                                          ResourceGroup resourceGroup) {
 
         VirtualMachine.DefinitionStages.WithCreate virtualMachineContextCreation =
                 createVirtualMachineContextCreation(azure, networkInterface, userData, resourceGroup);
         return virtualMachineContextCreation.create();
     }
 
-    private static VirtualMachine.DefinitionStages.WithCreate createVirtualMachineContextCreation(
+    public static VirtualMachine createVirtualMachineSync(
+            Azure azure, String virtualMachineName, Region region,
+            ResourceGroup resourceGroup, NetworkInterface networkInterface,
+            String imagePublished, String imageOffer, String imageSku,
+            String osUserName, String osUserPassword, String osComputeName,
+            String userData, String size) {
+
+        VirtualMachine.DefinitionStages.WithCreate virtualMachineContextCreation =
+                createVirtualMachineContextCreation(azure, VM_NAME_DEFAULT, Constants.REGION_DEFAULT,
+                        resourceGroup, networkInterface, IMAGE_PUBLISHER_DEFAULT, IMAGE_OFFER_DEFAULT,
+                        IMAGE_SKU_DEFAULT, OS_USER_NAME_DEFAULT, OS_USER_PASSWORD_DEFAULT, VM_NAME_DEFAULT,
+                        userData, VIRTUAL_MACHINE_SIZE_FREE_TIER);
+        return virtualMachineContextCreation.create();
+    }
+
+    public static VirtualMachine.DefinitionStages.WithCreate createVirtualMachineContextCreation(
             Azure azure,
             NetworkInterface networkInterface,
             String userData,
             ResourceGroup resourceGroup) {
 
+        return createVirtualMachineContextCreation(azure, VM_NAME_DEFAULT, Constants.REGION_DEFAULT,
+                resourceGroup, networkInterface, IMAGE_PUBLISHER_DEFAULT, IMAGE_OFFER_DEFAULT, IMAGE_SKU_DEFAULT,
+                OS_USER_NAME_DEFAULT, OS_USER_PASSWORD_DEFAULT, VM_NAME_DEFAULT, userData, VIRTUAL_MACHINE_SIZE_FREE_TIER);
+    }
+
+    public static VirtualMachine.DefinitionStages.WithCreate createVirtualMachineContextCreation(
+            Azure azure, String virtualMachineName, Region region,
+            ResourceGroup resourceGroup, NetworkInterface networkInterface,
+            String imagePublished, String imageOffer, String imageSku,
+            String osUserName, String osUserPassword, String osComputeName,
+            String userData, String size) {
+
         return azure.virtualMachines()
-                .define(VM_NAME_DEFAULT)
-                .withRegion(Constants.REGION_DEFAULT)
+                .define(virtualMachineName)
+                .withRegion(region)
                 .withExistingResourceGroup(resourceGroup)
                 .withExistingPrimaryNetworkInterface(networkInterface)
-                .withLatestLinuxImage(IMAGE_PUBLISHER_DEFAULT, IMAGE_OFFER_DEFAULT, IMAGE_SKU_DEFAULT)
-                .withRootUsername(OS_USER_NAME_DEFAULT)
-                .withRootPassword(OS_USER_PASSWORD_DEFAULT)
-                .withComputerName(VM_NAME_DEFAULT)
+                .withLatestLinuxImage(imagePublished, imageOffer, imageSku)
+                .withRootUsername(osUserName)
+                .withRootPassword(osUserPassword)
+                .withComputerName(osComputeName)
                 .withCustomData(userData)
-                .withSize(VIRTUAL_MACHINE_SIZE_FREE_TIER);
+                .withSize(size);
     }
 }
