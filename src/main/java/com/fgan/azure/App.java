@@ -1,6 +1,6 @@
 package com.fgan.azure;
 
-import com.fgan.azure.api.IdentityApi;
+import com.fgan.azure.api.identity.IdentityApi;
 import com.microsoft.azure.management.Azure;
 
 /**

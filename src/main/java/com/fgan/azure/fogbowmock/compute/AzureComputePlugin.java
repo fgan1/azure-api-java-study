@@ -6,7 +6,6 @@ import cloud.fogbow.ras.api.http.response.ComputeInstance;
 import cloud.fogbow.ras.api.http.response.InstanceState;
 import cloud.fogbow.ras.constants.Messages;
 import cloud.fogbow.ras.core.models.ResourceType;
-import cloud.fogbow.ras.core.models.UserData;
 import cloud.fogbow.ras.core.models.orders.ComputeOrder;
 import cloud.fogbow.ras.core.plugins.interoperability.ComputePlugin;
 import cloud.fogbow.ras.core.plugins.interoperability.aws.AwsV2StateMapper;

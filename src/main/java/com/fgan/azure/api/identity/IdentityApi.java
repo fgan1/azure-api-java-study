@@ -1,10 +1,11 @@
-package com.fgan.azure.api;
+package com.fgan.azure.api.identity;
 
 import com.fgan.azure.Constants;
 import com.fgan.azure.util.PropertiesUtil;
 import com.microsoft.aad.adal4j.AuthenticationContext;
 import com.microsoft.aad.adal4j.AuthenticationResult;
 import com.microsoft.azure.AzureEnvironment;
+import com.microsoft.azure.credentials.AzureTokenCredentials;
 import com.microsoft.azure.credentials.UserTokenCredentials;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.resources.Tenants;
@@ -50,6 +51,13 @@ public class IdentityApi {
         } catch (IOException e) {
             throw new Exception("Is not possible get Azure object", e);
         }
+    }
+
+    public static Azure getAzure(AzureTokenCredentials azureTokenCredentials) throws IOException {
+        return Azure.configure()
+                .withLogLevel(LogLevel.BASIC)
+                .authenticate(azureTokenCredentials)
+                .withDefaultSubscription();
     }
 
     @Deprecated

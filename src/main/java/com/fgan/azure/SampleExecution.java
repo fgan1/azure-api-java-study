@@ -1,6 +1,7 @@
 package com.fgan.azure;
 
 import com.fgan.azure.api.*;
+import com.fgan.azure.api.identity.IdentityApi;
 import com.fgan.azure.api.image.ImageApiSample;
 import com.fgan.azure.api.network.NetworkApiSample;
 import com.fgan.azure.util.AzureIDBuilder;
