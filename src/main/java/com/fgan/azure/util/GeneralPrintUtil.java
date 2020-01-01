@@ -5,9 +5,9 @@ import com.microsoft.azure.management.compute.*;
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.network.NetworkInterface;
 
-import java.util.Arrays;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.IntStream;
 
 public class GeneralPrintUtil {
 
@@ -62,6 +62,16 @@ public class GeneralPrintUtil {
         printSet(objects -> {
             for (Object object: objects) {
                 VirtualMachinePublisher virtualMachinePublisher = (VirtualMachinePublisher) object;
+                PagedList<VirtualMachineOffer> virtualMachineOffers = virtualMachinePublisher.offers().list();
+                for (VirtualMachineOffer virtualMachineOffer : virtualMachineOffers) {
+                    PagedList<VirtualMachineSku> virtualMachineSkus = virtualMachineOffer.skus().list();
+                    for (VirtualMachineSku machineSkus : virtualMachineSkus) {
+                        putLevelPrint(2);
+                        GeneralPrintUtil.printLines(virtualMachineOffer::name);
+                    }
+                    putLevelPrint(1);
+                    GeneralPrintUtil.printLines(virtualMachineOffer::name);
+                }
                 GeneralPrintUtil.printLines(virtualMachinePublisher::name);
             }
         }, virtualMachinePublishers);
@@ -74,6 +84,19 @@ public class GeneralPrintUtil {
                 GeneralPrintUtil.printLines(disk::name, disk::id);
             }
         }, disks);
+    }
+
+    public static void printVirtualMachineImage(PagedList<VirtualMachineImage> virtualMachineImages) {
+        printSet(objects -> {
+            for (Object object: objects) {
+                VirtualMachineImage virtualMachineImage = (VirtualMachineImage) object;
+                GeneralPrintUtil.printLines(virtualMachineImage::publisherName,
+                        virtualMachineImage::offer,
+                        virtualMachineImage::sku,
+                        virtualMachineImage::id);
+            }
+        }, virtualMachineImages);
+
     }
 
     public static void printComputeUsages(PagedList<ComputeUsage> computeUsages) {
@@ -106,5 +129,11 @@ public class GeneralPrintUtil {
             stringBuilder.append("|");
         }
         System.out.println(stringBuilder.toString());
+    }
+
+    public static void putLevelPrint(int level) {
+        IntStream.range(0, level).forEach(value -> {
+            System.out.print("--");
+        });
     }
 }

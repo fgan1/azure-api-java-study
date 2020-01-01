@@ -145,11 +145,11 @@ public class ComputeApi {
     /**
      * Get all Virtual Machine Sizes
      * <p>
-     * Meanings:
+     * It means in Fogbow context :
      * Virtual Machine Size is the flavor
      * Amount of vCPU and Memory
      */
-    private static PagedList<VirtualMachineSize> getVirtualMachineSizes(Azure azure) {
+    public static PagedList<VirtualMachineSize> getVirtualMachineSizes(Azure azure) {
         VirtualMachineSizes sizes = azure.virtualMachines().sizes();
         return sizes.listByRegion(Constants.REGION_DEFAULT);
     }
@@ -187,7 +187,7 @@ public class ComputeApi {
         azure.virtualMachines().deleteById(virtualMachineId);
     }
 
-    private static Completable deleteVirtualMachineAsync(Azure azure, String virtualMachineId) {
+    public static Completable deleteVirtualMachineAsync(Azure azure, String virtualMachineId) {
         return azure.virtualMachines().deleteByIdAsync(virtualMachineId);
     }
 
@@ -273,6 +273,7 @@ public class ComputeApi {
                 .withRootPassword(osUserPassword)
                 .withComputerName(osComputeName)
                 .withCustomData(userData)
+//                .withOSDiskSizeInGB()
                 .withSize(size);
     }
 }

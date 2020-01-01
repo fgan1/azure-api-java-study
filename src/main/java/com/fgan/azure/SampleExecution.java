@@ -1,6 +1,7 @@
 package com.fgan.azure;
 
 import com.fgan.azure.api.*;
+import com.fgan.azure.api.image.ImageApiSample;
 import com.fgan.azure.api.network.NetworkApiSample;
 import com.fgan.azure.util.AzureIDBuilder;
 import com.fgan.azure.util.GeneralPrintUtil;
@@ -40,6 +41,9 @@ public class SampleExecution {
         NetworkApiSample.build(azure).deleteNetworkFogbow();
         return this.instance;
     }
+
+    // TODO(chico) - finish refactoring
+//    ComputeApi.getNetworkIntefaces(azure);
 
     /**
      * Compute Samples
@@ -90,7 +94,9 @@ public class SampleExecution {
 
     //    ComputeApi.printInformation(azure);
 
-    // Volume
+    /**
+     * Volume Samples
+     */
     public SampleExecution printVolumeInformation(Azure azure) {
         VolumeApi.printMostInformation(azure);
         return this.instance;
@@ -123,7 +129,9 @@ public class SampleExecution {
         return this.instance;
     }
 
-    // Security Rules
+    /**
+     * Security Rules Samples
+     */
     public SampleExecution printSecurityRulesFromDefaultSecurityGroup(Azure azure) {
         SecurityRuleApi.printSecurityRulesFromDefaultSecurityGroup(azure);
         return this.instance;
@@ -134,7 +142,9 @@ public class SampleExecution {
         return this.instance;
     }
 
-    // Attachment
+    /**
+     * Attachment Samples
+     */
     public SampleExecution detackDiskByNameFromDefaultVmSync(Azure azure, String id) {
         AttachmentApi.detackDiskByNameFromDefaultVmSync(azure, id);
         return this.instance;
@@ -145,7 +155,9 @@ public class SampleExecution {
         return this.instance;
     }
 
-    // Identity
+    /**
+     * Identity Samples
+     */
     public SampleExecution checkAuthenticationByRequest() {
         IdentityApi.checkAuthenticationByRequest();
         return this.instance;
@@ -156,14 +168,20 @@ public class SampleExecution {
         return this.instance;
     }
 
-    // Quota
+    /**
+     * Quota Samples
+     */
     public SampleExecution printQuotaSync(Azure azure) {
         QuotaApi.printQuotasSync(azure);
         return this.instance;
     }
 
-    // TODO(chico) - finish refactoring
-//    ImageApi.printInformation(azure);
-//    ComputeApi.getNetworkIntefaces(azure);
+    /**
+     * Image Samples
+     */
+    public SampleExecution printImageInformation(Azure azure) {
+        ImageApiSample.printInformation(azure);
+        return this.instance;
+    }
 
 }

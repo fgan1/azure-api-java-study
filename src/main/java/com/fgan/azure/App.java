@@ -64,6 +64,10 @@ public class App {
                  * Quota
                  */
 //                .printQuotaSync(azure)
+                /**
+                 * Images
+                 */
+//                .printImageInformation(azure)
                 .finish();
 
         runningForever();

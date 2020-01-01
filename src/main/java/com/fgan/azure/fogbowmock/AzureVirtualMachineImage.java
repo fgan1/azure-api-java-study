@@ -23,4 +23,9 @@ public class AzureVirtualMachineImage {
     public String getSku() {
         return sku;
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s|%s|%s", this.publisher, this.offer, this.sku);
+    }
 }
