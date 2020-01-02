@@ -7,14 +7,14 @@ public class AzureCloudUser extends CloudUser {
     private String clientId;
     private String tenantId;
     private String clientKey;
-    private String defaultSubscriptionId;
+    private String subscriptionId;
 
-    public AzureCloudUser(String userId, String userName, String clientId, String tenantId, String clientKey, String defaultSubscriptionId) {
+    public AzureCloudUser(String userId, String userName, String clientId, String tenantId, String clientKey, String subscriptionId) {
         super(userId, userName, "");
         this.clientId = clientId;
         this.tenantId = tenantId;
         this.clientKey = clientKey;
-        this.defaultSubscriptionId = defaultSubscriptionId;
+        this.subscriptionId = subscriptionId;
     }
 
     public String getClientId() {
@@ -29,7 +29,7 @@ public class AzureCloudUser extends CloudUser {
         return clientKey;
     }
 
-    public String getDefaultSubscriptionId() {
-        return defaultSubscriptionId;
+    public String getSubscriptionId() {
+        return subscriptionId;
     }
 }

@@ -1,21 +1,22 @@
 package com.fgan.azure.fogbowmock;
 
-import com.fgan.azure.api.identity.IdentityApi;
+import cloud.fogbow.common.exceptions.FogbowException;
 import com.microsoft.azure.AzureEnvironment;
 import com.microsoft.azure.credentials.ApplicationTokenCredentials;
 import com.microsoft.azure.credentials.AzureTokenCredentials;
 import com.microsoft.azure.management.Azure;
+import com.microsoft.rest.LogLevel;
 
 import java.io.IOException;
 import java.util.HashMap;
 
-public class AzureClient {
+public class AzureClientUtil {
 
-    public static Azure getAzure(AzureCloudUser azureCloudUser) throws IOException {
+    public static Azure getAzure(AzureCloudUser azureCloudUser) throws FogbowException {
         String clientId = azureCloudUser.getClientId();
         String tenantId = azureCloudUser.getTenantId();
         String clientKey = azureCloudUser.getClientKey();
-        String defaultSubscriptionId = azureCloudUser.getDefaultSubscriptionId();
+        String defaultSubscriptionId = azureCloudUser.getSubscriptionId();
 
         final String mgmtUri = AzureEnvironment.AZURE.managementEndpoint();
         final String authUrl = AzureEnvironment.AZURE.activeDirectoryEndpoint();
@@ -35,10 +36,17 @@ public class AzureClient {
                 new ApplicationTokenCredentials(clientId, tenantId, clientKey, azureEnvironment)
                 .withDefaultSubscriptionId(defaultSubscriptionId);
 
-        return IdentityApi.getAzure(azureTokenCredentials);
+        try {
+            return Azure.configure()
+                    .withLogLevel(LogLevel.BASIC)
+                    .authenticate(azureTokenCredentials)
+                    .withDefaultSubscription();
+        } catch (IOException e) {
+            throw new FogbowException("It was not possible create the Azure Client", e);
+        }
     }
 
-    private enum CredentialSettings {
+    public enum CredentialSettings {
         SUBSCRIPTION_ID("subscription"),
         TENANT_ID("tenant"),
         CLIENT_ID("client"),

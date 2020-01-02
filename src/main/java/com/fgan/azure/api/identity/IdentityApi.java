@@ -1,6 +1,8 @@
 package com.fgan.azure.api.identity;
 
 import com.fgan.azure.Constants;
+import com.fgan.azure.fogbowmock.AzureClientUtil;
+import com.fgan.azure.fogbowmock.AzureCloudUser;
 import com.fgan.azure.util.PropertiesUtil;
 import com.microsoft.aad.adal4j.AuthenticationContext;
 import com.microsoft.aad.adal4j.AuthenticationResult;
@@ -13,8 +15,10 @@ import com.microsoft.rest.LogLevel;
 
 import javax.naming.ServiceUnavailableException;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -36,28 +40,44 @@ public class IdentityApi {
     public static Azure getAzure() throws Exception {
         System.out.println("Getting azure object");
 
-        String azureAuthLocation = PropertiesUtil.getAzureAuthLocationPath();
-        final File credFile = new File(azureAuthLocation);
-        if (!credFile.exists()) {
-            String errorMsg = String.format("There is no file on path: %s", azureAuthLocation);
-            throw new Exception(errorMsg);
-        }
-
+        final File azureCredentialsFile = getAzureCredentialsFile();
         try {
             return Azure.configure()
                     .withLogLevel(LogLevel.BASIC)
-                    .authenticate(credFile)
+                    .authenticate(azureCredentialsFile)
                     .withDefaultSubscription();
         } catch (IOException e) {
             throw new Exception("Is not possible get Azure object", e);
         }
     }
 
-    public static Azure getAzure(AzureTokenCredentials azureTokenCredentials) throws IOException {
-        return Azure.configure()
-                .withLogLevel(LogLevel.BASIC)
-                .authenticate(azureTokenCredentials)
-                .withDefaultSubscription();
+    private static File getAzureCredentialsFile() throws Exception {
+        String azureAuthLocation = PropertiesUtil.getAzureAuthLocationPath();
+        final File credFile = new File(azureAuthLocation);
+        if (!credFile.exists()) {
+            String errorMsg = String.format("There is no file on path: %s", azureAuthLocation);
+            throw new Exception(errorMsg);
+        }
+        return credFile;
+    }
+
+    /**
+     * Note: Using Fogbow envirement to test it.
+     */
+    public static Azure getAzureFogbow() throws Exception {
+        Properties credentials = new Properties();
+        File azureCredentialsFile = getAzureCredentialsFile();
+        FileInputStream credentialsFileStream = new FileInputStream(azureCredentialsFile);
+        credentials.load(credentialsFileStream);
+        credentialsFileStream.close();
+
+        String clientId = credentials.getProperty(AzureClientUtil.CredentialSettings.CLIENT_ID.toString());
+        String tenantId = credentials.getProperty(AzureClientUtil.CredentialSettings.TENANT_ID.toString());
+        String clientKey = credentials.getProperty(AzureClientUtil.CredentialSettings.CLIENT_KEY.toString());
+        String subscriptionId = credentials.getProperty(AzureClientUtil.CredentialSettings.SUBSCRIPTION_ID.toString());;
+        AzureCloudUser azureCloudUser = new AzureCloudUser(
+                "", "", clientId, tenantId, clientKey, subscriptionId);
+        return AzureClientUtil.getAzure(azureCloudUser);
     }
 
     @Deprecated

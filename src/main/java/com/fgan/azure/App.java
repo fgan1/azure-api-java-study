@@ -15,7 +15,8 @@ public class App {
 
     public static void main( String[] args ) throws Exception {
         System.out.println("Hello Azure Api!");
-        Azure azure = IdentityApi.getAzure();
+//        Azure azure = IdentityApi.getAzure();
+        Azure azure = IdentityApi.getAzureFogbow();
 
         String id = "";
         String name = "";

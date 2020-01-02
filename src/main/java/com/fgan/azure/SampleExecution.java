@@ -20,9 +20,8 @@ public class SampleExecution {
         return instance;
     }
 
-    public SampleExecution finish() {
+    public void finish() {
         System.out.println("**||||||||||||| Ending Sample Main Thread |||||||||||||**");
-        return this.instance;
     }
 
     /**
