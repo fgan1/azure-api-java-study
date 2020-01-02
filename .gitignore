@@ -9,3 +9,5 @@ src/main/resources/*
 !src/main/resources/*.properties.example
 !src/main/resources/*.example
 src/main/java/com/fgan/azure/AppExtraTest.java
+
+resource-allocation-service.log

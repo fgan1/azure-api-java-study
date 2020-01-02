@@ -25,7 +25,6 @@ import rx.Completable;
 import rx.Observable;
 import rx.schedulers.Schedulers;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -82,6 +81,7 @@ public class AzureVirtualMachineOperationImpl implements AzureVirtualMachineOper
             throws FogbowException {
 
         Azure azure = AzureClientUtil.getAzure(azureCloudUser);
+
         PagedList<VirtualMachineSize> virtualMachineSizes = ComputeApi.getVirtualMachineSizes(azure);
         VirtualMachineSize firstVirtualMachineSize = virtualMachineSizes.stream()
                 .filter((virtualMachineSize) ->

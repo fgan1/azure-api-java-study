@@ -61,22 +61,30 @@ public class IdentityApi {
         return credFile;
     }
 
-    /**
-     * Note: Using Fogbow envirement to test it.
-     */
-    public static Azure getAzureFogbow() throws Exception {
+    private static Properties getAzureCredentialsProperties() throws Exception {
         Properties credentials = new Properties();
         File azureCredentialsFile = getAzureCredentialsFile();
         FileInputStream credentialsFileStream = new FileInputStream(azureCredentialsFile);
         credentials.load(credentialsFileStream);
         credentialsFileStream.close();
+        return credentials;
+    }
+
+    public static AzureCloudUser getAzureCloudUser() throws Exception {
+        Properties credentials = getAzureCredentialsProperties();
 
         String clientId = credentials.getProperty(AzureClientUtil.CredentialSettings.CLIENT_ID.toString());
         String tenantId = credentials.getProperty(AzureClientUtil.CredentialSettings.TENANT_ID.toString());
         String clientKey = credentials.getProperty(AzureClientUtil.CredentialSettings.CLIENT_KEY.toString());
         String subscriptionId = credentials.getProperty(AzureClientUtil.CredentialSettings.SUBSCRIPTION_ID.toString());;
-        AzureCloudUser azureCloudUser = new AzureCloudUser(
-                "", "", clientId, tenantId, clientKey, subscriptionId);
+        return new AzureCloudUser("", "", clientId, tenantId, clientKey, subscriptionId);
+    }
+
+    /**
+     * Note: Using Fogbow envirement to test it.
+     */
+    public static Azure getAzureFogbow() throws Exception {
+        AzureCloudUser azureCloudUser = getAzureCloudUser();
         return AzureClientUtil.getAzure(azureCloudUser);
     }
 

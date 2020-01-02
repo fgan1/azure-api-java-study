@@ -9,9 +9,8 @@ import cloud.fogbow.ras.core.models.ResourceType;
 import cloud.fogbow.ras.core.models.orders.ComputeOrder;
 import cloud.fogbow.ras.core.plugins.interoperability.ComputePlugin;
 import cloud.fogbow.ras.core.plugins.interoperability.aws.AwsV2StateMapper;
-import cloud.fogbow.ras.core.plugins.interoperability.util.DefaultLaunchCommandGenerator;
-import cloud.fogbow.ras.core.plugins.interoperability.util.LaunchCommandGenerator;
 import com.fgan.azure.fogbowmock.*;
+import com.fgan.azure.fogbowmock.image.AzureImageOperation;
 import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.LoggerFactory;
 
@@ -22,13 +21,12 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
 
     private final static org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AzureComputePlugin.class);
 
-    // TODO(chico)
-    private static final String DEFAULT_NETWORK_ID_KEY = "default_network_id";
+    private static final String DEFAULT_NETWORK_INTERFACE_NAME_KEY = "default_network_interface_name";
     private static final String DEFAULT_RESOURCE_GROUP_NAME_KEY = "resource_group_name";
     private static final String DEFAULT_REGION_NAME_KEY = "region_name";
 
-    private final LaunchCommandGenerator launchCommandGenerator;
-    private final String defaultNetworkId;
+//    private final LaunchCommandGenerator launchCommandGenerator;
+    private final String defaultNetworkInterfaceId;
     private final Properties properties;
     private final String resourceGroupName;
     private final String regionName;
@@ -37,10 +35,10 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
     public AzureComputePlugin(String confFilePath) {
         this.properties = PropertiesUtil.readProperties(confFilePath);
 
-        this.defaultNetworkId = this.properties.getProperty(DEFAULT_NETWORK_ID_KEY);
+        this.defaultNetworkInterfaceId = this.properties.getProperty(DEFAULT_NETWORK_INTERFACE_NAME_KEY);
         this.resourceGroupName = this.properties.getProperty(DEFAULT_RESOURCE_GROUP_NAME_KEY);
         this.regionName = this.properties.getProperty(DEFAULT_REGION_NAME_KEY);
-        this.launchCommandGenerator = new DefaultLaunchCommandGenerator();
+//        this.launchCommandGenerator = new DefaultLaunchCommandGenerator();
         this.azureVirtualMachineRequest = new AzureVirtualMachineOperationImpl();
     }
 
@@ -61,9 +59,10 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
         LOGGER.info(String.format(Messages.Info.REQUESTING_INSTANCE_FROM_PROVIDER));
         String networkInterfaceId = getNetworkInterfaceId(computeOrder);
         String flavorName = this.azureVirtualMachineRequest.findFlavour(computeOrder, azureCloudUser);
-        AzureVirtualMachineImage azureVirtualMachineImage = AzureImageRepository.buildAzureVirtualMachineImageBy(computeOrder.getImageId());
+        AzureVirtualMachineImage azureVirtualMachineImage = AzureImageOperation.buildAzureVirtualMachineImageBy(computeOrder.getImageId());
         String virtualMachineName = AzureResourceNameUtil.createVirtualMachineName(computeOrder);
-        String userData = this.launchCommandGenerator.createLaunchCommand(computeOrder);
+//        String userData = this.launchCommandGenerator.createLaunchCommand(computeOrder);
+        String userData = com.fgan.azure.util.PropertiesUtil.getUserData();
         String osUserName = computeOrder.getId();
         String osUserPassword = computeOrder.getId();
         String osComputeName = computeOrder.getId();
@@ -93,10 +92,12 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
     @VisibleForTesting
     String getNetworkInterfaceId(ComputeOrder computeOrder) throws FogbowException {
         List<String> networkIds = computeOrder.getNetworkIds();
-        if (!networkIds.isEmpty()) {
+        if (networkIds.size() > 1) {
             throw new FogbowException("Multiple networks not allowed yed");
+        } else if (networkIds.size() == 1) {
+            return networkIds.stream().findFirst().get();
         }
-        return this.defaultNetworkId;
+        return this.defaultNetworkInterfaceId;
     }
 
     @Override

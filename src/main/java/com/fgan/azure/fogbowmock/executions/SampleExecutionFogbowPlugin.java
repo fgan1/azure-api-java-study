@@ -1,38 +1,57 @@
 package com.fgan.azure.fogbowmock.executions;
 
-import cloud.fogbow.common.models.CloudUser;
+import cloud.fogbow.common.exceptions.FogbowException;
 import cloud.fogbow.ras.core.models.orders.ComputeOrder;
-import cloud.fogbow.ras.core.plugins.interoperability.ComputePlugin;
+import com.fgan.azure.api.identity.IdentityApi;
 import com.fgan.azure.fogbowmock.AzureCloudUser;
 import com.fgan.azure.fogbowmock.compute.AzureComputePlugin;
+import com.fgan.azure.util.PropertiesUtil;
 
 public class SampleExecutionFogbowPlugin {
 
-    private static SampleExecutionFogbowPlugin instance = new SampleExecutionFogbowPlugin();
+    private static SampleExecutionFogbowPlugin instanceSample = new SampleExecutionFogbowPlugin();
 
     public static SampleExecutionFogbowPlugin start() {
         System.out.println("**||||||||||||| Starting FOGBOW PLUGIN Sample Main Thread |||||||||||||**");
-        return instance;
+        return instanceSample;
     }
 
     public void finish() {
         System.out.println("**||||||||||||| Ending FOGBOW PLUGIN Sample Main Thread |||||||||||||**");
     }
 
-    public static Compute compute() {
-        return new Compute();
+    public static Compute compute(String computePropertiesPath) throws Exception {
+        return new Compute(computePropertiesPath);
     }
 
-    static class Compute {
+    static class Compute extends TypeExecution<Compute> {
 
-        AzureComputePlugin azureComputePlugin;
+        private AzureComputePlugin azureComputePlugin;
+        private AzureCloudUser azureCloudUser;
 
-        Compute() {
-            this.azureComputePlugin = new AzureComputePlugin();
+        Compute(String computePropertiesPath) throws Exception {
+            this.azureComputePlugin = new AzureComputePlugin(computePropertiesPath);
+            this.azureCloudUser = IdentityApi.getAzureCloudUser();;
         }
 
-        public void create(ComputeOrder computeOrder, AzureCloudUser azureCloudUser) {
+        public Compute create(ComputeOrder computeOrder) throws FogbowException {
+            this.azureComputePlugin.requestInstance(computeOrder, this.azureCloudUser);
+            return this;
+        }
 
+    }
+
+    static class TypeExecution<T> {
+
+        T start() {
+            T specificType = (T) this;
+            System.out.println(String.format("Start Excuting Type : %s", specificType.getClass().getSimpleName()));
+            return specificType;
+        }
+
+        SampleExecutionFogbowPlugin end() {
+            System.out.println("End Excuting Type");
+            return SampleExecutionFogbowPlugin.instanceSample;
         }
 
     }

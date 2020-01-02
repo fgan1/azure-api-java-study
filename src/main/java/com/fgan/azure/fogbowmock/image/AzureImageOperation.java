@@ -1,7 +1,8 @@
-package com.fgan.azure.fogbowmock;
+package com.fgan.azure.fogbowmock.image;
 
 import cloud.fogbow.ras.api.http.response.ImageSummary;
 import com.fgan.azure.api.image.ImageApi;
+import com.fgan.azure.fogbowmock.AzureVirtualMachineImage;
 import com.google.common.annotations.VisibleForTesting;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.Azure;
@@ -9,15 +10,25 @@ import com.microsoft.azure.management.compute.VirtualMachineOffer;
 import com.microsoft.azure.management.compute.VirtualMachinePublisher;
 import com.microsoft.azure.management.compute.VirtualMachineSku;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class AzureImageRepository {
+public class AzureImageOperation {
 
-    @VisibleForTesting static final String IMAGE_SUMMARY_ID_SEPARETOR = ":|:";
+    // TODO(chico) - change visibility when it goes to the Fogbow code.
+    public static final String IMAGE_SUMMARY_ID_SEPARETOR = "@#";
     @VisibleForTesting static final String IMAGE_SUMMARY_NAME_SEPARETOR = " - ";
+
+    private static final int SUMMARY_ID_PARAMETER_SIZE = 3;
+    private static final int PUBLISHER_ID_SUMMARY_POSITION = 0;
+    private static final int OFFER_ID_SUMMARY_POSITION = 1;
+    private static final int SKU_ID_SUMMARY_POSITION = 2;
+    private static final int SUMMARY_NAME_PARAMETER_SIZE = 2;
+    private static final int OFFER_NAME_SUMMARY_POSITION = 0;
+    private static final int SKU_NAME_SUMMARY_POSITION = 1;
 
     public static ImageSummary buildImageSummaryBy(AzureVirtualMachineImage azureVirtualMachineImage) {
         String id = convertToImageSummaryId(azureVirtualMachineImage);
@@ -28,32 +39,28 @@ public class AzureImageRepository {
     // TODO(chico) - review this magic numbers
     public static AzureVirtualMachineImage buildAzureVirtualMachineImageBy(String imageSummaryId) {
         String[] imageSummaryIdChunks = imageSummaryId.split(IMAGE_SUMMARY_ID_SEPARETOR);
-        String published = imageSummaryIdChunks[0];
-        String offer = imageSummaryIdChunks[1];
-        String sku = imageSummaryIdChunks[2];
+        String published = imageSummaryIdChunks[PUBLISHER_ID_SUMMARY_POSITION];
+        String offer = imageSummaryIdChunks[OFFER_ID_SUMMARY_POSITION];
+        String sku = imageSummaryIdChunks[SKU_ID_SUMMARY_POSITION];
         return new AzureVirtualMachineImage(published, offer, sku);
     }
 
     private static String convertToImageSummaryId(AzureVirtualMachineImage azureVirtualMachineImage) {
-        StringBuilder stringBuilder = new StringBuilder();
-        return stringBuilder
-                .append(azureVirtualMachineImage.getPublisher())
-                .append(IMAGE_SUMMARY_ID_SEPARETOR)
-                .append(azureVirtualMachineImage.getOffer())
-                .append(IMAGE_SUMMARY_ID_SEPARETOR)
-                .append(azureVirtualMachineImage.getSku())
-                .toString();
+        String[] list = new String[SUMMARY_ID_PARAMETER_SIZE];
+        list[PUBLISHER_ID_SUMMARY_POSITION] = azureVirtualMachineImage.getPublisher();
+        list[OFFER_ID_SUMMARY_POSITION] = azureVirtualMachineImage.getOffer();
+        list[SKU_ID_SUMMARY_POSITION] = azureVirtualMachineImage.getSku();
+        return StringUtils.join(list, IMAGE_SUMMARY_ID_SEPARETOR);
     }
 
     private static String convertToImageSummaryName(AzureVirtualMachineImage azureVirtualMachineImage) {
-        StringBuilder stringBuilder = new StringBuilder();
-        return stringBuilder
-                .append(azureVirtualMachineImage.getOffer())
-                .append(IMAGE_SUMMARY_NAME_SEPARETOR)
-                .append(azureVirtualMachineImage.getSku())
-                .toString();
+        String[] list = new String[SUMMARY_NAME_PARAMETER_SIZE];
+        list[OFFER_NAME_SUMMARY_POSITION] = azureVirtualMachineImage.getOffer();
+        list[SKU_NAME_SUMMARY_POSITION] = azureVirtualMachineImage.getSku();
+        return StringUtils.join(list, IMAGE_SUMMARY_NAME_SEPARETOR);
     }
 
+    // TODO(chico) - Finish
     public static List<AzureVirtualMachineImage> recoverImages(Azure azure, Region region) {
         List<String> allowedPublishersNames = Arrays.asList("Canonical", "CoreOS");
         List<AzureVirtualMachineImage> azureVirtualMachineImages = new ArrayList<>();

@@ -1,8 +1,8 @@
 # Required
-default_network_id=<default_network_id>
+default_network_interface_name=
 
 # Required
-resource_group_name=<resource_group_name>
+resource_group_name=
 
 # Required
-region_name=<region_name>
+region_name=

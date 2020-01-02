@@ -15,8 +15,7 @@ public class App {
 
     public static void main( String[] args ) throws Exception {
         System.out.println("Hello Azure Api!");
-//        Azure azure = IdentityApi.getAzure();
-        Azure azure = IdentityApi.getAzureFogbow();
+        Azure azure = IdentityApi.getAzure();
 
         String id = "";
         String name = "";
@@ -71,10 +70,10 @@ public class App {
 //                .printImageInformation(azure)
                 .finish();
 
-        runningForever();
+        runningForeverUntilYouStopIt();
     }
 
-    public static void runningForever() throws InterruptedException {
+    public static void runningForeverUntilYouStopIt() throws InterruptedException {
         final int SLEEP_TIME = 10000;
         while (true) {
             Thread.sleep(SLEEP_TIME);
