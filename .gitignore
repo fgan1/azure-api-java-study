@@ -4,8 +4,8 @@ target/
 vendor/ras/
 vendor/common/
 
-src/main/resources/
+src/main/resources/*
+!src/main/resources/azure-cloud/
 !src/main/resources/*.properties.example
 !src/main/resources/*.example
-!src/main/resources/azure-cloud/*.example
 src/main/java/com/fgan/azure/AppExtraTest.java
