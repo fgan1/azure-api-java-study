@@ -31,7 +31,7 @@ public class SampleExecutionFogbowPlugin {
 
         Compute(String computePropertiesPath) throws Exception {
             this.azureComputePlugin = new AzureComputePlugin(computePropertiesPath);
-            this.azureCloudUser = IdentityApi.getAzureCloudUser();;
+            this.azureCloudUser = IdentityApi.getAzureCloudUser();
         }
 
         public Compute create(ComputeOrder computeOrder) throws FogbowException {

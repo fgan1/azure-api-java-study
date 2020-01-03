@@ -10,6 +10,7 @@ public class AzureVirtualMachineParameters {
     private String regionName;
     private AzureVirtualMachineImage azureVirtualMachineImage;
     private String userData;
+    private int diskSize;
     private String size;
     private String osUserName;
     private String osUserPassword;
@@ -69,6 +70,14 @@ public class AzureVirtualMachineParameters {
 
     public void setSize(String size) {
         this.size = size;
+    }
+
+    public int getDiskSize() {
+        return diskSize;
+    }
+
+    public void setDiskSize(int diskSize) {
+        this.diskSize = diskSize;
     }
 
     public String getOsUserName() {

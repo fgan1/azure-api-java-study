@@ -1,8 +1,9 @@
 package com.fgan.azure.api;
 
+import cloud.fogbow.common.exceptions.FogbowException;
 import com.fgan.azure.Constants;
 import com.fgan.azure.api.network.NetworkApi;
-import com.fgan.azure.util.AzureIDBuilder;
+import com.fgan.azure.util.AzureIDBuilderGeneral;
 import com.fgan.azure.util.GeneralPrintUtil;
 import com.fgan.azure.util.PropertiesUtil;
 import com.microsoft.azure.PagedList;
@@ -30,19 +31,20 @@ public class ComputeApi {
     private static final String IMAGE_PUBLISHER_DEFAULT = "Canonical";
     private static final String IMAGE_OFFER_DEFAULT = "UbuntuServer";
     private static final String IMAGE_SKU_DEFAULT = "18.04-LTS";
+    private static final int DISK_SIZE_DEFAULT = 15;
 
     /**
      * Create Virtual Machine.
      * Sample to firts tests.
      */
-    public static void runSambleOneSync(Azure azure) {
+    public static void runSambleOneSync(Azure azure) throws Exception {
         String networkInterfaceId = PropertiesUtil.getNetworkInterfaceIdProp();
         String resourceGroupName = PropertiesUtil.getResourceGroupNameProp();
 
         NetworkInterface networkInterface = new NetworkApi(azure).getNetworkInterface(azure, networkInterfaceId);
         String userData = PropertiesUtil.getUserData();
         ResourceGroup resourceGroup = ManagerApi.getResourceGroup(azure, resourceGroupName);
-        VirtualMachine virtualMachine = createVirtualMachineSync(azure, networkInterface, userData, resourceGroup);
+        VirtualMachine virtualMachine = createVirtualMachineSync(azure, networkInterface, userData, resourceGroup.name());
         GeneralPrintUtil.printLines(virtualMachine::id,
                 virtualMachine::vmId,
                 virtualMachine::computerName,
@@ -59,7 +61,7 @@ public class ComputeApi {
      * -- (2) PowerState/running|Creating
      * -- (3) PowerState/running|Succeeded
      */
-    public static void createComputeFogbowWithObservebla(Azure azure) throws InterruptedException {
+    public static void createComputeFogbowWithObservebla(Azure azure) throws Exception {
         String networkInterfaceId = PropertiesUtil.getNetworkInterfaceIdProp();
         String resourceGroupName = PropertiesUtil.getResourceGroupNameProp();
 
@@ -77,7 +79,7 @@ public class ComputeApi {
             System.out.println("Completed.");
         });
 
-        String id = AzureIDBuilder.buildVirtualMachineId(ComputeApi.VM_NAME_DEFAULT);
+        String id = AzureIDBuilderGeneral.buildVirtualMachineId(ComputeApi.VM_NAME_DEFAULT);
         verifyVMState(azure, id);
     }
 
@@ -108,7 +110,7 @@ public class ComputeApi {
      * - Delete VirtualMachine
      * - Delete Disk
      */
-    public static void deleteVmAsync(Azure azure, String virtualMachineId) {
+    public static void deleteVmAsync(Azure azure, String virtualMachineId) throws Exception {
         VirtualMachine virtualMachine = getVirtualMachineById(azure, virtualMachineId);
         String osDiskId = virtualMachine.osDiskId();
         Completable completable = deleteVirtualMachineAsync(azure, virtualMachineId);
@@ -120,7 +122,7 @@ public class ComputeApi {
         });
     }
 
-    public static void printVmInformation(Azure azure, String virtualMachineId) {
+    public static void printVmInformation(Azure azure, String virtualMachineId) throws Exception {
         VirtualMachine virtualMachine = getVirtualMachineById(azure, virtualMachineId);
         GeneralPrintUtil.printLines(virtualMachine::name,
                 virtualMachine::id,
@@ -163,12 +165,16 @@ public class ComputeApi {
     }
 
     public static VirtualMachine getVirtualMachineByName(Azure azure, String virtualMachineName) {
-        String virtualMachineId = AzureIDBuilder.buildVirtualMachineId(virtualMachineName);
+        String virtualMachineId = AzureIDBuilderGeneral.buildVirtualMachineId(virtualMachineName);
         return azure.virtualMachines().getById(virtualMachineId);
     }
 
-    public static VirtualMachine getVirtualMachineById(Azure azure, String virtualMachineId) {
-        return azure.virtualMachines().getById(virtualMachineId);
+    public static VirtualMachine getVirtualMachineById(Azure azure, String virtualMachineId) throws FogbowException {
+        try {
+            return azure.virtualMachines().getById(virtualMachineId);
+        } catch (RuntimeException e) {
+            throw new FogbowException("*", e);
+        }
     }
 
     private static PagedList<VirtualMachine> getVirtualMachines(Azure azure) {
@@ -193,22 +199,22 @@ public class ComputeApi {
                                                                    ResourceGroup resourceGroup) {
 
         VirtualMachine.DefinitionStages.WithCreate virtualMachineContextCreation =
-                createVirtualMachineContextCreation(azure, networkInterface, userData, resourceGroup);
+                createVirtualMachineContextCreation(azure, networkInterface, userData, resourceGroup.name());
         return virtualMachineContextCreation.createAsync();
     }
 
     public static Observable<Indexable> createVirtualMachineAsync(
             Azure azure, String virtualMachineName, Region region,
-            ResourceGroup resourceGroup, NetworkInterface networkInterface,
+            String resourceGroupName, NetworkInterface networkInterface,
             String imagePublished, String imageOffer, String imageSku,
             String osUserName, String osUserPassword, String osComputeName,
-            String userData, String size) {
+            String userData, int diskSize, String size) {
 
         VirtualMachine.DefinitionStages.WithCreate virtualMachineContextCreation =
                 createVirtualMachineContextCreation(azure, VM_NAME_DEFAULT, Constants.REGION_DEFAULT,
-                        resourceGroup, networkInterface, IMAGE_PUBLISHER_DEFAULT, IMAGE_OFFER_DEFAULT,
+                        resourceGroupName, networkInterface, IMAGE_PUBLISHER_DEFAULT, IMAGE_OFFER_DEFAULT,
                         IMAGE_SKU_DEFAULT, OS_USER_NAME_DEFAULT, OS_USER_PASSWORD_DEFAULT, VM_NAME_DEFAULT,
-                        userData, VIRTUAL_MACHINE_SIZE_FREE_TIER);
+                        userData, DISK_SIZE_DEFAULT, VIRTUAL_MACHINE_SIZE_FREE_TIER);
         return virtualMachineContextCreation.createAsync();
     }
 
@@ -219,25 +225,25 @@ public class ComputeApi {
     public static VirtualMachine createVirtualMachineSync(Azure azure,
                                                           NetworkInterface networkInterface,
                                                           String userData,
-                                                          ResourceGroup resourceGroup) {
+                                                          String resourceGroupName) {
 
         VirtualMachine.DefinitionStages.WithCreate virtualMachineContextCreation =
-                createVirtualMachineContextCreation(azure, networkInterface, userData, resourceGroup);
+                createVirtualMachineContextCreation(azure, networkInterface, userData, resourceGroupName);
         return virtualMachineContextCreation.create();
     }
 
     public static VirtualMachine createVirtualMachineSync(
             Azure azure, String virtualMachineName, Region region,
-            ResourceGroup resourceGroup, NetworkInterface networkInterface,
+            String resourceGroupName, NetworkInterface networkInterface,
             String imagePublished, String imageOffer, String imageSku,
             String osUserName, String osUserPassword, String osComputeName,
-            String userData, String size) {
+            String userData, int diskSize, String size) {
 
         VirtualMachine.DefinitionStages.WithCreate virtualMachineContextCreation =
                 createVirtualMachineContextCreation(azure, VM_NAME_DEFAULT, Constants.REGION_DEFAULT,
-                        resourceGroup, networkInterface, IMAGE_PUBLISHER_DEFAULT, IMAGE_OFFER_DEFAULT,
+                        resourceGroupName, networkInterface, IMAGE_PUBLISHER_DEFAULT, IMAGE_OFFER_DEFAULT,
                         IMAGE_SKU_DEFAULT, OS_USER_NAME_DEFAULT, OS_USER_PASSWORD_DEFAULT, VM_NAME_DEFAULT,
-                        userData, VIRTUAL_MACHINE_SIZE_FREE_TIER);
+                        userData, DISK_SIZE_DEFAULT, VIRTUAL_MACHINE_SIZE_FREE_TIER);
         return virtualMachineContextCreation.create();
     }
 
@@ -245,31 +251,31 @@ public class ComputeApi {
             Azure azure,
             NetworkInterface networkInterface,
             String userData,
-            ResourceGroup resourceGroup) {
+            String resourceGroupName) {
 
         return createVirtualMachineContextCreation(azure, VM_NAME_DEFAULT, Constants.REGION_DEFAULT,
-                resourceGroup, networkInterface, IMAGE_PUBLISHER_DEFAULT, IMAGE_OFFER_DEFAULT, IMAGE_SKU_DEFAULT,
-                OS_USER_NAME_DEFAULT, OS_USER_PASSWORD_DEFAULT, VM_NAME_DEFAULT, userData, VIRTUAL_MACHINE_SIZE_FREE_TIER);
+                resourceGroupName, networkInterface, IMAGE_PUBLISHER_DEFAULT, IMAGE_OFFER_DEFAULT, IMAGE_SKU_DEFAULT,
+                OS_USER_NAME_DEFAULT, OS_USER_PASSWORD_DEFAULT, VM_NAME_DEFAULT, userData, DISK_SIZE_DEFAULT, VIRTUAL_MACHINE_SIZE_FREE_TIER);
     }
 
     public static VirtualMachine.DefinitionStages.WithCreate createVirtualMachineContextCreation(
             Azure azure, String virtualMachineName, Region region,
-            ResourceGroup resourceGroup, NetworkInterface networkInterface,
+            String resourceGroupName, NetworkInterface networkInterface,
             String imagePublished, String imageOffer, String imageSku,
             String osUserName, String osUserPassword, String osComputeName,
-            String userData, String size) {
+            String userData, int diskSize, String size) {
 
         return azure.virtualMachines()
                 .define(virtualMachineName)
                 .withRegion(region)
-                .withExistingResourceGroup(resourceGroup)
+                .withExistingResourceGroup(resourceGroupName)
                 .withExistingPrimaryNetworkInterface(networkInterface)
                 .withLatestLinuxImage(imagePublished, imageOffer, imageSku)
                 .withRootUsername(osUserName)
                 .withRootPassword(osUserPassword)
                 .withComputerName(osComputeName)
                 .withCustomData(userData)
-//                .withOSDiskSizeInGB()
+                .withOSDiskSizeInGB(diskSize)
                 .withSize(size);
     }
 }

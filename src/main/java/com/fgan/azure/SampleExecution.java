@@ -4,7 +4,7 @@ import com.fgan.azure.api.*;
 import com.fgan.azure.api.identity.IdentityApi;
 import com.fgan.azure.api.image.ImageApiSample;
 import com.fgan.azure.api.network.NetworkApiSample;
-import com.fgan.azure.util.AzureIDBuilder;
+import com.fgan.azure.util.AzureIDBuilderGeneral;
 import com.fgan.azure.util.GeneralPrintUtil;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.Disk;
@@ -80,7 +80,7 @@ public class SampleExecution {
     public SampleExecution deleteVirtualMachineAlreadyCreatedByNameAsync(Azure azure, String name)
             throws Exception {
 
-        String virtualMachineId = AzureIDBuilder.buildVirtualMachineId(name);
+        String virtualMachineId = AzureIDBuilderGeneral.buildVirtualMachineId(name);
         ComputeApi.deleteVmAsync(azure, virtualMachineId);
         return this.instance;
     }
@@ -109,7 +109,7 @@ public class SampleExecution {
     }
 
     public SampleExecution deleteDiskCreatedByName(Azure azure, String name) {
-        String diskId = AzureIDBuilder.buildDiskId(name);
+        String diskId = AzureIDBuilderGeneral.buildDiskId(name);
         VolumeApi.deleteDisk(azure, diskId);
         return this.instance;
     }

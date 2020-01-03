@@ -1,6 +1,6 @@
 package com.fgan.azure.util;
 
-public class AzureIDBuilder {
+public class AzureIDBuilderGeneral {
 
     // /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachines/{virtualMachineName}
     private static String VIRTUAL_MACHINE_STRUCTURE =

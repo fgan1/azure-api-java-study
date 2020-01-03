@@ -4,7 +4,7 @@ import com.fgan.azure.Constants;
 import com.fgan.azure.api.network.exceptions.CreateNetworkException;
 import com.fgan.azure.api.network.exceptions.CreateNetworkInterfaceException;
 import com.fgan.azure.api.network.exceptions.CreateNetworkOperationException;
-import com.fgan.azure.util.AzureIDBuilder;
+import com.fgan.azure.util.AzureIDBuilderGeneral;
 import com.fgan.azure.util.GeneralPrintUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.microsoft.azure.PagedList;
@@ -69,7 +69,7 @@ public class NetworkApiSample {
     }
 
     public void printSpecificNetworkInformationByName(Azure azure, String networkName) {
-        String networkId = AzureIDBuilder.buildNetworkId(networkName);
+        String networkId = AzureIDBuilderGeneral.buildNetworkId(networkName);
         printSpecificNetworkInformationById(azure, networkId);
     }
 
@@ -138,7 +138,7 @@ public class NetworkApiSample {
 
     @VisibleForTesting
     Completable getDeleteSecurityGroupCompletable() {
-        String securityGroupId = AzureIDBuilder.buildSecurityGroupId(SECURITY_GROUP_NAME_DEFAULT);
+        String securityGroupId = AzureIDBuilderGeneral.buildSecurityGroupId(SECURITY_GROUP_NAME_DEFAULT);
         Completable deleteSecurityGroupCompletable = this.networkApi.deleteSecurityGroupByIdAsync(securityGroupId);
 
         LOGGER.debug(String.format("It will delete security group named %s", securityGroupId));
@@ -150,7 +150,7 @@ public class NetworkApiSample {
 
     @VisibleForTesting
     Completable getDeleteNetworkCompletable() {
-        String networkId = AzureIDBuilder.buildNetworkId(NETWORK_NAME_DEFAULT);
+        String networkId = AzureIDBuilderGeneral.buildNetworkId(NETWORK_NAME_DEFAULT);
         Completable deleteNetworkCompletable = this.networkApi.deleteNetworkByIdAsync(networkId);
 
         LOGGER.debug(String.format("It will delete network named %s", networkId));
@@ -252,19 +252,19 @@ public class NetworkApiSample {
 
     @VisibleForTesting
     Completable buildDeleteSecurityGroupCompletable() {
-        String securityGroupId = AzureIDBuilder.buildSecurityGroupId(SECURITY_GROUP_NAME_DEFAULT);
+        String securityGroupId = AzureIDBuilderGeneral.buildSecurityGroupId(SECURITY_GROUP_NAME_DEFAULT);
         return this.networkApi.deleteSecurityGroupByIdAsync(securityGroupId);
     }
 
     @VisibleForTesting
     Completable buildDeleteNetworkCompletable() {
-        String networkId = AzureIDBuilder.buildNetworkId(NETWORK_NAME_DEFAULT);
+        String networkId = AzureIDBuilderGeneral.buildNetworkId(NETWORK_NAME_DEFAULT);
         return this.networkApi.deleteNetworkByIdAsync(networkId);
     }
 
     @VisibleForTesting
     Completable buildDeleteNetworkInterfaceCompletable() {
-        String networkInterfaceId = AzureIDBuilder.buildNetworkInterfaceId(NETWORK_INTERFACE_NAME_DEFAULT);
+        String networkInterfaceId = AzureIDBuilderGeneral.buildNetworkInterfaceId(NETWORK_INTERFACE_NAME_DEFAULT);
         return this.networkApi.deleteNetworkInterfaceByIdAsync(networkInterfaceId);
     }
 

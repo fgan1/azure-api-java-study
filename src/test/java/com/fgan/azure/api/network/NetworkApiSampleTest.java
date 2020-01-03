@@ -5,7 +5,7 @@ import com.fgan.azure.LoggerAssert;
 import com.fgan.azure.TestUtil;
 import com.fgan.azure.api.network.exceptions.CreateNetworkException;
 import com.fgan.azure.api.network.exceptions.CreateNetworkInterfaceException;
-import com.fgan.azure.util.AzureIDBuilder;
+import com.fgan.azure.util.AzureIDBuilderGeneral;
 import com.fgan.azure.util.PropertiesUtil;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.network.NetworkSecurityGroup;
@@ -20,7 +20,7 @@ import rx.Observable;
 
 import java.io.IOException;
 
-@PrepareForTest({PropertiesUtil.class, AzureIDBuilder.class})
+@PrepareForTest({PropertiesUtil.class, AzureIDBuilderGeneral.class})
 public class NetworkApiSampleTest extends TestUtil {
 
     private LoggerAssert loggerAssertNetworkApiSample = new LoggerAssert(NetworkApiSample.class);

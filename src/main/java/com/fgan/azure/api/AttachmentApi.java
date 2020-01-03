@@ -1,6 +1,6 @@
 package com.fgan.azure.api;
 
-import com.fgan.azure.util.AzureIDBuilder;
+import com.fgan.azure.util.AzureIDBuilderGeneral;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.Disk;
 import com.microsoft.azure.management.compute.VirtualMachine;
@@ -16,8 +16,8 @@ import com.microsoft.azure.management.compute.VirtualMachine;
 public class AttachmentApi {
 
     public static void attackDiskByNameFromDefaultVmSync(Azure azure, String diskName) {
-        String virtualMachineId = AzureIDBuilder.buildVirtualMachineId(ComputeApi.VM_NAME_DEFAULT);
-        String diskId = AzureIDBuilder.buildDiskId(diskName);
+        String virtualMachineId = AzureIDBuilderGeneral.buildVirtualMachineId(ComputeApi.VM_NAME_DEFAULT);
+        String diskId = AzureIDBuilderGeneral.buildDiskId(diskName);
         attackDiskSync(azure, diskId, virtualMachineId);
     }
 
@@ -36,8 +36,8 @@ public class AttachmentApi {
     }
 
     public static void detackDiskByNameFromDefaultVmSync(Azure azure, String diskName) {
-        String virtualMachineId = AzureIDBuilder.buildVirtualMachineId(ComputeApi.VM_NAME_DEFAULT);
-        String diskId = AzureIDBuilder.buildDiskId(diskName);
+        String virtualMachineId = AzureIDBuilderGeneral.buildVirtualMachineId(ComputeApi.VM_NAME_DEFAULT);
+        String diskId = AzureIDBuilderGeneral.buildDiskId(diskName);
         detackDiskSync(azure, diskId, virtualMachineId);
     }
 

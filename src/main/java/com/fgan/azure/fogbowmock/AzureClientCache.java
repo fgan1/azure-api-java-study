@@ -1,18 +1,71 @@
 package com.fgan.azure.fogbowmock;
 
 import cloud.fogbow.common.exceptions.FogbowException;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.microsoft.azure.AzureEnvironment;
 import com.microsoft.azure.credentials.ApplicationTokenCredentials;
 import com.microsoft.azure.credentials.AzureTokenCredentials;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.rest.LogLevel;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
-public class AzureClientUtil {
+// TODO(chico) - implement tests
+public class AzureClientCache {
+    private static final Logger LOGGER = Logger.getLogger(AzureClientCache.class);
+
+    private static final long LIFE_TIME_IN_MINUTES = 30;
+
+    private final static LoadingCache<AzureCloudUser, Azure> loadingCache;
+
+    static {
+        loadingCache = CacheBuilder.newBuilder()
+                .expireAfterWrite(LIFE_TIME_IN_MINUTES, TimeUnit.MINUTES)
+                .build(new CacheLoader<AzureCloudUser, Azure>() {
+                    @Override
+                    public Azure load(AzureCloudUser azureCloudUser) throws Exception {
+                        LOGGER.debug("Creating a new Azure client");
+                        return getAzureProperly(azureCloudUser);
+                    }
+                });
+    }
 
     public static Azure getAzure(AzureCloudUser azureCloudUser) throws FogbowException {
+        try {
+            LOGGER.debug("Trying to get Azure client in the cache");
+            return loadingCache.get(azureCloudUser);
+        } catch (ExecutionException e) {
+            // TODO(chico) - finish
+            throw new FogbowException("", e);
+        }
+    }
+
+    /**
+     *
+     * @param azureCloudUser
+     * @return
+     * @throws FogbowException
+     */
+    public static Azure getAzureProperly(AzureCloudUser azureCloudUser) throws FogbowException {
+        AzureTokenCredentials azureTokenCredentials = getAzureTokenCredentials(azureCloudUser);
+
+        try {
+            return Azure.configure()
+                    .withLogLevel(LogLevel.BASIC)
+                    .authenticate(azureTokenCredentials)
+                    .withDefaultSubscription();
+        } catch (IOException e) {
+            throw new FogbowException("It was not possible create the Azure Client", e);
+        }
+    }
+
+    private static AzureTokenCredentials getAzureTokenCredentials(AzureCloudUser azureCloudUser) {
         String clientId = azureCloudUser.getClientId();
         String tenantId = azureCloudUser.getTenantId();
         String clientKey = azureCloudUser.getClientKey();
@@ -32,32 +85,20 @@ public class AzureClientUtil {
                 this.put(AzureEnvironment.Endpoint.KEYVAULT.toString(), vaultSuffix);
             }
         });
-        AzureTokenCredentials azureTokenCredentials =
-                new ApplicationTokenCredentials(clientId, tenantId, clientKey, azureEnvironment)
+        return new ApplicationTokenCredentials(clientId, tenantId, clientKey, azureEnvironment)
                 .withDefaultSubscriptionId(defaultSubscriptionId);
-
-        try {
-            return Azure.configure()
-                    .withLogLevel(LogLevel.BASIC)
-                    .authenticate(azureTokenCredentials)
-                    .withDefaultSubscription();
-        } catch (IOException e) {
-            throw new FogbowException("It was not possible create the Azure Client", e);
-        }
     }
 
     public enum CredentialSettings {
         SUBSCRIPTION_ID("subscription"),
+        RESOURCE_GROUP_NAME("resourceGroupName"),
         TENANT_ID("tenant"),
         CLIENT_ID("client"),
         CLIENT_KEY("key"),
-        CLIENT_CERT("certificate"),
-        CLIENT_CERT_PASS("certificatePassword"),
         MANAGEMENT_URI("managementURI"),
         BASE_URL("baseURL"),
         AUTH_URL("authURL"),
-        GRAPH_URL("graphURL"),
-        VAULT_SUFFIX("vaultSuffix");
+        GRAPH_URL("graphURL");
 
         private final String name;
 

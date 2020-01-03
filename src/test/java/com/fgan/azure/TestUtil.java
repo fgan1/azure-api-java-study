@@ -1,6 +1,6 @@
 package com.fgan.azure;
 
-import com.fgan.azure.util.AzureIDBuilder;
+import com.fgan.azure.util.AzureIDBuilderGeneral;
 import com.fgan.azure.util.PropertiesUtil;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({PropertiesUtil.class, AzureIDBuilder.class})
+@PrepareForTest({PropertiesUtil.class, AzureIDBuilderGeneral.class})
 public class TestUtil {
 
     static final String ID_DEFAULT = "id";
@@ -24,11 +24,11 @@ public class TestUtil {
         Properties properties = new Properties();
         PowerMockito.when(PropertiesUtil.getInstance()).thenReturn(properties);
 
-        PowerMockito.mockStatic(AzureIDBuilder.class);
-        PowerMockito.when(AzureIDBuilder.buildVirtualMachineId(Mockito.anyString())).thenReturn(ID_DEFAULT);
-        PowerMockito.when(AzureIDBuilder.buildSecurityGroupId(Mockito.anyString())).thenReturn(ID_DEFAULT);
-        PowerMockito.when(AzureIDBuilder.buildDiskId(Mockito.anyString())).thenReturn(ID_DEFAULT);
-        PowerMockito.when(AzureIDBuilder.buildNetworkId(Mockito.anyString())).thenReturn(ID_DEFAULT);
+        PowerMockito.mockStatic(AzureIDBuilderGeneral.class);
+        PowerMockito.when(AzureIDBuilderGeneral.buildVirtualMachineId(Mockito.anyString())).thenReturn(ID_DEFAULT);
+        PowerMockito.when(AzureIDBuilderGeneral.buildSecurityGroupId(Mockito.anyString())).thenReturn(ID_DEFAULT);
+        PowerMockito.when(AzureIDBuilderGeneral.buildDiskId(Mockito.anyString())).thenReturn(ID_DEFAULT);
+        PowerMockito.when(AzureIDBuilderGeneral.buildNetworkId(Mockito.anyString())).thenReturn(ID_DEFAULT);
     }
 
 }

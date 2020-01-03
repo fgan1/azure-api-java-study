@@ -10,23 +10,24 @@ import cloud.fogbow.ras.core.models.orders.ComputeOrder;
 import cloud.fogbow.ras.core.plugins.interoperability.ComputePlugin;
 import cloud.fogbow.ras.core.plugins.interoperability.aws.AwsV2StateMapper;
 import com.fgan.azure.fogbowmock.*;
+import com.fgan.azure.fogbowmock.azureidbuilder.AzureIdBuilder;
 import com.fgan.azure.fogbowmock.image.AzureImageOperation;
 import com.google.common.annotations.VisibleForTesting;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 
 import java.util.List;
 import java.util.Properties;
 
 public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
 
-    private final static org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AzureComputePlugin.class);
+    private static final Logger LOGGER = Logger.getLogger(AzureComputePlugin.class);
 
     private static final String DEFAULT_NETWORK_INTERFACE_NAME_KEY = "default_network_interface_name";
     private static final String DEFAULT_RESOURCE_GROUP_NAME_KEY = "resource_group_name";
     private static final String DEFAULT_REGION_NAME_KEY = "region_name";
 
 //    private final LaunchCommandGenerator launchCommandGenerator;
-    private final String defaultNetworkInterfaceId;
+    private final String defaultNetworkInterfaceName;
     private final Properties properties;
     private final String resourceGroupName;
     private final String regionName;
@@ -35,7 +36,7 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
     public AzureComputePlugin(String confFilePath) {
         this.properties = PropertiesUtil.readProperties(confFilePath);
 
-        this.defaultNetworkInterfaceId = this.properties.getProperty(DEFAULT_NETWORK_INTERFACE_NAME_KEY);
+        this.defaultNetworkInterfaceName = this.properties.getProperty(DEFAULT_NETWORK_INTERFACE_NAME_KEY);
         this.resourceGroupName = this.properties.getProperty(DEFAULT_RESOURCE_GROUP_NAME_KEY);
         this.regionName = this.properties.getProperty(DEFAULT_REGION_NAME_KEY);
 //        this.launchCommandGenerator = new DefaultLaunchCommandGenerator();
@@ -44,12 +45,12 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
 
     @Override
     public boolean isReady(String instanceState) {
-        return AwsV2StateMapper.map(ResourceType.COMPUTE, instanceState).equals(InstanceState.READY);
+        return AzureStateMapper.map(ResourceType.COMPUTE, instanceState).equals(InstanceState.READY);
     }
 
     @Override
-    public boolean hasFailed(String s) {
-        return false;
+    public boolean hasFailed(String instanceState) {
+        return AzureStateMapper.map(ResourceType.COMPUTE, instanceState).equals(InstanceState.FAILED);
     }
 
     @Override
@@ -57,10 +58,11 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
             throws FogbowException {
 
         LOGGER.info(String.format(Messages.Info.REQUESTING_INSTANCE_FROM_PROVIDER));
-        String networkInterfaceId = getNetworkInterfaceId(computeOrder);
+        String networkInterfaceId = getNetworkInterfaceId(computeOrder, azureCloudUser);
         String flavorName = this.azureVirtualMachineRequest.findFlavour(computeOrder, azureCloudUser);
+        int diskSize = computeOrder.getDisk();
         AzureVirtualMachineImage azureVirtualMachineImage = AzureImageOperation.buildAzureVirtualMachineImageBy(computeOrder.getImageId());
-        String virtualMachineName = AzureResourceNameUtil.createVirtualMachineName(computeOrder);
+        String virtualMachineName = AzureResourceInstanceId.generateAzureResourceNameBy(computeOrder);
 //        String userData = this.launchCommandGenerator.createLaunchCommand(computeOrder);
         String userData = com.fgan.azure.util.PropertiesUtil.getUserData();
         String osUserName = computeOrder.getId();
@@ -80,24 +82,27 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
                 .with(AzureVirtualMachineParameters::setUserData, userData)
                 .with(AzureVirtualMachineParameters::setVirtualMachineName, virtualMachineName)
                 .with(AzureVirtualMachineParameters::setSize, flavorName)
+                .with(AzureVirtualMachineParameters::setDiskSize, diskSize)
                 .build();
 
         this.azureVirtualMachineRequest.doCreateAsynchronously(azureVirtualMachineParameters, azureCloudUser);
 
-        String instanceId = AzureResourceNameUtil.createVirtualMachineName(computeOrder);
-        return instanceId;
+        return AzureResourceInstanceId.generateFogbowInstanceIdBy(computeOrder);
     }
 
     // TODO(chico) - Finish; Study multi network interfaces behaviour.
     @VisibleForTesting
-    String getNetworkInterfaceId(ComputeOrder computeOrder) throws FogbowException {
+    String getNetworkInterfaceId(ComputeOrder computeOrder, AzureCloudUser azureCloudUser) throws FogbowException {
         List<String> networkIds = computeOrder.getNetworkIds();
         if (networkIds.size() > 1) {
             throw new FogbowException("Multiple networks not allowed yed");
         } else if (networkIds.size() == 1) {
             return networkIds.stream().findFirst().get();
         }
-        return this.defaultNetworkInterfaceId;
+
+        return AzureIdBuilder
+                .configure(azureCloudUser)
+                .buildNetworkInterfaceId(this.defaultNetworkInterfaceName);
     }
 
     @Override

@@ -18,8 +18,12 @@ public class NetworkApi extends ApiAzure {
         super(azure);
     }
 
-    public NetworkInterface getNetworkInterface(Azure azure, String networkId) {
-        return azure.networkInterfaces().getById(networkId);
+    public static NetworkInterface getNetworkInterface(Azure azure, String networkId) throws Exception {
+        try {
+            return azure.networkInterfaces().getById(networkId);
+        } catch (RuntimeException e) {
+            throw new Exception("*", e);
+        }
     }
 
     Network getNetwork(String networkId) {

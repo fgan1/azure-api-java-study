@@ -1,26 +1,25 @@
 package com.fgan.azure.fogbowmock.compute;
 
 import cloud.fogbow.common.exceptions.FogbowException;
+import cloud.fogbow.common.exceptions.InstanceNotFoundException;
 import cloud.fogbow.common.exceptions.NoAvailableResourcesException;
 import cloud.fogbow.ras.api.http.response.ComputeInstance;
 import cloud.fogbow.ras.core.models.UserData;
 import cloud.fogbow.ras.core.models.orders.ComputeOrder;
 import com.fgan.azure.api.ComputeApi;
-import com.fgan.azure.api.ManagerApi;
 import com.fgan.azure.api.network.NetworkApi;
-import com.fgan.azure.fogbowmock.AzureClientUtil;
+import com.fgan.azure.fogbowmock.AzureClientCache;
 import com.fgan.azure.fogbowmock.AzureCloudUser;
-import com.fgan.azure.fogbowmock.AzureIDBuilderFogbow;
 import com.fgan.azure.fogbowmock.AzureVirtualMachineImage;
+import com.fgan.azure.fogbowmock.azureidbuilder.AzureIdBuilder;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.compute.VirtualMachineSize;
 import com.microsoft.azure.management.network.NetworkInterface;
-import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azure.management.resources.fluentcore.model.Indexable;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 import rx.Completable;
 import rx.Observable;
 import rx.schedulers.Schedulers;
@@ -31,15 +30,17 @@ import java.util.List;
 
 public class AzureVirtualMachineOperationImpl implements AzureVirtualMachineOperation {
 
-    private final static org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AzureComputePlugin.class);
+    private static final Logger LOGGER = Logger.getLogger(AzureComputePlugin.class);
 
     @Override
     public void doCreateAsynchronously(AzureVirtualMachineParameters azureVirtualMachineParameters,
                                        AzureCloudUser azureCloudUser) throws FogbowException {
 
-        Azure azure = AzureClientUtil.getAzure(azureCloudUser);
+        Azure azure = AzureClientCache.getAzure(azureCloudUser);
 
-        String networkInterfaceId = azureVirtualMachineParameters.getNetworkInterfaceId();
+        String fogbowNetworkInterfaceId = azureVirtualMachineParameters.getNetworkInterfaceId();
+        NetworkInterface networkInterface = getNetworkInterface(fogbowNetworkInterfaceId, azureCloudUser, azure);
+
         String resourceGroupName = azureVirtualMachineParameters.getResourceGroupName();
         String regionName = azureVirtualMachineParameters.getRegionName();
         String virtualMachineName = azureVirtualMachineParameters.getVirtualMachineName();
@@ -48,19 +49,17 @@ public class AzureVirtualMachineOperationImpl implements AzureVirtualMachineOper
         String osComputeName = azureVirtualMachineParameters.getOsComputeName();
         String userData = azureVirtualMachineParameters.getUserData();
         String size = azureVirtualMachineParameters.getSize();
+        int diskSize = azureVirtualMachineParameters.getDiskSize();
         AzureVirtualMachineImage azureVirtualMachineImage = azureVirtualMachineParameters.getAzureVirtualMachineImage();
-        NetworkInterface networkInterface = new NetworkApi(azure).getNetworkInterface(azure, networkInterfaceId);
-        ResourceGroup resourceGroup = ManagerApi.getResourceGroup(azure, resourceGroupName);
         Region region = Region.findByLabelOrName(regionName);
         String imagePublished = azureVirtualMachineImage.getPublisher();
         String imageOffer = azureVirtualMachineImage.getOffer();
         String imageSku = azureVirtualMachineImage.getSku();
 
-        Observable<Indexable> virtualMachineAsync = ComputeApi.createVirtualMachineAsync(azure, virtualMachineName, region,
-                resourceGroup, networkInterface,
-                imagePublished, imageOffer, imageSku,
-                osUserName, osUserPassword, osComputeName,
-                userData, size);
+        Observable<Indexable> virtualMachineAsync = ComputeApi.createVirtualMachineAsync(
+                azure, virtualMachineName, region, resourceGroupName, networkInterface,
+                imagePublished, imageOffer, imageSku, osUserName, osUserPassword, osComputeName,
+                userData, diskSize, size);
 
         virtualMachineAsync
                 .subscribeOn(Schedulers.computation())
@@ -76,11 +75,26 @@ public class AzureVirtualMachineOperationImpl implements AzureVirtualMachineOper
                 .subscribe();
     }
 
+    private NetworkInterface getNetworkInterface(String fogbowNetworkInterfaceId,
+                                                 AzureCloudUser azureCloudUser,
+                                                 Azure azure)
+            throws FogbowException {
+
+        try {
+            String azureNetworkInterfaceId = AzureIdBuilder
+                    .configure(azureCloudUser)
+                    .buildNetworkInterfaceId(fogbowNetworkInterfaceId);
+            return NetworkApi.getNetworkInterface(azure, azureNetworkInterfaceId);
+        } catch (Exception e) {
+            throw new FogbowException("", e);
+        }
+    }
+
     @Override
     public String findFlavour(ComputeOrder computeOrder, AzureCloudUser azureCloudUser)
             throws FogbowException {
 
-        Azure azure = AzureClientUtil.getAzure(azureCloudUser);
+        Azure azure = AzureClientCache.getAzure(azureCloudUser);
 
         PagedList<VirtualMachineSize> virtualMachineSizes = ComputeApi.getVirtualMachineSizes(azure);
         VirtualMachineSize firstVirtualMachineSize = virtualMachineSizes.stream()
@@ -104,31 +118,52 @@ public class AzureVirtualMachineOperationImpl implements AzureVirtualMachineOper
     public ComputeInstance getComputeInstance(ComputeOrder computeOrder, AzureCloudUser azureCloudUser)
             throws FogbowException {
 
-        Azure azure = AzureClientUtil.getAzure(azureCloudUser);
-        String azureInstanceId = AzureIDBuilderFogbow.buildAzureVirtualMachineId(computeOrder.getInstanceId());
-        String virtualMachineId = AzureIDBuilderFogbow.buildAzureVirtualMachineId(azureInstanceId);
-        VirtualMachine virtualMachine = ComputeApi.getVirtualMachineById(azure, virtualMachineId);
+        Azure azure = AzureClientCache.getAzure(azureCloudUser);
+
+        VirtualMachine virtualMachine = null;
+        try {
+            String instanceId = computeOrder.getInstanceId();
+            virtualMachine = ComputeApi.getVirtualMachineById(azure, instanceId);
+        } catch (FogbowException e) {
+            throw new InstanceNotFoundException();
+        }
+
+        String virtualMachineSizeName = virtualMachine.size().toString();
+        VirtualMachineSize virtualMachineSize = findVirtualMachineSizeByName(virtualMachineSizeName, azure);
+        int vCPU = virtualMachineSize.numberOfCores();
+        int memory = virtualMachineSize.memoryInMB();
+        int disk = virtualMachine.osDiskSize();
 
         String id = virtualMachine.vmId();
-        String cloudName = virtualMachine.computerName();
+        String cloudState = virtualMachine.provisioningState();
         String name = virtualMachine.computerName();
-        int vCPU = 0;
-        int memory = 0;
-        int disk = virtualMachine.osDiskSize();
-        List<String> ipAddresses = Arrays.asList(virtualMachine.getPrimaryNetworkInterface().primaryPrivateIP());
+        String primaryPrivateIp = virtualMachine.getPrimaryNetworkInterface().primaryPrivateIP();
+        List<String> ipAddresses = Arrays.asList(primaryPrivateIp);
         String imageId = computeOrder.getImageId();
         String publicKey = computeOrder.getPublicKey();
         List<UserData> userData = computeOrder.getUserData();
-        return new ComputeInstance(id, cloudName, name, vCPU, memory, disk, ipAddresses, imageId, publicKey, userData);
+
+        return new ComputeInstance(id, cloudState, name, vCPU, memory, disk, ipAddresses, imageId, publicKey, userData);
+    }
+
+    public VirtualMachineSize findVirtualMachineSizeByName(String virtualMachineSizeNameWanted,
+                                                           Azure azure) {
+
+        PagedList<VirtualMachineSize> virtualMachineSizes = ComputeApi.getVirtualMachineSizes(azure);
+        return virtualMachineSizes.stream()
+                .filter((virtualMachineSize) -> virtualMachineSizeNameWanted.equals(virtualMachineSize.name()))
+                .findFirst().get();
     }
 
     @Override
     public void doDeleteAsynchronously(ComputeOrder computeOrder, AzureCloudUser azureCloudUser)
             throws FogbowException {
 
-        Azure azure = AzureClientUtil.getAzure(azureCloudUser);
-        String azureInstanceId = AzureIDBuilderFogbow.buildAzureVirtualMachineId(computeOrder.getInstanceId());
-        Completable completable = ComputeApi.deleteVirtualMachineAsync(azure, azureInstanceId);
+        Azure azure = AzureClientCache.getAzure(azureCloudUser);
+
+        String instanceId = computeOrder.getInstanceId();
+
+        Completable completable = ComputeApi.deleteVirtualMachineAsync(azure, instanceId);
         completable
                 .subscribeOn(Schedulers.computation())
                 .doOnSubscribe((a) -> {

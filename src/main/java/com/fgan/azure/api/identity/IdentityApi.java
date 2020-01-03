@@ -1,13 +1,12 @@
 package com.fgan.azure.api.identity;
 
 import com.fgan.azure.Constants;
-import com.fgan.azure.fogbowmock.AzureClientUtil;
+import com.fgan.azure.fogbowmock.AzureClientCache;
 import com.fgan.azure.fogbowmock.AzureCloudUser;
 import com.fgan.azure.util.PropertiesUtil;
 import com.microsoft.aad.adal4j.AuthenticationContext;
 import com.microsoft.aad.adal4j.AuthenticationResult;
 import com.microsoft.azure.AzureEnvironment;
-import com.microsoft.azure.credentials.AzureTokenCredentials;
 import com.microsoft.azure.credentials.UserTokenCredentials;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.resources.Tenants;
@@ -73,11 +72,12 @@ public class IdentityApi {
     public static AzureCloudUser getAzureCloudUser() throws Exception {
         Properties credentials = getAzureCredentialsProperties();
 
-        String clientId = credentials.getProperty(AzureClientUtil.CredentialSettings.CLIENT_ID.toString());
-        String tenantId = credentials.getProperty(AzureClientUtil.CredentialSettings.TENANT_ID.toString());
-        String clientKey = credentials.getProperty(AzureClientUtil.CredentialSettings.CLIENT_KEY.toString());
-        String subscriptionId = credentials.getProperty(AzureClientUtil.CredentialSettings.SUBSCRIPTION_ID.toString());;
-        return new AzureCloudUser("", "", clientId, tenantId, clientKey, subscriptionId);
+        String clientId = credentials.getProperty(AzureClientCache.CredentialSettings.CLIENT_ID.toString());
+        String tenantId = credentials.getProperty(AzureClientCache.CredentialSettings.TENANT_ID.toString());
+        String clientKey = credentials.getProperty(AzureClientCache.CredentialSettings.CLIENT_KEY.toString());
+        String subscriptionId = credentials.getProperty(AzureClientCache.CredentialSettings.SUBSCRIPTION_ID.toString());;
+        String resourceGroupName =  credentials.getProperty(AzureClientCache.CredentialSettings.RESOURCE_GROUP_NAME.toString());
+        return new AzureCloudUser("", "", clientId, tenantId, clientKey, subscriptionId, resourceGroupName);
     }
 
     /**
@@ -85,7 +85,7 @@ public class IdentityApi {
      */
     public static Azure getAzureFogbow() throws Exception {
         AzureCloudUser azureCloudUser = getAzureCloudUser();
-        return AzureClientUtil.getAzure(azureCloudUser);
+        return AzureClientCache.getAzure(azureCloudUser);
     }
 
     @Deprecated

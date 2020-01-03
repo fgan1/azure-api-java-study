@@ -36,7 +36,6 @@ public class AzureImageOperation {
         return new ImageSummary(id, name);
     }
 
-    // TODO(chico) - review this magic numbers
     public static AzureVirtualMachineImage buildAzureVirtualMachineImageBy(String imageSummaryId) {
         String[] imageSummaryIdChunks = imageSummaryId.split(IMAGE_SUMMARY_ID_SEPARETOR);
         String published = imageSummaryIdChunks[PUBLISHER_ID_SUMMARY_POSITION];
