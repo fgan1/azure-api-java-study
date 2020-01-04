@@ -1,6 +1,7 @@
-package com.fgan.azure.fogbowmock;
+package com.fgan.azure.fogbowmock.util;
 
 import cloud.fogbow.common.exceptions.FogbowException;
+import com.fgan.azure.fogbowmock.common.AzureCloudUser;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;

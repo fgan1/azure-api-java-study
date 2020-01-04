@@ -1,6 +1,6 @@
-package com.fgan.azure.fogbowmock.azureidbuilder;
+package com.fgan.azure.fogbowmock.util;
 
-import com.fgan.azure.fogbowmock.AzureCloudUser;
+import com.fgan.azure.fogbowmock.common.AzureCloudUser;
 
 public class AzureIdBuilder {
 

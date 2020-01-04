@@ -8,10 +8,11 @@ import cloud.fogbow.ras.core.models.UserData;
 import cloud.fogbow.ras.core.models.orders.ComputeOrder;
 import com.fgan.azure.api.ComputeApi;
 import com.fgan.azure.api.network.NetworkApi;
-import com.fgan.azure.fogbowmock.AzureClientCache;
-import com.fgan.azure.fogbowmock.AzureCloudUser;
-import com.fgan.azure.fogbowmock.AzureVirtualMachineImage;
-import com.fgan.azure.fogbowmock.azureidbuilder.AzureIdBuilder;
+import com.fgan.azure.fogbowmock.compute.model.AzureVirtualMachineImageRef;
+import com.fgan.azure.fogbowmock.compute.model.AzureVirtualMachineRef;
+import com.fgan.azure.fogbowmock.util.AzureClientCache;
+import com.fgan.azure.fogbowmock.common.AzureCloudUser;
+import com.fgan.azure.fogbowmock.util.AzureIdBuilder;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.VirtualMachine;
@@ -33,7 +34,7 @@ public class AzureVirtualMachineOperationImpl implements AzureVirtualMachineOper
     private static final Logger LOGGER = Logger.getLogger(AzureComputePlugin.class);
 
     @Override
-    public void doCreateAsynchronously(AzureVirtualMachineParameters azureVirtualMachineParameters,
+    public void doCreateAsynchronously(AzureVirtualMachineRef azureVirtualMachineParameters,
                                        AzureCloudUser azureCloudUser) throws FogbowException {
 
         Azure azure = AzureClientCache.getAzure(azureCloudUser);
@@ -50,7 +51,7 @@ public class AzureVirtualMachineOperationImpl implements AzureVirtualMachineOper
         String userData = azureVirtualMachineParameters.getUserData();
         String size = azureVirtualMachineParameters.getSize();
         int diskSize = azureVirtualMachineParameters.getDiskSize();
-        AzureVirtualMachineImage azureVirtualMachineImage = azureVirtualMachineParameters.getAzureVirtualMachineImage();
+        AzureVirtualMachineImageRef azureVirtualMachineImage = azureVirtualMachineParameters.getAzureVirtualMachineImage();
         Region region = Region.findByLabelOrName(regionName);
         String imagePublished = azureVirtualMachineImage.getPublisher();
         String imageOffer = azureVirtualMachineImage.getOffer();

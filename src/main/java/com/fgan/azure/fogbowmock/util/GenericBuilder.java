@@ -1,4 +1,4 @@
-package com.fgan.azure.fogbowmock;
+package com.fgan.azure.fogbowmock.util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,15 +12,15 @@ public class GenericBuilder<T> {
 
     private List<Consumer<T>> instanceModifiers = new ArrayList<>();
 
-    public GenericBuilder(Supplier<T> instantiator) {
+    protected GenericBuilder(Supplier<T> instantiator) {
         this.instantiator = instantiator;
     }
 
-    public static <T> GenericBuilder<T> of(Supplier<T> instantiator) {
+    protected static <T> GenericBuilder<T> of(Supplier<T> instantiator) {
         return new GenericBuilder<T>(instantiator);
     }
 
-    public <U> GenericBuilder<T> with(BiConsumer<T, U> consumer, U value) {
+    protected <U> GenericBuilder<T> with(BiConsumer<T, U> consumer, U value) {
         Consumer<T> c = instance -> consumer.accept(instance, value);
         instanceModifiers.add(c);
         return this;

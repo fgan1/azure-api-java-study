@@ -3,11 +3,12 @@ package com.fgan.azure.fogbowmock.compute;
 import cloud.fogbow.common.exceptions.FogbowException;
 import cloud.fogbow.ras.api.http.response.ComputeInstance;
 import cloud.fogbow.ras.core.models.orders.ComputeOrder;
-import com.fgan.azure.fogbowmock.AzureCloudUser;
+import com.fgan.azure.fogbowmock.common.AzureCloudUser;
+import com.fgan.azure.fogbowmock.compute.model.AzureVirtualMachineRef;
 
 public interface AzureVirtualMachineOperation<T> {
 
-    void doCreateAsynchronously(AzureVirtualMachineParameters azureVirtualMachineParameters,
+    void doCreateAsynchronously(AzureVirtualMachineRef azureVirtualMachineParameters,
                                 AzureCloudUser azureCloudUser)
             throws FogbowException;
 

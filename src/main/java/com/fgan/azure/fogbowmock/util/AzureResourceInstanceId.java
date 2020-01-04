@@ -1,4 +1,4 @@
-package com.fgan.azure.fogbowmock;
+package com.fgan.azure.fogbowmock.util;
 
 import cloud.fogbow.ras.core.models.orders.Order;
 

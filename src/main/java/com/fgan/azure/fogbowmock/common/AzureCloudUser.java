@@ -1,4 +1,4 @@
-package com.fgan.azure.fogbowmock;
+package com.fgan.azure.fogbowmock.common;
 
 import cloud.fogbow.common.models.CloudUser;
 

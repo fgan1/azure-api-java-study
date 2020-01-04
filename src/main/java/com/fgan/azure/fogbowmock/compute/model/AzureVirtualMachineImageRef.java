@@ -1,12 +1,12 @@
-package com.fgan.azure.fogbowmock;
+package com.fgan.azure.fogbowmock.compute.model;
 
-public class AzureVirtualMachineImage {
+public class AzureVirtualMachineImageRef {
 
     private String publisher;
     private String offer;
     private String sku;
 
-    public AzureVirtualMachineImage(String publisher, String offer, String sku) {
+    public AzureVirtualMachineImageRef(String publisher, String offer, String sku) {
         this.publisher = publisher;
         this.offer = offer;
         this.sku = sku;
@@ -24,8 +24,4 @@ public class AzureVirtualMachineImage {
         return sku;
     }
 
-    @Override
-    public String toString() {
-        return String.format("%s|%s|%s", this.publisher, this.offer, this.sku);
-    }
 }

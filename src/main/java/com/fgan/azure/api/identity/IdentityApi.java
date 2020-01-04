@@ -1,8 +1,8 @@
 package com.fgan.azure.api.identity;
 
 import com.fgan.azure.Constants;
-import com.fgan.azure.fogbowmock.AzureClientCache;
-import com.fgan.azure.fogbowmock.AzureCloudUser;
+import com.fgan.azure.fogbowmock.util.AzureClientCache;
+import com.fgan.azure.fogbowmock.common.AzureCloudUser;
 import com.fgan.azure.util.PropertiesUtil;
 import com.microsoft.aad.adal4j.AuthenticationContext;
 import com.microsoft.aad.adal4j.AuthenticationResult;

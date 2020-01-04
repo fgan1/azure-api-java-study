@@ -8,10 +8,14 @@ import cloud.fogbow.ras.constants.Messages;
 import cloud.fogbow.ras.core.models.ResourceType;
 import cloud.fogbow.ras.core.models.orders.ComputeOrder;
 import cloud.fogbow.ras.core.plugins.interoperability.ComputePlugin;
-import cloud.fogbow.ras.core.plugins.interoperability.aws.AwsV2StateMapper;
-import com.fgan.azure.fogbowmock.*;
-import com.fgan.azure.fogbowmock.azureidbuilder.AzureIdBuilder;
+import cloud.fogbow.ras.core.plugins.interoperability.util.DefaultLaunchCommandGenerator;
+import com.fgan.azure.fogbowmock.common.AzureCloudUser;
+import com.fgan.azure.fogbowmock.common.AzureStateMapper;
+import com.fgan.azure.fogbowmock.compute.model.AzureVirtualMachineImageRef;
+import com.fgan.azure.fogbowmock.compute.model.AzureVirtualMachineRef;
 import com.fgan.azure.fogbowmock.image.AzureImageOperation;
+import com.fgan.azure.fogbowmock.util.AzureIdBuilder;
+import com.fgan.azure.fogbowmock.util.AzureResourceInstanceId;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.log4j.Logger;
 
@@ -26,12 +30,12 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
     private static final String DEFAULT_RESOURCE_GROUP_NAME_KEY = "resource_group_name";
     private static final String DEFAULT_REGION_NAME_KEY = "region_name";
 
-//    private final LaunchCommandGenerator launchCommandGenerator;
+    private final AzureVirtualMachineOperation<AzureVirtualMachineOperationImpl> azureVirtualMachineRequest;
+    private final DefaultLaunchCommandGenerator launchCommandGenerator;
     private final String defaultNetworkInterfaceName;
     private final Properties properties;
     private final String resourceGroupName;
     private final String regionName;
-    private final AzureVirtualMachineOperation<AzureVirtualMachineOperationImpl> azureVirtualMachineRequest;
 
     public AzureComputePlugin(String confFilePath) {
         this.properties = PropertiesUtil.readProperties(confFilePath);
@@ -39,7 +43,7 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
         this.defaultNetworkInterfaceName = this.properties.getProperty(DEFAULT_NETWORK_INTERFACE_NAME_KEY);
         this.resourceGroupName = this.properties.getProperty(DEFAULT_RESOURCE_GROUP_NAME_KEY);
         this.regionName = this.properties.getProperty(DEFAULT_REGION_NAME_KEY);
-//        this.launchCommandGenerator = new DefaultLaunchCommandGenerator();
+        this.launchCommandGenerator = new DefaultLaunchCommandGenerator();
         this.azureVirtualMachineRequest = new AzureVirtualMachineOperationImpl();
     }
 
@@ -61,33 +65,36 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
         String networkInterfaceId = getNetworkInterfaceId(computeOrder, azureCloudUser);
         String flavorName = this.azureVirtualMachineRequest.findFlavour(computeOrder, azureCloudUser);
         int diskSize = computeOrder.getDisk();
-        AzureVirtualMachineImage azureVirtualMachineImage = AzureImageOperation.buildAzureVirtualMachineImageBy(computeOrder.getImageId());
+        AzureVirtualMachineImageRef azureVirtualMachineImage = AzureImageOperation.buildAzureVirtualMachineImageBy(computeOrder.getImageId());
         String virtualMachineName = AzureResourceInstanceId.generateAzureResourceNameBy(computeOrder);
-//        String userData = this.launchCommandGenerator.createLaunchCommand(computeOrder);
-        String userData = com.fgan.azure.util.PropertiesUtil.getUserData();
+        String userData = getUserData();
         String osUserName = computeOrder.getId();
         String osUserPassword = computeOrder.getId();
         String osComputeName = computeOrder.getId();
 
-        AzureVirtualMachineParameters azureVirtualMachineParameters = GenericBuilder
-                .of(AzureVirtualMachineParameters::new)
-                .with(AzureVirtualMachineParameters::setNetworkInterfaceId, networkInterfaceId)
-                .with(AzureVirtualMachineParameters::setResourceGroupName, this.resourceGroupName)
-                .with(AzureVirtualMachineParameters::setRegionName, this.regionName)
-                .with(AzureVirtualMachineParameters::setAzureVirtualMachineImage, azureVirtualMachineImage)
-                .with(AzureVirtualMachineParameters::setNetworkInterfaceId, networkInterfaceId)
-                .with(AzureVirtualMachineParameters::setOsComputeName, osComputeName)
-                .with(AzureVirtualMachineParameters::setOsUserName, osUserName)
-                .with(AzureVirtualMachineParameters::setOsUserPassword, osUserPassword)
-                .with(AzureVirtualMachineParameters::setUserData, userData)
-                .with(AzureVirtualMachineParameters::setVirtualMachineName, virtualMachineName)
-                .with(AzureVirtualMachineParameters::setSize, flavorName)
-                .with(AzureVirtualMachineParameters::setDiskSize, diskSize)
+        AzureVirtualMachineRef azureVirtualMachineParameters = AzureVirtualMachineRef.builder()
+                .virtualMachineName(virtualMachineName)
+                .azureVirtualMachineImage(azureVirtualMachineImage)
+                .networkInterfaceId(networkInterfaceId)
+                .diskSize(diskSize)
+                .size(flavorName)
+                .osComputeName(osComputeName)
+                .osUserName(osUserName)
+                .osUserPassword(osUserPassword)
+                .regionName(this.regionName)
+                .resourceGroupName(this.resourceGroupName)
+                .userData(userData)
                 .build();
 
         this.azureVirtualMachineRequest.doCreateAsynchronously(azureVirtualMachineParameters, azureCloudUser);
 
         return AzureResourceInstanceId.generateFogbowInstanceIdBy(computeOrder);
+    }
+
+    private String getUserData() {
+//        return this.launchCommandGenerator.createLaunchCommand(computeOrder);
+        // TODO(chico) - Remove when It goes to the Fogbow context
+        return com.fgan.azure.util.PropertiesUtil.getUserData();
     }
 
     // TODO(chico) - Finish; Study multi network interfaces behaviour.

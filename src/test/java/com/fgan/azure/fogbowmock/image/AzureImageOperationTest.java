@@ -1,7 +1,7 @@
 package com.fgan.azure.fogbowmock.image;
 
 import cloud.fogbow.ras.api.http.response.ImageSummary;
-import com.fgan.azure.fogbowmock.AzureVirtualMachineImage;
+import com.fgan.azure.fogbowmock.compute.model.AzureVirtualMachineImageRef;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -15,7 +15,7 @@ public class AzureImageOperationTest {
         String publisherExpected = "publisherExpected";
         String offerExpected = "offerExpected";
         String skuExpected = "skuExpected";
-        AzureVirtualMachineImage azureVirtualMachineImage = Mockito.mock(AzureVirtualMachineImage.class);
+        AzureVirtualMachineImageRef azureVirtualMachineImage = Mockito.mock(AzureVirtualMachineImageRef.class);
         Mockito.when(azureVirtualMachineImage.getPublisher()).thenReturn(publisherExpected);
         Mockito.when(azureVirtualMachineImage.getOffer()).thenReturn(offerExpected);
         Mockito.when(azureVirtualMachineImage.getSku()).thenReturn(skuExpected);
@@ -58,7 +58,7 @@ public class AzureImageOperationTest {
                 .toString();
 
         // execute
-        AzureVirtualMachineImage azureVirtualMachineImage = AzureImageOperation.buildAzureVirtualMachineImageBy(summaryIdExpected);
+        AzureVirtualMachineImageRef azureVirtualMachineImage = AzureImageOperation.buildAzureVirtualMachineImageBy(summaryIdExpected);
 
         // verify
         Assert.assertEquals(publisherExpected, azureVirtualMachineImage.getPublisher());

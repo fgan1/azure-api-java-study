@@ -3,9 +3,8 @@ package com.fgan.azure.fogbowmock.executions;
 import cloud.fogbow.common.exceptions.FogbowException;
 import cloud.fogbow.ras.core.models.orders.ComputeOrder;
 import com.fgan.azure.api.identity.IdentityApi;
-import com.fgan.azure.fogbowmock.AzureCloudUser;
+import com.fgan.azure.fogbowmock.common.AzureCloudUser;
 import com.fgan.azure.fogbowmock.compute.AzureComputePlugin;
-import com.fgan.azure.util.PropertiesUtil;
 
 public class SampleExecutionFogbowPlugin {
 
