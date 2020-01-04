@@ -1,7 +1,7 @@
 package com.fgan.azure.api.identity;
 
 import com.fgan.azure.Constants;
-import com.fgan.azure.fogbowmock.util.AzureClientCache;
+import com.fgan.azure.fogbowmock.util.AzureClientCacheManager;
 import com.fgan.azure.fogbowmock.common.AzureCloudUser;
 import com.fgan.azure.util.PropertiesUtil;
 import com.microsoft.aad.adal4j.AuthenticationContext;
@@ -72,11 +72,11 @@ public class IdentityApi {
     public static AzureCloudUser getAzureCloudUser() throws Exception {
         Properties credentials = getAzureCredentialsProperties();
 
-        String clientId = credentials.getProperty(AzureClientCache.CredentialSettings.CLIENT_ID.toString());
-        String tenantId = credentials.getProperty(AzureClientCache.CredentialSettings.TENANT_ID.toString());
-        String clientKey = credentials.getProperty(AzureClientCache.CredentialSettings.CLIENT_KEY.toString());
-        String subscriptionId = credentials.getProperty(AzureClientCache.CredentialSettings.SUBSCRIPTION_ID.toString());;
-        String resourceGroupName =  credentials.getProperty(AzureClientCache.CredentialSettings.RESOURCE_GROUP_NAME.toString());
+        String clientId = credentials.getProperty(AzureClientCacheManager.CredentialSettings.CLIENT_ID.toString());
+        String tenantId = credentials.getProperty(AzureClientCacheManager.CredentialSettings.TENANT_ID.toString());
+        String clientKey = credentials.getProperty(AzureClientCacheManager.CredentialSettings.CLIENT_KEY.toString());
+        String subscriptionId = credentials.getProperty(AzureClientCacheManager.CredentialSettings.SUBSCRIPTION_ID.toString());;
+        String resourceGroupName =  credentials.getProperty(AzureClientCacheManager.CredentialSettings.RESOURCE_GROUP_NAME.toString());
         return new AzureCloudUser("", "", clientId, tenantId, clientKey, subscriptionId, resourceGroupName);
     }
 
@@ -85,7 +85,7 @@ public class IdentityApi {
      */
     public static Azure getAzureFogbow() throws Exception {
         AzureCloudUser azureCloudUser = getAzureCloudUser();
-        return AzureClientCache.getAzure(azureCloudUser);
+        return AzureClientCacheManager.getAzure(azureCloudUser);
     }
 
     @Deprecated

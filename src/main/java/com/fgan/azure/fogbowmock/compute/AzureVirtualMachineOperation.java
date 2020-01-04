@@ -1,23 +1,22 @@
 package com.fgan.azure.fogbowmock.compute;
 
 import cloud.fogbow.common.exceptions.FogbowException;
-import cloud.fogbow.ras.api.http.response.ComputeInstance;
-import cloud.fogbow.ras.core.models.orders.ComputeOrder;
 import com.fgan.azure.fogbowmock.common.AzureCloudUser;
-import com.fgan.azure.fogbowmock.compute.model.AzureVirtualMachineRef;
+import com.fgan.azure.fogbowmock.compute.model.AzureCreateVirtualMachineRef;
+import com.fgan.azure.fogbowmock.compute.model.AzureGetVirtualMachineRef;
 
 public interface AzureVirtualMachineOperation<T> {
 
-    void doCreateAsynchronously(AzureVirtualMachineRef azureVirtualMachineParameters,
-                                AzureCloudUser azureCloudUser)
+    void doCreateInstance(AzureCreateVirtualMachineRef azureCreateVirtualMachineRef,
+                          AzureCloudUser azureCloudUser)
             throws FogbowException;
 
-    String findFlavour(ComputeOrder computeOrder, AzureCloudUser azureCloudUser)
+    String findVirtualMachineSizeName(int memoryRequired, int vCpuRequired, AzureCloudUser azureCloudUser)
             throws FogbowException;
 
-    ComputeInstance getComputeInstance(ComputeOrder computeOrder, AzureCloudUser azureCloudUser)
+    AzureGetVirtualMachineRef doGetInstance(String azureInstanceId, AzureCloudUser azureCloudUser)
             throws FogbowException;
 
-    void doDeleteAsynchronously(ComputeOrder computeOrder, AzureCloudUser azureCloudUser)
+    void doDeleteInstance(String azureInstanceId, AzureCloudUser azureCloudUser)
             throws FogbowException;
 }

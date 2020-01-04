@@ -4,9 +4,9 @@ import com.fgan.azure.fogbowmock.util.GenericBuilder;
 
 import java.util.function.Supplier;
 
-public class AzureVirtualMachineRef {
+public class AzureCreateVirtualMachineRef {
 
-    private AzureVirtualMachineImageRef azureVirtualMachineImage;
+    private AzureGetImageRef azureVirtualMachineImage;
     private String networkInterfaceId;
     private String resourceGroupName;
     private String virtualMachineName;
@@ -19,14 +19,14 @@ public class AzureVirtualMachineRef {
     private String size;
 
     public static Builder builder() {
-        return new Builder(AzureVirtualMachineRef::new);
+        return new Builder(AzureCreateVirtualMachineRef::new);
     }
 
-    public AzureVirtualMachineImageRef getAzureVirtualMachineImage() {
+    public AzureGetImageRef getAzureVirtualMachineImage() {
         return azureVirtualMachineImage;
     }
 
-    private void setAzureVirtualMachineImage(AzureVirtualMachineImageRef azureVirtualMachineImage) {
+    private void setAzureVirtualMachineImage(AzureGetImageRef azureVirtualMachineImage) {
         this.azureVirtualMachineImage = azureVirtualMachineImage;
     }
 
@@ -110,64 +110,64 @@ public class AzureVirtualMachineRef {
         this.size = size;
     }
 
-    public static class Builder extends GenericBuilder<AzureVirtualMachineRef> {
+    public static class Builder extends GenericBuilder<AzureCreateVirtualMachineRef> {
 
         Builder(Supplier instantiator) {
             super(instantiator);
         }
 
-        public Builder azureVirtualMachineImage(AzureVirtualMachineImageRef azureVirtualMachineImage) {
-            with(AzureVirtualMachineRef::setAzureVirtualMachineImage, azureVirtualMachineImage);
+        public Builder azureVirtualMachineImage(AzureGetImageRef azureVirtualMachineImage) {
+            with(AzureCreateVirtualMachineRef::setAzureVirtualMachineImage, azureVirtualMachineImage);
             return this;
         }
 
         public Builder networkInterfaceId(String networkInterfaceId) {
-            with(AzureVirtualMachineRef::setNetworkInterfaceId, networkInterfaceId);
+            with(AzureCreateVirtualMachineRef::setNetworkInterfaceId, networkInterfaceId);
             return this;
         }
 
         public Builder resourceGroupName(String resourceGroupName) {
-            with(AzureVirtualMachineRef::setResourceGroupName, resourceGroupName);
+            with(AzureCreateVirtualMachineRef::setResourceGroupName, resourceGroupName);
             return this;
         }
 
         public Builder virtualMachineName(String virtualMachineName) {
-            with(AzureVirtualMachineRef::setVirtualMachineName, virtualMachineName);
+            with(AzureCreateVirtualMachineRef::setVirtualMachineName, virtualMachineName);
             return this;
         }
 
         public Builder osUserPassword(String osUserPassword) {
-            with(AzureVirtualMachineRef::setOsUserPassword, osUserPassword);
+            with(AzureCreateVirtualMachineRef::setOsUserPassword, osUserPassword);
             return this;
         }
 
         public Builder osComputeName(String osComputeName) {
-            with(AzureVirtualMachineRef::setOsComputeName, osComputeName);
+            with(AzureCreateVirtualMachineRef::setOsComputeName, osComputeName);
             return this;
         }
 
         public Builder osUserName(String osUserName) {
-            with(AzureVirtualMachineRef::setOsUserName, osUserName);
+            with(AzureCreateVirtualMachineRef::setOsUserName, osUserName);
             return this;
         }
 
         public Builder regionName(String regionName) {
-            with(AzureVirtualMachineRef::setRegionName, regionName);
+            with(AzureCreateVirtualMachineRef::setRegionName, regionName);
             return this;
         }
 
         public Builder userData(String userData) {
-            with(AzureVirtualMachineRef::setUserData, userData);
+            with(AzureCreateVirtualMachineRef::setUserData, userData);
             return this;
         }
 
         public Builder diskSize(int diskSize) {
-            with(AzureVirtualMachineRef::setDiskSize, diskSize);
+            with(AzureCreateVirtualMachineRef::setDiskSize, diskSize);
             return this;
         }
 
         public Builder size(String size) {
-            with(AzureVirtualMachineRef::setSize, size);
+            with(AzureCreateVirtualMachineRef::setSize, size);
             return this;
         }
     }

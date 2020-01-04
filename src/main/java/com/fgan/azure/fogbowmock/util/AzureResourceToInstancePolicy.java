@@ -2,7 +2,7 @@ package com.fgan.azure.fogbowmock.util;
 
 import cloud.fogbow.ras.core.models.orders.Order;
 
-public class AzureResourceInstanceId {
+public class AzureResourceToInstancePolicy {
 
     /**
      * Generate the Azure Resource Name. The Azure resource name is equals to Fogbow instance Id

@@ -1,12 +1,12 @@
 package com.fgan.azure.fogbowmock.compute.model;
 
-public class AzureVirtualMachineImageRef {
+public class AzureGetImageRef {
 
     private String publisher;
     private String offer;
     private String sku;
 
-    public AzureVirtualMachineImageRef(String publisher, String offer, String sku) {
+    public AzureGetImageRef(String publisher, String offer, String sku) {
         this.publisher = publisher;
         this.offer = offer;
         this.sku = sku;

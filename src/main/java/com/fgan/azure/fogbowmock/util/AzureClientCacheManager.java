@@ -18,8 +18,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 // TODO(chico) - implement tests
-public class AzureClientCache {
-    private static final Logger LOGGER = Logger.getLogger(AzureClientCache.class);
+public class AzureClientCacheManager {
+    private static final Logger LOGGER = Logger.getLogger(AzureClientCacheManager.class);
 
     private static final long LIFE_TIME_IN_MINUTES = 30;
 
@@ -47,12 +47,6 @@ public class AzureClientCache {
         }
     }
 
-    /**
-     *
-     * @param azureCloudUser
-     * @return
-     * @throws FogbowException
-     */
     public static Azure getAzureProperly(AzureCloudUser azureCloudUser) throws FogbowException {
         AzureTokenCredentials azureTokenCredentials = getAzureTokenCredentials(azureCloudUser);
 

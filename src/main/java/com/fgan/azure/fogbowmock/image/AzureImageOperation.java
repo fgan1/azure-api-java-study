@@ -2,7 +2,7 @@ package com.fgan.azure.fogbowmock.image;
 
 import cloud.fogbow.ras.api.http.response.ImageSummary;
 import com.fgan.azure.api.image.ImageApi;
-import com.fgan.azure.fogbowmock.compute.model.AzureVirtualMachineImageRef;
+import com.fgan.azure.fogbowmock.compute.model.AzureGetImageRef;
 import com.google.common.annotations.VisibleForTesting;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.Azure;
@@ -30,21 +30,21 @@ public class AzureImageOperation {
     private static final int OFFER_NAME_SUMMARY_POSITION = 0;
     private static final int SKU_NAME_SUMMARY_POSITION = 1;
 
-    public static ImageSummary buildImageSummaryBy(AzureVirtualMachineImageRef azureVirtualMachineImage) {
+    public static ImageSummary buildImageSummaryBy(AzureGetImageRef azureVirtualMachineImage) {
         String id = convertToImageSummaryId(azureVirtualMachineImage);
         String name = convertToImageSummaryName(azureVirtualMachineImage);
         return new ImageSummary(id, name);
     }
 
-    public static AzureVirtualMachineImageRef buildAzureVirtualMachineImageBy(String imageSummaryId) {
+    public static AzureGetImageRef buildAzureVirtualMachineImageBy(String imageSummaryId) {
         String[] imageSummaryIdChunks = imageSummaryId.split(IMAGE_SUMMARY_ID_SEPARETOR);
         String published = imageSummaryIdChunks[PUBLISHER_ID_SUMMARY_POSITION];
         String offer = imageSummaryIdChunks[OFFER_ID_SUMMARY_POSITION];
         String sku = imageSummaryIdChunks[SKU_ID_SUMMARY_POSITION];
-        return new AzureVirtualMachineImageRef(published, offer, sku);
+        return new AzureGetImageRef(published, offer, sku);
     }
 
-    private static String convertToImageSummaryId(AzureVirtualMachineImageRef azureVirtualMachineImage) {
+    private static String convertToImageSummaryId(AzureGetImageRef azureVirtualMachineImage) {
         String[] list = new String[SUMMARY_ID_PARAMETER_SIZE];
         list[PUBLISHER_ID_SUMMARY_POSITION] = azureVirtualMachineImage.getPublisher();
         list[OFFER_ID_SUMMARY_POSITION] = azureVirtualMachineImage.getOffer();
@@ -52,7 +52,7 @@ public class AzureImageOperation {
         return StringUtils.join(list, IMAGE_SUMMARY_ID_SEPARETOR);
     }
 
-    private static String convertToImageSummaryName(AzureVirtualMachineImageRef azureVirtualMachineImage) {
+    private static String convertToImageSummaryName(AzureGetImageRef azureVirtualMachineImage) {
         String[] list = new String[SUMMARY_NAME_PARAMETER_SIZE];
         list[OFFER_NAME_SUMMARY_POSITION] = azureVirtualMachineImage.getOffer();
         list[SKU_NAME_SUMMARY_POSITION] = azureVirtualMachineImage.getSku();
@@ -60,9 +60,9 @@ public class AzureImageOperation {
     }
 
     // TODO(chico) - Finish
-    public static List<AzureVirtualMachineImageRef> recoverImages(Azure azure, Region region) {
+    public static List<AzureGetImageRef> recoverImages(Azure azure, Region region) {
         List<String> allowedPublishersNames = Arrays.asList("Canonical", "CoreOS");
-        List<AzureVirtualMachineImageRef> azureVirtualMachineImages = new ArrayList<>();
+        List<AzureGetImageRef> azureVirtualMachineImages = new ArrayList<>();
         PagedList<VirtualMachinePublisher> imagePublishersByRegion = ImageApi.getImagePublishersByRegion(azure, region);
         imagePublishersByRegion.stream()
                 .filter(publisher -> allowedPublishersNames.contains(publisher.name()))
@@ -73,8 +73,8 @@ public class AzureImageOperation {
                                 PagedList<VirtualMachineSku> virtualMachineSkus = offer.skus().list();
                                 virtualMachineSkus.stream()
                                         .forEach(sku -> {
-                                            AzureVirtualMachineImageRef azureVirtualMachineImage =
-                                                    new AzureVirtualMachineImageRef(publisher.name(), offer.name(), sku.name());
+                                            AzureGetImageRef azureVirtualMachineImage =
+                                                    new AzureGetImageRef(publisher.name(), offer.name(), sku.name());
                                             azureVirtualMachineImages.add(azureVirtualMachineImage);
                                             System.out.println(azureVirtualMachineImage.toString());
                                         });

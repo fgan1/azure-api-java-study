@@ -3,16 +3,15 @@ package com.fgan.azure.fogbowmock.compute;
 import cloud.fogbow.common.exceptions.FogbowException;
 import cloud.fogbow.common.exceptions.InstanceNotFoundException;
 import cloud.fogbow.common.exceptions.NoAvailableResourcesException;
-import cloud.fogbow.ras.api.http.response.ComputeInstance;
-import cloud.fogbow.ras.core.models.UserData;
-import cloud.fogbow.ras.core.models.orders.ComputeOrder;
 import com.fgan.azure.api.ComputeApi;
 import com.fgan.azure.api.network.NetworkApi;
-import com.fgan.azure.fogbowmock.compute.model.AzureVirtualMachineImageRef;
-import com.fgan.azure.fogbowmock.compute.model.AzureVirtualMachineRef;
-import com.fgan.azure.fogbowmock.util.AzureClientCache;
 import com.fgan.azure.fogbowmock.common.AzureCloudUser;
+import com.fgan.azure.fogbowmock.compute.model.AzureCreateVirtualMachineRef;
+import com.fgan.azure.fogbowmock.compute.model.AzureGetImageRef;
+import com.fgan.azure.fogbowmock.compute.model.AzureGetVirtualMachineRef;
+import com.fgan.azure.fogbowmock.util.AzureClientCacheManager;
 import com.fgan.azure.fogbowmock.util.AzureIdBuilder;
+import com.fgan.azure.fogbowmock.util.AzureSchedulerManager;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.VirtualMachine;
@@ -28,30 +27,43 @@ import rx.schedulers.Schedulers;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
-public class AzureVirtualMachineOperationImpl implements AzureVirtualMachineOperation {
+/**
+ * AzureVirtualMachineOperationSDK uses the Reactive Programming and uses the RXJava library.
+ */
+public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOperation {
 
     private static final Logger LOGGER = Logger.getLogger(AzureComputePlugin.class);
 
+    private final ExecutorService virtualMachineExecutor;
+
+    public AzureVirtualMachineOperationSDK() {
+        this.virtualMachineExecutor = AzureSchedulerManager.getVirtualMachineExecutor();
+    }
+
+    /**
+     * Create asynchronously because this operation takes a long time.
+     */
     @Override
-    public void doCreateAsynchronously(AzureVirtualMachineRef azureVirtualMachineParameters,
-                                       AzureCloudUser azureCloudUser) throws FogbowException {
+    public void doCreateInstance(AzureCreateVirtualMachineRef azureCreateVirtualMachineRef,
+                                 AzureCloudUser azureCloudUser) throws FogbowException {
 
-        Azure azure = AzureClientCache.getAzure(azureCloudUser);
+        Azure azure = AzureClientCacheManager.getAzure(azureCloudUser);
 
-        String fogbowNetworkInterfaceId = azureVirtualMachineParameters.getNetworkInterfaceId();
-        NetworkInterface networkInterface = getNetworkInterface(fogbowNetworkInterfaceId, azureCloudUser, azure);
+        String networkInterfaceId = azureCreateVirtualMachineRef.getNetworkInterfaceId();
+        NetworkInterface networkInterface = getNetworkInterface(networkInterfaceId, azureCloudUser, azure);
 
-        String resourceGroupName = azureVirtualMachineParameters.getResourceGroupName();
-        String regionName = azureVirtualMachineParameters.getRegionName();
-        String virtualMachineName = azureVirtualMachineParameters.getVirtualMachineName();
-        String osUserName = azureVirtualMachineParameters.getOsUserName();
-        String osUserPassword = azureVirtualMachineParameters.getOsUserPassword();
-        String osComputeName = azureVirtualMachineParameters.getOsComputeName();
-        String userData = azureVirtualMachineParameters.getUserData();
-        String size = azureVirtualMachineParameters.getSize();
-        int diskSize = azureVirtualMachineParameters.getDiskSize();
-        AzureVirtualMachineImageRef azureVirtualMachineImage = azureVirtualMachineParameters.getAzureVirtualMachineImage();
+        String resourceGroupName = azureCreateVirtualMachineRef.getResourceGroupName();
+        String regionName = azureCreateVirtualMachineRef.getRegionName();
+        String virtualMachineName = azureCreateVirtualMachineRef.getVirtualMachineName();
+        String osUserName = azureCreateVirtualMachineRef.getOsUserName();
+        String osUserPassword = azureCreateVirtualMachineRef.getOsUserPassword();
+        String osComputeName = azureCreateVirtualMachineRef.getOsComputeName();
+        String userData = azureCreateVirtualMachineRef.getUserData();
+        String size = azureCreateVirtualMachineRef.getSize();
+        int diskSize = azureCreateVirtualMachineRef.getDiskSize();
+        AzureGetImageRef azureVirtualMachineImage = azureCreateVirtualMachineRef.getAzureVirtualMachineImage();
         Region region = Region.findByLabelOrName(regionName);
         String imagePublished = azureVirtualMachineImage.getPublisher();
         String imageOffer = azureVirtualMachineImage.getOffer();
@@ -62,8 +74,15 @@ public class AzureVirtualMachineOperationImpl implements AzureVirtualMachineOper
                 imagePublished, imageOffer, imageSku, osUserName, osUserPassword, osComputeName,
                 userData, diskSize, size);
 
+        doCreateInstanceAsynchronously(virtualMachineAsync);
+    }
+
+    /**
+     * Create
+     */
+    private void doCreateInstanceAsynchronously(Observable<Indexable> virtualMachineAsync) {
         virtualMachineAsync
-                .subscribeOn(Schedulers.computation())
+                .subscribeOn(Schedulers.from(virtualMachineExecutor))
                 .doOnSubscribe(() -> {
                     LOGGER.debug("Start asynchronous create virtual machine");
                 })
@@ -92,16 +111,16 @@ public class AzureVirtualMachineOperationImpl implements AzureVirtualMachineOper
     }
 
     @Override
-    public String findFlavour(ComputeOrder computeOrder, AzureCloudUser azureCloudUser)
+    public String findVirtualMachineSizeName(int memoryRequired, int vCpuRequired, AzureCloudUser azureCloudUser)
             throws FogbowException {
 
-        Azure azure = AzureClientCache.getAzure(azureCloudUser);
+        Azure azure = AzureClientCacheManager.getAzure(azureCloudUser);
 
         PagedList<VirtualMachineSize> virtualMachineSizes = ComputeApi.getVirtualMachineSizes(azure);
         VirtualMachineSize firstVirtualMachineSize = virtualMachineSizes.stream()
                 .filter((virtualMachineSize) ->
-                        virtualMachineSize.memoryInMB() >= computeOrder.getMemory() &&
-                                virtualMachineSize.numberOfCores() >= computeOrder.getvCPU()
+                        virtualMachineSize.memoryInMB() >= memoryRequired &&
+                                virtualMachineSize.numberOfCores() >= vCpuRequired
                 )
                 .sorted(Comparator
                         .comparingInt(VirtualMachineSize::memoryInMB)
@@ -116,15 +135,14 @@ public class AzureVirtualMachineOperationImpl implements AzureVirtualMachineOper
     }
 
     @Override
-    public ComputeInstance getComputeInstance(ComputeOrder computeOrder, AzureCloudUser azureCloudUser)
+    public AzureGetVirtualMachineRef doGetInstance(String azureInstanceId, AzureCloudUser azureCloudUser)
             throws FogbowException {
 
-        Azure azure = AzureClientCache.getAzure(azureCloudUser);
+        Azure azure = AzureClientCacheManager.getAzure(azureCloudUser);
 
         VirtualMachine virtualMachine = null;
         try {
-            String instanceId = computeOrder.getInstanceId();
-            virtualMachine = ComputeApi.getVirtualMachineById(azure, instanceId);
+            virtualMachine = ComputeApi.getVirtualMachineById(azure, azureInstanceId);
         } catch (FogbowException e) {
             throw new InstanceNotFoundException();
         }
@@ -137,14 +155,19 @@ public class AzureVirtualMachineOperationImpl implements AzureVirtualMachineOper
 
         String id = virtualMachine.vmId();
         String cloudState = virtualMachine.provisioningState();
-        String name = virtualMachine.computerName();
+        String name = virtualMachine.name();
         String primaryPrivateIp = virtualMachine.getPrimaryNetworkInterface().primaryPrivateIP();
         List<String> ipAddresses = Arrays.asList(primaryPrivateIp);
-        String imageId = computeOrder.getImageId();
-        String publicKey = computeOrder.getPublicKey();
-        List<UserData> userData = computeOrder.getUserData();
 
-        return new ComputeInstance(id, cloudState, name, vCPU, memory, disk, ipAddresses, imageId, publicKey, userData);
+        return AzureGetVirtualMachineRef.builder()
+                .disk(disk)
+                .id(id)
+                .cloudState(cloudState)
+                .ipAddresses(ipAddresses)
+                .memory(memory)
+                .name(name)
+                .vCPU(vCPU)
+                .build();
     }
 
     public VirtualMachineSize findVirtualMachineSizeByName(String virtualMachineSizeNameWanted,
@@ -156,17 +179,22 @@ public class AzureVirtualMachineOperationImpl implements AzureVirtualMachineOper
                 .findFirst().get();
     }
 
+    /**
+     * Delete asynchronously because this operation takes a long time.
+     */
     @Override
-    public void doDeleteAsynchronously(ComputeOrder computeOrder, AzureCloudUser azureCloudUser)
+    public void doDeleteInstance(String azureInstanceId, AzureCloudUser azureCloudUser)
             throws FogbowException {
 
-        Azure azure = AzureClientCache.getAzure(azureCloudUser);
+        Azure azure = AzureClientCacheManager.getAzure(azureCloudUser);
 
-        String instanceId = computeOrder.getInstanceId();
+        Completable completable = ComputeApi.deleteVirtualMachineAsync(azure, azureInstanceId);
+        doDeleteInstanceAsynchronously(completable);
+    }
 
-        Completable completable = ComputeApi.deleteVirtualMachineAsync(azure, instanceId);
+    private void doDeleteInstanceAsynchronously(Completable completable) {
         completable
-                .subscribeOn(Schedulers.computation())
+                .subscribeOn(Schedulers.from(virtualMachineExecutor))
                 .doOnSubscribe((a) -> {
                     LOGGER.debug("Start asynchronous delete virtual machine");
                 })
