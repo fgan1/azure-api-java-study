@@ -3,6 +3,7 @@ package com.fgan.azure.api;
 import cloud.fogbow.common.exceptions.FogbowException;
 import com.fgan.azure.Constants;
 import com.fgan.azure.api.network.NetworkApi;
+import com.fgan.azure.fogbowmock.exceptions.AzureException;
 import com.fgan.azure.util.AzureIDBuilderGeneral;
 import com.fgan.azure.util.GeneralPrintUtil;
 import com.fgan.azure.util.PropertiesUtil;
@@ -152,8 +153,13 @@ public class ComputeApi {
      * Amount of vCPU and Memory
      */
     public static PagedList<VirtualMachineSize> getVirtualMachineSizes(Azure azure) {
+        Region region = Constants.REGION_DEFAULT;
+        return getVirtualMachineSizes(azure, region);
+    }
+
+    public static PagedList<VirtualMachineSize> getVirtualMachineSizes(Azure azure, Region region) {
         VirtualMachineSizes sizes = azure.virtualMachines().sizes();
-        return sizes.listByRegion(Constants.REGION_DEFAULT);
+        return sizes.listByRegion(region);
     }
 
     private static AvailabilitySet getAvailabilitySet(Azure azure, String id) {
@@ -169,11 +175,11 @@ public class ComputeApi {
         return azure.virtualMachines().getById(virtualMachineId);
     }
 
-    public static VirtualMachine getVirtualMachineById(Azure azure, String virtualMachineId) throws FogbowException {
+    public static VirtualMachine getVirtualMachineById(Azure azure, String virtualMachineId) throws AzureException.ResourceNotFound {
         try {
             return azure.virtualMachines().getById(virtualMachineId);
         } catch (RuntimeException e) {
-            throw new FogbowException("*", e);
+            throw new AzureException.ResourceNotFound(e);
         }
     }
 

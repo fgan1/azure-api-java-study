@@ -1,6 +1,8 @@
 package com.fgan.azure.fogbowmock.compute;
 
 import cloud.fogbow.common.exceptions.FogbowException;
+import cloud.fogbow.common.exceptions.InstanceNotFoundException;
+import cloud.fogbow.common.exceptions.UnauthorizedRequestException;
 import cloud.fogbow.common.util.PropertiesUtil;
 import cloud.fogbow.ras.api.http.response.ComputeInstance;
 import cloud.fogbow.ras.api.http.response.InstanceState;
@@ -11,9 +13,10 @@ import cloud.fogbow.ras.core.plugins.interoperability.ComputePlugin;
 import cloud.fogbow.ras.core.plugins.interoperability.util.DefaultLaunchCommandGenerator;
 import com.fgan.azure.fogbowmock.common.AzureCloudUser;
 import com.fgan.azure.fogbowmock.common.AzureStateMapper;
-import com.fgan.azure.fogbowmock.compute.model.AzureGetImageRef;
 import com.fgan.azure.fogbowmock.compute.model.AzureCreateVirtualMachineRef;
+import com.fgan.azure.fogbowmock.compute.model.AzureGetImageRef;
 import com.fgan.azure.fogbowmock.compute.model.AzureGetVirtualMachineRef;
+import com.fgan.azure.fogbowmock.exceptions.AzureException;
 import com.fgan.azure.fogbowmock.image.AzureImageOperation;
 import com.fgan.azure.fogbowmock.util.AzureIdBuilder;
 import com.fgan.azure.fogbowmock.util.AzureResourceToInstancePolicy;
@@ -65,8 +68,7 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
         LOGGER.info(String.format(Messages.Info.REQUESTING_INSTANCE_FROM_PROVIDER));
 
         String networkInterfaceId = getNetworkInterfaceId(computeOrder, azureCloudUser);
-        String flavorName = this.azureVirtualMachineOperation.findVirtualMachineSizeName(
-                computeOrder.getMemory(), computeOrder.getvCPU(), azureCloudUser);
+        String virtualMachineSizeName = getVirtualMachineSizeName(computeOrder, azureCloudUser);
         int diskSize = computeOrder.getDisk();
         AzureGetImageRef azureVirtualMachineImage = AzureImageOperation.buildAzureVirtualMachineImageBy(computeOrder.getImageId());
         String virtualMachineName = AzureResourceToInstancePolicy.generateAzureResourceNameBy(computeOrder);
@@ -80,7 +82,7 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
                 .azureVirtualMachineImage(azureVirtualMachineImage)
                 .networkInterfaceId(networkInterfaceId)
                 .diskSize(diskSize)
-                .size(flavorName)
+                .size(virtualMachineSizeName)
                 .osComputeName(osComputeName)
                 .osUserName(osUserName)
                 .osUserPassword(osUserPassword)
@@ -89,9 +91,34 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
                 .userData(userData)
                 .build();
 
-        this.azureVirtualMachineOperation.doCreateInstance(azureCreateVirtualMachineRef, azureCloudUser);
+        return doRequestInstance(computeOrder, azureCloudUser, azureCreateVirtualMachineRef);
+    }
 
-        return AzureResourceToInstancePolicy.generateFogbowInstanceIdBy(computeOrder);
+    private String getVirtualMachineSizeName(ComputeOrder computeOrder, AzureCloudUser azureCloudUser)
+            throws UnauthorizedRequestException, InstanceNotFoundException {
+
+        try {
+            return this.azureVirtualMachineOperation.findVirtualMachineSizeName(
+                    computeOrder.getMemory(), computeOrder.getvCPU(), azureCloudUser);
+        } catch (AzureException.Unauthorized e) {
+            throw new UnauthorizedRequestException("", e);
+        } catch (AzureException.NoAvailableResourcesException e) {
+            throw new InstanceNotFoundException("", e);
+        }
+    }
+
+    private String doRequestInstance(ComputeOrder computeOrder, AzureCloudUser azureCloudUser,
+                                     AzureCreateVirtualMachineRef azureCreateVirtualMachineRef)
+            throws UnauthorizedRequestException, InstanceNotFoundException {
+
+        try {
+            this.azureVirtualMachineOperation.doCreateInstance(azureCreateVirtualMachineRef, azureCloudUser);
+            return AzureResourceToInstancePolicy.generateFogbowInstanceIdBy(computeOrder);
+        } catch (AzureException.Unauthorized e) {
+            throw new UnauthorizedRequestException("", e);
+        } catch (AzureException.ResourceNotFound e) {
+            throw new InstanceNotFoundException("", e);
+        }
     }
 
     private String getUserData() {
@@ -123,15 +150,25 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
             throws FogbowException {
 
         LOGGER.info(String.format(Messages.Info.GETTING_INSTANCE_S, computeOrder.getInstanceId()));
-
         String azureVirtualMachineId = AzureIdBuilder
                 .configure(azureCloudUser)
                 .buildVirtualMachineId(computeOrder.getInstanceId());
 
-        AzureGetVirtualMachineRef azureGetVirtualMachineRef =
-                this.azureVirtualMachineOperation.doGetInstance(azureVirtualMachineId, azureCloudUser);
+        AzureGetVirtualMachineRef azureGetVirtualMachineRef = doRequestInstance(azureCloudUser, azureVirtualMachineId);
 
         return buildComputeInstance(azureGetVirtualMachineRef);
+    }
+
+    private AzureGetVirtualMachineRef doRequestInstance(AzureCloudUser azureCloudUser, String azureVirtualMachineId)
+            throws UnauthorizedRequestException, InstanceNotFoundException {
+
+        try {
+            return this.azureVirtualMachineOperation.doGetInstance(azureVirtualMachineId, azureCloudUser);
+        } catch (AzureException.Unauthorized e) {
+            throw new UnauthorizedRequestException("", e);
+        } catch (AzureException.ResourceNotFound e) {
+            throw new InstanceNotFoundException("", e);
+        }
     }
 
     private ComputeInstance buildComputeInstance(AzureGetVirtualMachineRef azureGetVirtualMachineRef) {
@@ -143,7 +180,7 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
         int disk = azureGetVirtualMachineRef.getDisk();
         List<String> ipAddresses = azureGetVirtualMachineRef.getIpAddresses();
 
-        return new ComputeInstance(id, cloudState, name, vCPU, memory, disk,ipAddresses);
+        return new ComputeInstance(id, cloudState, name, vCPU, memory, disk, ipAddresses);
     }
 
     @Override
@@ -156,7 +193,15 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
                 .configure(azureCloudUser)
                 .buildVirtualMachineId(computeOrder.getInstanceId());
 
-        this.azureVirtualMachineOperation.doDeleteInstance(azureVirtualMachineId, azureCloudUser);
+        doDeleteInstance(azureCloudUser, azureVirtualMachineId);
+    }
+
+    private void doDeleteInstance(AzureCloudUser azureCloudUser, String azureVirtualMachineId) throws UnauthorizedRequestException {
+        try {
+            this.azureVirtualMachineOperation.doDeleteInstance(azureVirtualMachineId, azureCloudUser);
+        } catch (AzureException.Unauthorized e) {
+            throw new UnauthorizedRequestException("", e);
+        }
     }
 
 }

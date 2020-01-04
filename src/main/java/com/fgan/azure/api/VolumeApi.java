@@ -2,6 +2,7 @@ package com.fgan.azure.api;
 
 import cloud.fogbow.common.exceptions.FogbowException;
 import com.fgan.azure.Constants;
+import com.fgan.azure.fogbowmock.exceptions.AzureException;
 import com.fgan.azure.util.GeneralPrintUtil;
 import com.fgan.azure.util.PropertiesUtil;
 import com.microsoft.azure.PagedList;
@@ -28,7 +29,9 @@ public class VolumeApi {
         GeneralPrintUtil.printDisksLines(disks);
     }
 
-    public static void deleteDiskByVirtualMachine(Azure azure, String virtualMachineId) throws FogbowException {
+    public static void deleteDiskByVirtualMachine(Azure azure, String virtualMachineId)
+            throws AzureException.ResourceNotFound {
+
         VirtualMachine virtualMachine = ComputeApi.getVirtualMachineById(azure, virtualMachineId);
         String diskId = virtualMachine.osDiskId();
         deleteDisk(azure, diskId);

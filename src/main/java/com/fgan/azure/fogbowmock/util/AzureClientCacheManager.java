@@ -2,6 +2,7 @@ package com.fgan.azure.fogbowmock.util;
 
 import cloud.fogbow.common.exceptions.FogbowException;
 import com.fgan.azure.fogbowmock.common.AzureCloudUser;
+import com.fgan.azure.fogbowmock.exceptions.AzureException;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -37,13 +38,12 @@ public class AzureClientCacheManager {
                 });
     }
 
-    public static Azure getAzure(AzureCloudUser azureCloudUser) throws FogbowException {
+    public static Azure getAzure(AzureCloudUser azureCloudUser) throws AzureException.Unauthorized {
         try {
             LOGGER.debug("Trying to get Azure client in the cache");
             return loadingCache.get(azureCloudUser);
         } catch (ExecutionException e) {
-            // TODO(chico) - finish
-            throw new FogbowException("", e);
+            throw new AzureException.Unauthorized(e);
         }
     }
 

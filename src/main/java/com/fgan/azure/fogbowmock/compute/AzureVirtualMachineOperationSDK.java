@@ -1,14 +1,12 @@
 package com.fgan.azure.fogbowmock.compute;
 
-import cloud.fogbow.common.exceptions.FogbowException;
-import cloud.fogbow.common.exceptions.InstanceNotFoundException;
-import cloud.fogbow.common.exceptions.NoAvailableResourcesException;
 import com.fgan.azure.api.ComputeApi;
 import com.fgan.azure.api.network.NetworkApi;
 import com.fgan.azure.fogbowmock.common.AzureCloudUser;
 import com.fgan.azure.fogbowmock.compute.model.AzureCreateVirtualMachineRef;
 import com.fgan.azure.fogbowmock.compute.model.AzureGetImageRef;
 import com.fgan.azure.fogbowmock.compute.model.AzureGetVirtualMachineRef;
+import com.fgan.azure.fogbowmock.exceptions.AzureException;
 import com.fgan.azure.fogbowmock.util.AzureClientCacheManager;
 import com.fgan.azure.fogbowmock.util.AzureIdBuilder;
 import com.fgan.azure.fogbowmock.util.AzureSchedulerManager;
@@ -47,13 +45,13 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
      */
     @Override
     public void doCreateInstance(AzureCreateVirtualMachineRef azureCreateVirtualMachineRef,
-                                 AzureCloudUser azureCloudUser) throws FogbowException {
+                                 AzureCloudUser azureCloudUser)
+            throws AzureException.Unauthorized, AzureException.ResourceNotFound {
 
         Azure azure = AzureClientCacheManager.getAzure(azureCloudUser);
 
         String networkInterfaceId = azureCreateVirtualMachineRef.getNetworkInterfaceId();
         NetworkInterface networkInterface = getNetworkInterface(networkInterfaceId, azureCloudUser, azure);
-
         String resourceGroupName = azureCreateVirtualMachineRef.getResourceGroupName();
         String regionName = azureCreateVirtualMachineRef.getRegionName();
         String virtualMachineName = azureCreateVirtualMachineRef.getVirtualMachineName();
@@ -98,7 +96,7 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
     private NetworkInterface getNetworkInterface(String fogbowNetworkInterfaceId,
                                                  AzureCloudUser azureCloudUser,
                                                  Azure azure)
-            throws FogbowException {
+            throws AzureException.ResourceNotFound {
 
         try {
             String azureNetworkInterfaceId = AzureIdBuilder
@@ -106,13 +104,13 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
                     .buildNetworkInterfaceId(fogbowNetworkInterfaceId);
             return NetworkApi.getNetworkInterface(azure, azureNetworkInterfaceId);
         } catch (Exception e) {
-            throw new FogbowException("", e);
+            throw new AzureException.ResourceNotFound(e);
         }
     }
 
     @Override
     public String findVirtualMachineSizeName(int memoryRequired, int vCpuRequired, AzureCloudUser azureCloudUser)
-            throws FogbowException {
+            throws AzureException.Unauthorized, AzureException.NoAvailableResourcesException {
 
         Azure azure = AzureClientCacheManager.getAzure(azureCloudUser);
 
@@ -128,7 +126,7 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
                 .findFirst().get();
 
         if (firstVirtualMachineSize == null) {
-            throw new NoAvailableResourcesException();
+            throw new AzureException.NoAvailableResourcesException("");
         }
 
         return firstVirtualMachineSize.name();
@@ -136,16 +134,11 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
 
     @Override
     public AzureGetVirtualMachineRef doGetInstance(String azureInstanceId, AzureCloudUser azureCloudUser)
-            throws FogbowException {
+            throws AzureException.Unauthorized, AzureException.ResourceNotFound {
 
         Azure azure = AzureClientCacheManager.getAzure(azureCloudUser);
 
-        VirtualMachine virtualMachine = null;
-        try {
-            virtualMachine = ComputeApi.getVirtualMachineById(azure, azureInstanceId);
-        } catch (FogbowException e) {
-            throw new InstanceNotFoundException();
-        }
+        VirtualMachine virtualMachine = ComputeApi.getVirtualMachineById(azure, azureInstanceId);
 
         String virtualMachineSizeName = virtualMachine.size().toString();
         VirtualMachineSize virtualMachineSize = findVirtualMachineSizeByName(virtualMachineSizeName, azure);
@@ -184,7 +177,7 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
      */
     @Override
     public void doDeleteInstance(String azureInstanceId, AzureCloudUser azureCloudUser)
-            throws FogbowException {
+            throws AzureException.Unauthorized {
 
         Azure azure = AzureClientCacheManager.getAzure(azureCloudUser);
 

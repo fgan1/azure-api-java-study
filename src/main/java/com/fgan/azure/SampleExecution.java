@@ -5,6 +5,7 @@ import com.fgan.azure.api.*;
 import com.fgan.azure.api.identity.IdentityApi;
 import com.fgan.azure.api.image.ImageApiSample;
 import com.fgan.azure.api.network.NetworkApiSample;
+import com.fgan.azure.fogbowmock.exceptions.AzureException;
 import com.fgan.azure.util.AzureIDBuilderGeneral;
 import com.fgan.azure.util.GeneralPrintUtil;
 import com.microsoft.azure.management.Azure;
@@ -120,7 +121,9 @@ public class SampleExecution {
         return this.instance;
     }
 
-    public SampleExecution deleteDiskByVirtualMachine(Azure azure, String virtualMachineId) throws FogbowException {
+    public SampleExecution deleteDiskByVirtualMachine(Azure azure, String virtualMachineId)
+            throws AzureException.ResourceNotFound {
+
         VolumeApi.deleteDiskByVirtualMachine(azure, virtualMachineId);
         return this.instance;
     }
@@ -146,12 +149,16 @@ public class SampleExecution {
     /**
      * Attachment Samples
      */
-    public SampleExecution detackDiskByNameFromDefaultVmSync(Azure azure, String id) throws FogbowException {
+    public SampleExecution detackDiskByNameFromDefaultVmSync(Azure azure, String id)
+            throws AzureException.ResourceNotFound {
+
         AttachmentApi.detackDiskByNameFromDefaultVmSync(azure, id);
         return this.instance;
     }
 
-    public SampleExecution attackDiskByNameFromDefaultVmSync(Azure azure, String id) throws FogbowException {
+    public SampleExecution attackDiskByNameFromDefaultVmSync(Azure azure, String id)
+            throws AzureException.ResourceNotFound {
+
         AttachmentApi.attackDiskByNameFromDefaultVmSync(azure, id);
         return this.instance;
     }
