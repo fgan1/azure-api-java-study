@@ -1,5 +1,6 @@
 package com.fgan.azure;
 
+import cloud.fogbow.common.exceptions.FogbowException;
 import com.fgan.azure.api.*;
 import com.fgan.azure.api.identity.IdentityApi;
 import com.fgan.azure.api.image.ImageApiSample;
@@ -48,12 +49,12 @@ public class SampleExecution {
     /**
      * Compute Samples
      */
-    public SampleExecution runComputeSampleOne(Azure azure) {
+    public SampleExecution runComputeSampleOne(Azure azure) throws Exception {
         ComputeApi.runSambleOneSync(azure);
         return this.instance;
     }
 
-    public SampleExecution createComputeStyleFogbow(Azure azure) throws InterruptedException {
+    public SampleExecution createComputeStyleFogbow(Azure azure) throws Exception {
         ComputeApi.createComputeFogbowWithObservebla(azure);
         return this.instance;
     }
@@ -119,7 +120,7 @@ public class SampleExecution {
         return this.instance;
     }
 
-    public SampleExecution deleteDiskByVirtualMachine(Azure azure, String virtualMachineId) {
+    public SampleExecution deleteDiskByVirtualMachine(Azure azure, String virtualMachineId) throws FogbowException {
         VolumeApi.deleteDiskByVirtualMachine(azure, virtualMachineId);
         return this.instance;
     }
@@ -145,12 +146,12 @@ public class SampleExecution {
     /**
      * Attachment Samples
      */
-    public SampleExecution detackDiskByNameFromDefaultVmSync(Azure azure, String id) {
+    public SampleExecution detackDiskByNameFromDefaultVmSync(Azure azure, String id) throws FogbowException {
         AttachmentApi.detackDiskByNameFromDefaultVmSync(azure, id);
         return this.instance;
     }
 
-    public SampleExecution attackDiskByNameFromDefaultVmSync(Azure azure, String id) {
+    public SampleExecution attackDiskByNameFromDefaultVmSync(Azure azure, String id) throws FogbowException {
         AttachmentApi.attackDiskByNameFromDefaultVmSync(azure, id);
         return this.instance;
     }

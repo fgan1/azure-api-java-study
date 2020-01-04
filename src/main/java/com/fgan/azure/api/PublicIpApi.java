@@ -1,5 +1,6 @@
 package com.fgan.azure.api;
 
+import cloud.fogbow.common.exceptions.FogbowException;
 import com.fgan.azure.Constants;
 import com.fgan.azure.util.PropertiesUtil;
 import com.microsoft.azure.management.Azure;
@@ -18,7 +19,7 @@ public class PublicIpApi {
 
     public static final String PUBLIC_IP_NAME_DEFAULT = Constants.PREFIX + "publicIp";
 
-    public static void attachPublicIdToVm(Azure azure, String virtualMachineId, String publicIpAddressId) {
+    public static void attachPublicIdToVm(Azure azure, String virtualMachineId, String publicIpAddressId) throws FogbowException {
         VirtualMachine virtualMachine = ComputeApi.getVirtualMachineById(azure, virtualMachineId);
         PublicIPAddress publicIpAddress = getPublicIpAddress(azure, publicIpAddressId);
         NetworkInterface primaryNetworkInterface = virtualMachine.getPrimaryNetworkInterface();
@@ -27,7 +28,7 @@ public class PublicIpApi {
                 .apply();
     }
 
-    public static void detachPublicIdToVm(Azure azure, String virtualMachineId) {
+    public static void detachPublicIdToVm(Azure azure, String virtualMachineId) throws FogbowException {
         VirtualMachine virtualMachine = ComputeApi.getVirtualMachineById(azure, virtualMachineId);
         NetworkInterface primaryNetworkInterface = virtualMachine.getPrimaryNetworkInterface();
         primaryNetworkInterface.update()

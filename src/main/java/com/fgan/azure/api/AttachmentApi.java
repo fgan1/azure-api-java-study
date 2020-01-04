@@ -1,5 +1,6 @@
 package com.fgan.azure.api;
 
+import cloud.fogbow.common.exceptions.FogbowException;
 import com.fgan.azure.util.AzureIDBuilderGeneral;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.Disk;
@@ -15,7 +16,7 @@ import com.microsoft.azure.management.compute.VirtualMachine;
  */
 public class AttachmentApi {
 
-    public static void attackDiskByNameFromDefaultVmSync(Azure azure, String diskName) {
+    public static void attackDiskByNameFromDefaultVmSync(Azure azure, String diskName) throws FogbowException {
         String virtualMachineId = AzureIDBuilderGeneral.buildVirtualMachineId(ComputeApi.VM_NAME_DEFAULT);
         String diskId = AzureIDBuilderGeneral.buildDiskId(diskName);
         attackDiskSync(azure, diskId, virtualMachineId);
@@ -27,7 +28,7 @@ public class AttachmentApi {
      * Note:
      * This operation is synchronous and spends more than 1 minute to complete.
      */
-    private static void attackDiskSync(Azure azure, String diskId, String virtualMachineId) {
+    private static void attackDiskSync(Azure azure, String diskId, String virtualMachineId) throws FogbowException {
         VirtualMachine virtualMachine = ComputeApi.getVirtualMachineById(azure, virtualMachineId);
         Disk disk = VolumeApi.getDisk(azure, diskId);
         virtualMachine.update()
@@ -35,7 +36,7 @@ public class AttachmentApi {
                 .apply();
     }
 
-    public static void detackDiskByNameFromDefaultVmSync(Azure azure, String diskName) {
+    public static void detackDiskByNameFromDefaultVmSync(Azure azure, String diskName) throws FogbowException {
         String virtualMachineId = AzureIDBuilderGeneral.buildVirtualMachineId(ComputeApi.VM_NAME_DEFAULT);
         String diskId = AzureIDBuilderGeneral.buildDiskId(diskName);
         detackDiskSync(azure, diskId, virtualMachineId);
@@ -47,7 +48,7 @@ public class AttachmentApi {
      * Note:
      * This operation is synchronous and spends more than 30 seconds to complete.
      */
-    private static void detackDiskSync(Azure azure, String diskId, String virtualMachineId) {
+    private static void detackDiskSync(Azure azure, String diskId, String virtualMachineId) throws FogbowException {
         VirtualMachine virtualMachine = ComputeApi.getVirtualMachineById(azure, virtualMachineId);
         Disk disk = VolumeApi.getDisk(azure, diskId);
         // TODO(chico) - check the magicNumber meaning
