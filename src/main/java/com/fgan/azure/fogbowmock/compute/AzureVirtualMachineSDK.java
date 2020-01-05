@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 
 public class AzureVirtualMachineSDK {
 
+    // TODO(chico) - Implement tests
     public static Observable<Indexable> buildVirtualMachineObservable(Azure azure, String virtualMachineName, Region region,
                                                                       String resourceGroupName, NetworkInterface networkInterface,
                                                                       String imagePublished, String imageOffer, String imageSku,

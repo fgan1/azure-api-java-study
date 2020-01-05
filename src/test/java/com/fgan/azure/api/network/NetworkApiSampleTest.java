@@ -5,6 +5,7 @@ import com.fgan.azure.LoggerAssert;
 import com.fgan.azure.TestUtil;
 import com.fgan.azure.api.network.exceptions.CreateNetworkException;
 import com.fgan.azure.api.network.exceptions.CreateNetworkInterfaceException;
+import com.fgan.azure.fogbowmock.exceptions.AzureException;
 import com.fgan.azure.util.AzureIDBuilderGeneral;
 import com.fgan.azure.util.PropertiesUtil;
 import com.microsoft.azure.management.Azure;
@@ -30,7 +31,7 @@ public class NetworkApiSampleTest extends TestUtil {
     private NetworkApiSample networkApiSample;
 
     @Before
-    public void setUp() throws IOException {
+    public void setUp() throws IOException, AzureException.Unauthorized {
         super.setUp();
         this.azureMock = null;
         this.networkApiSample = Mockito.spy(NetworkApiSample.build(azureMock));

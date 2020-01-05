@@ -3,12 +3,14 @@ package com.fgan.azure.fogbowmock.compute;
 import com.fgan.azure.api.ComputeApi;
 import com.fgan.azure.api.network.NetworkApi;
 import com.fgan.azure.fogbowmock.common.AzureCloudUser;
+import com.fgan.azure.fogbowmock.common.Messages;
 import com.fgan.azure.fogbowmock.compute.model.AzureCreateVirtualMachineRef;
 import com.fgan.azure.fogbowmock.compute.model.AzureGetImageRef;
 import com.fgan.azure.fogbowmock.compute.model.AzureGetVirtualMachineRef;
 import com.fgan.azure.fogbowmock.exceptions.AzureException;
 import com.fgan.azure.fogbowmock.util.AzureClientCacheManager;
 import com.fgan.azure.fogbowmock.util.AzureSchedulerManager;
+import com.google.common.annotations.VisibleForTesting;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.VirtualMachine;
@@ -16,9 +18,10 @@ import com.microsoft.azure.management.compute.VirtualMachineSize;
 import com.microsoft.azure.management.network.NetworkInterface;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azure.management.resources.fluentcore.model.Indexable;
-import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
 import rx.Completable;
 import rx.Observable;
+import rx.Scheduler;
 import rx.schedulers.Schedulers;
 
 import java.util.Arrays;
@@ -31,7 +34,8 @@ import java.util.concurrent.ExecutorService;
  */
 public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOperation {
 
-    private static final Logger LOGGER = Logger.getLogger(AzureComputePlugin.class);
+//    private static final Logger LOGGER = Logger.getLogger(AzureVirtualMachineOperationSDK.class);
+    private final static org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AzureVirtualMachineOperationSDK.class);
 
     private final ExecutorService virtualMachineExecutor;
 
@@ -49,12 +53,14 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
 
         Azure azure = AzureClientCacheManager.getAzure(azureCloudUser);
 
-        Observable<Indexable> virtualMachineAsync = getAzureVirtualMachineObservable(azureCreateVirtualMachineRef, azure);
+        Observable<Indexable> virtualMachineAsync = getAzureVirtualMachineObservable(
+                azureCreateVirtualMachineRef, azure);
 
-        doCreateInstanceAsynchronously(virtualMachineAsync);
+        subscribeCreateVirtualMachine(virtualMachineAsync);
     }
 
-    private Observable<Indexable> getAzureVirtualMachineObservable(
+    @VisibleForTesting
+    Observable<Indexable> getAzureVirtualMachineObservable(
             AzureCreateVirtualMachineRef azureCreateVirtualMachineRef,
             Azure azure) throws AzureException.ResourceNotFound {
 
@@ -82,21 +88,30 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
     }
 
     /**
-     * Create
+     * Execute create Virtual Machine observable and set its behaviour.
      */
-    private void doCreateInstanceAsynchronously(Observable<Indexable> virtualMachineAsync) {
-        virtualMachineAsync
-                .subscribeOn(Schedulers.from(virtualMachineExecutor))
+    @VisibleForTesting
+    void subscribeCreateVirtualMachine(Observable<Indexable> virtualMachineObservable) {
+        Scheduler scheduler = getScheduler();
+
+        virtualMachineObservable
+                .subscribeOn(scheduler)
                 .doOnSubscribe(() -> {
-                    LOGGER.debug("Start asynchronous create virtual machine");
+                    LOGGER.info(Messages.START_CREATE_VM_ASYNC_BEHAVIOUR);
                 })
-                .doOnError((error -> {
-                    LOGGER.debug("Error while creating virtual machine asynchounously");
+                .onErrorReturn((error -> {
+                    LOGGER.error(Messages.ERROR_CREATE_VM_ASYNC_BEHAVIOUR, error);
+                    return null;
                 }))
                 .doOnCompleted(() -> {
-                    LOGGER.debug("End asynchronous create virtual machine");
+                    LOGGER.info(Messages.END_CREATE_VM_ASYNC_BEHAVIOUR);
                 })
                 .subscribe();
+    }
+
+    @VisibleForTesting
+    Scheduler getScheduler() {
+        return Schedulers.from(this.virtualMachineExecutor);
     }
 
     private NetworkInterface getNetworkInterface(String azureNetworkInterfaceId,
@@ -141,13 +156,11 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
         Azure azure = AzureClientCacheManager.getAzure(azureCloudUser);
 
         VirtualMachine virtualMachine = ComputeApi.getVirtualMachineById(azure, azureInstanceId);
-
         String virtualMachineSizeName = virtualMachine.size().toString();
         VirtualMachineSize virtualMachineSize = findVirtualMachineSizeByName(virtualMachineSizeName, azure);
         int vCPU = virtualMachineSize.numberOfCores();
         int memory = virtualMachineSize.memoryInMB();
         int disk = virtualMachine.osDiskSize();
-
         String id = virtualMachine.vmId();
         String cloudState = virtualMachine.provisioningState();
         String name = virtualMachine.name();
@@ -165,13 +178,15 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
                 .build();
     }
 
-    public VirtualMachineSize findVirtualMachineSizeByName(String virtualMachineSizeNameWanted,
+    @VisibleForTesting
+    VirtualMachineSize findVirtualMachineSizeByName(String virtualMachineSizeNameWanted,
                                                            Azure azure) {
 
         PagedList<VirtualMachineSize> virtualMachineSizes = ComputeApi.getVirtualMachineSizes(azure);
         return virtualMachineSizes.stream()
                 .filter((virtualMachineSize) -> virtualMachineSizeNameWanted.equals(virtualMachineSize.name()))
-                .findFirst().get();
+                .findFirst()
+                .get();
     }
 
     /**
@@ -184,20 +199,28 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
         Azure azure = AzureClientCacheManager.getAzure(azureCloudUser);
 
         Completable completable = ComputeApi.deleteVirtualMachineAsync(azure, azureInstanceId);
-        doDeleteInstanceAsynchronously(completable);
+
+        subscribeDeleteVirtualMachine(completable);
     }
 
-    private void doDeleteInstanceAsynchronously(Completable completable) {
-        completable
-                .subscribeOn(Schedulers.from(virtualMachineExecutor))
+    /**
+     * Execute delete Virtual Machine observable and set its behaviour.
+     */
+    @VisibleForTesting
+    void subscribeDeleteVirtualMachine(Completable deleteVirtualMachineCompletable) {
+        Scheduler scheduler = getScheduler();
+
+        deleteVirtualMachineCompletable
+                .subscribeOn(scheduler)
                 .doOnSubscribe((a) -> {
-                    LOGGER.debug("Start asynchronous delete virtual machine");
+                    LOGGER.info(Messages.START_DELETE_VM_ASYNC_BEHAVIOUR);
                 })
-                .doOnError((error -> {
-                    LOGGER.debug("Error while deleting virtual machine asynchounously");
+                .onErrorComplete((error -> {
+                    LOGGER.error(Messages.ERROR_DELETE_VM_ASYNC_BEHAVIOUR);
+                    return null;
                 }))
                 .doOnCompleted(() -> {
-                    LOGGER.debug("End asynchronous delete virtual machine");
+                    LOGGER.info(Messages.END_DELETE_VM_ASYNC_BEHAVIOUR);
                 })
                 .subscribe();
     }

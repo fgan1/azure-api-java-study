@@ -1,5 +1,6 @@
 package com.fgan.azure;
 
+import com.fgan.azure.fogbowmock.exceptions.AzureException;
 import com.fgan.azure.util.AzureIDBuilderGeneral;
 import com.fgan.azure.util.PropertiesUtil;
 import org.junit.Before;
@@ -19,7 +20,7 @@ public class TestUtil {
     static final String ID_DEFAULT = "id";
 
     @Before
-    public void setUp() throws IOException {
+    public void setUp() throws IOException, AzureException.Unauthorized {
         PowerMockito.mockStatic(PropertiesUtil.class);
         Properties properties = new Properties();
         PowerMockito.when(PropertiesUtil.getInstance()).thenReturn(properties);
