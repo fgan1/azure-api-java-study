@@ -44,7 +44,7 @@ public class GenericBuilderTest {
         GenericObject genericObject = GenericObject.builder()
                 .atributeRequired(attributeRequired)
                 .atributeOptional(attributeOptional)
-                .buildAndCheck();
+                .checkAndBuild();
 
         // verify
         Assert.assertEquals(attributeOptional, genericObject.getAtributeOptional());
@@ -71,7 +71,7 @@ public class GenericBuilderTest {
     // test case: When calling the build method with a required attribute not filled and it does not call
     // check parameters method, it must verify if it throws an exception.
     @Test
-    public void testBuildSuccessfullyWhenARequiredAttributeIsNotFieldAndWithChecking() {
+    public void testBuildFailWhenARequiredAttributeIsNotFieldAndWithChecking() {
 
         // set up
         String attributeOptional = "attributeOptional";
@@ -80,7 +80,7 @@ public class GenericBuilderTest {
         try {
             GenericObject.builder()
                     .atributeOptional(attributeOptional)
-                    .buildAndCheck();
+                    .checkAndBuild();
         } catch (GenericBuilderException e) {
             // verify
             String exceptionMessageExpected = generateExceptionMessage();
@@ -89,7 +89,7 @@ public class GenericBuilderTest {
     }
 
     // test case: When calling the build method with a required attribute not filled and it does not call
-    // check parameters method, it must verify if it throws an exception.
+    // check parameters method, it must verify if it the Object was filled with the right values.
     @Test
     public void testBuildSuccessfullyWhenAnOpitionalAttributeIsNotFieldAndWithChecking()
             throws GenericBuilderException {
@@ -100,7 +100,7 @@ public class GenericBuilderTest {
         // exercise
         GenericObject genericObject = GenericObject.builder()
                 .atributeRequired(attributeRequired)
-                .buildAndCheck();
+                .checkAndBuild();
 
         // verify
         Assert.assertEquals(attributeRequired, genericObject.getAtributeRequired());
@@ -108,8 +108,9 @@ public class GenericBuilderTest {
     }
 
     private String generateExceptionMessage() {
+        String requiredAttribute = GenericObject.class.getDeclaredFields()[0].getName();
         return String.format(GenericBuilderException.FIELD_REQUIRED_MESSAGE,
-                GenericObject.class.getDeclaredFields()[0].getName(), GenericBuilder.class.getSimpleName());
+                requiredAttribute, GenericObject.class.getSimpleName());
     }
 
     private static class GenericObject {

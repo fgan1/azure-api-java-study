@@ -93,7 +93,7 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
                     .regionName(this.regionName)
                     .resourceGroupName(this.resourceGroupName)
                     .userData(userData)
-                    .buildAndCheck();
+                    .checkAndBuild();
         } catch (GenericBuilderException e) {
             throw new FogbowException();
         }

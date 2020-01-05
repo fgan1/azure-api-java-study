@@ -8,7 +8,6 @@ import com.fgan.azure.fogbowmock.compute.model.AzureGetImageRef;
 import com.fgan.azure.fogbowmock.compute.model.AzureGetVirtualMachineRef;
 import com.fgan.azure.fogbowmock.exceptions.AzureException;
 import com.fgan.azure.fogbowmock.util.AzureClientCacheManager;
-import com.fgan.azure.fogbowmock.util.AzureIdBuilder;
 import com.fgan.azure.fogbowmock.util.AzureSchedulerManager;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.Azure;
@@ -50,6 +49,15 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
 
         Azure azure = AzureClientCacheManager.getAzure(azureCloudUser);
 
+        Observable<Indexable> virtualMachineAsync = getAzureVirtualMachineObservable(azureCreateVirtualMachineRef, azure);
+
+        doCreateInstanceAsynchronously(virtualMachineAsync);
+    }
+
+    private Observable<Indexable> getAzureVirtualMachineObservable(
+            AzureCreateVirtualMachineRef azureCreateVirtualMachineRef,
+            Azure azure) throws AzureException.ResourceNotFound {
+
         String networkInterfaceId = azureCreateVirtualMachineRef.getNetworkInterfaceId();
         NetworkInterface networkInterface = getNetworkInterface(networkInterfaceId, azure);
         String resourceGroupName = azureCreateVirtualMachineRef.getResourceGroupName();
@@ -67,12 +75,10 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
         String imageOffer = azureVirtualMachineImage.getOffer();
         String imageSku = azureVirtualMachineImage.getSku();
 
-        Observable<Indexable> virtualMachineAsync = ComputeApi.createVirtualMachineAsync(
+        return AzureVirtualMachineSDK.buildVirtualMachineObservable(
                 azure, virtualMachineName, region, resourceGroupName, networkInterface,
                 imagePublished, imageOffer, imageSku, osUserName, osUserPassword, osComputeName,
                 userData, diskSize, size);
-
-        doCreateInstanceAsynchronously(virtualMachineAsync);
     }
 
     /**

@@ -1,5 +1,7 @@
 package com.fgan.azure.fogbowmock.util;
 
+import org.apache.log4j.Logger;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -12,6 +14,8 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class GenericBuilder<T> {
+
+    private static final Logger LOGGER = Logger.getLogger(GenericBuilder.class);
 
     private final Supplier<T> instantiator;
 
@@ -31,7 +35,7 @@ public class GenericBuilder<T> {
         return this;
     }
 
-    public T buildAndCheck() throws GenericBuilderException {
+    public T checkAndBuild() throws GenericBuilderException {
         T object = build();
         checkParametersRequired(object);
         return object;
@@ -39,12 +43,11 @@ public class GenericBuilder<T> {
 
     private void checkParametersRequired(T object) throws GenericBuilderException {
         for (Field field : object.getClass().getDeclaredFields()) {
-            field.setAccessible(true);
             if (field.isAnnotationPresent(Required.class)) {
                 Object value = getFieldValue(object, field);
                 if (value == null) {
                     String message = String.format(GenericBuilderException.FIELD_REQUIRED_MESSAGE,
-                            field.getName(), this.getClass().getSuperclass().getSimpleName());
+                            field.getName(), object.getClass().getSimpleName());
                     throw new GenericBuilderException(message);
                 }
             }
@@ -53,8 +56,10 @@ public class GenericBuilder<T> {
 
     private Object getFieldValue(T object, Field field) {
         try {
+            field.setAccessible(true);
             return field.get(object);
         } catch (IllegalAccessException e) {
+            LOGGER.warn(String.format("There is an illegal access on field %s", field.getName()), e);
             return null;
         }
     }
