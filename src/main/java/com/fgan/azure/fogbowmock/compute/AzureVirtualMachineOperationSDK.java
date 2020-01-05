@@ -51,7 +51,7 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
         Azure azure = AzureClientCacheManager.getAzure(azureCloudUser);
 
         String networkInterfaceId = azureCreateVirtualMachineRef.getNetworkInterfaceId();
-        NetworkInterface networkInterface = getNetworkInterface(networkInterfaceId, azureCloudUser, azure);
+        NetworkInterface networkInterface = getNetworkInterface(networkInterfaceId, azure);
         String resourceGroupName = azureCreateVirtualMachineRef.getResourceGroupName();
         String regionName = azureCreateVirtualMachineRef.getRegionName();
         String virtualMachineName = azureCreateVirtualMachineRef.getVirtualMachineName();
@@ -93,15 +93,11 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
                 .subscribe();
     }
 
-    private NetworkInterface getNetworkInterface(String fogbowNetworkInterfaceId,
-                                                 AzureCloudUser azureCloudUser,
+    private NetworkInterface getNetworkInterface(String azureNetworkInterfaceId,
                                                  Azure azure)
             throws AzureException.ResourceNotFound {
 
         try {
-            String azureNetworkInterfaceId = AzureIdBuilder
-                    .configure(azureCloudUser)
-                    .buildNetworkInterfaceId(fogbowNetworkInterfaceId);
             return NetworkApi.getNetworkInterface(azure, azureNetworkInterfaceId);
         } catch (Exception e) {
             throw new AzureException.ResourceNotFound(e);

@@ -20,6 +20,7 @@ import com.fgan.azure.fogbowmock.exceptions.AzureException;
 import com.fgan.azure.fogbowmock.image.AzureImageOperation;
 import com.fgan.azure.fogbowmock.util.AzureIdBuilder;
 import com.fgan.azure.fogbowmock.util.AzureResourceToInstancePolicy;
+import com.fgan.azure.fogbowmock.util.GenericBuilderException;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.log4j.Logger;
 
@@ -77,19 +78,25 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
         String osUserPassword = computeOrder.getId();
         String osComputeName = computeOrder.getId();
 
-        AzureCreateVirtualMachineRef azureCreateVirtualMachineRef = AzureCreateVirtualMachineRef.builder()
-                .virtualMachineName(virtualMachineName)
-                .azureVirtualMachineImage(azureVirtualMachineImage)
-                .networkInterfaceId(networkInterfaceId)
-                .diskSize(diskSize)
-                .size(virtualMachineSizeName)
-                .osComputeName(osComputeName)
-                .osUserName(osUserName)
-                .osUserPassword(osUserPassword)
-                .regionName(this.regionName)
-                .resourceGroupName(this.resourceGroupName)
-                .userData(userData)
-                .build();
+        // TODO(chico) - review it
+        AzureCreateVirtualMachineRef azureCreateVirtualMachineRef = null;
+        try {
+            azureCreateVirtualMachineRef = AzureCreateVirtualMachineRef.builder()
+                    .virtualMachineName(virtualMachineName)
+                    .azureVirtualMachineImage(azureVirtualMachineImage)
+                    .networkInterfaceId(networkInterfaceId)
+                    .diskSize(diskSize)
+                    .size(virtualMachineSizeName)
+                    .osComputeName(osComputeName)
+                    .osUserName(osUserName)
+                    .osUserPassword(osUserPassword)
+                    .regionName(this.regionName)
+                    .resourceGroupName(this.resourceGroupName)
+                    .userData(userData)
+                    .buildAndCheck();
+        } catch (GenericBuilderException e) {
+            throw new FogbowException();
+        }
 
         return doRequestInstance(computeOrder, azureCloudUser, azureCreateVirtualMachineRef);
     }

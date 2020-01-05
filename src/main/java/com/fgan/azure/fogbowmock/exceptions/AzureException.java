@@ -22,4 +22,10 @@ public class AzureException {
         }
     }
 
+    public static class ParamaterRequiredException extends Exception {
+        public ParamaterRequiredException(String var1) {
+            super(var1);
+        }
+    }
+
 }
