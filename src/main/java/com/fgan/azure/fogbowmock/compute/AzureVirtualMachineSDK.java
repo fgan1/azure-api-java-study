@@ -1,8 +1,12 @@
 package com.fgan.azure.fogbowmock.compute;
 
+import com.fgan.azure.fogbowmock.exceptions.AzureException;
 import com.google.common.annotations.VisibleForTesting;
+import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.VirtualMachine;
+import com.microsoft.azure.management.compute.VirtualMachineSize;
+import com.microsoft.azure.management.compute.VirtualMachineSizes;
 import com.microsoft.azure.management.network.NetworkInterface;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azure.management.resources.fluentcore.model.Indexable;
@@ -58,4 +62,24 @@ public class AzureVirtualMachineSDK {
         return matcherOffer.find();
     }
 
+    public static PagedList<VirtualMachineSize> getVirtualMachineSizes(Azure azure, Region region)
+            throws AzureException.ResourceNotFound {
+
+        try {
+            VirtualMachineSizes sizes = azure.virtualMachines().sizes();
+            return sizes.listByRegion(region);
+        } catch (RuntimeException e) {
+            throw new AzureException.ResourceNotFound(e);
+        }
+    }
+
+    public static VirtualMachine getVirtualMachineById(Azure azure, String virtualMachineId)
+            throws AzureException.ResourceNotFound {
+
+        try {
+            return azure.virtualMachines().getById(virtualMachineId);
+        } catch (RuntimeException e) {
+            throw new AzureException.ResourceNotFound(e);
+        }
+    }
 }

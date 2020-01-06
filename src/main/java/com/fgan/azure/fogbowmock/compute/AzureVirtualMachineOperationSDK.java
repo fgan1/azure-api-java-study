@@ -1,7 +1,6 @@
 package com.fgan.azure.fogbowmock.compute;
 
 import com.fgan.azure.api.ComputeApi;
-import com.fgan.azure.api.network.NetworkApi;
 import com.fgan.azure.fogbowmock.common.AzureCloudUser;
 import com.fgan.azure.fogbowmock.common.Messages;
 import com.fgan.azure.fogbowmock.compute.model.AzureCreateVirtualMachineRef;
@@ -65,7 +64,7 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
             Azure azure) throws AzureException.ResourceNotFound {
 
         String networkInterfaceId = azureCreateVirtualMachineRef.getNetworkInterfaceId();
-        NetworkInterface networkInterface = getNetworkInterface(networkInterfaceId, azure);
+        NetworkInterface networkInterface = AzureNetworkSDK.getNetworkInterface(azure, networkInterfaceId);
         String resourceGroupName = azureCreateVirtualMachineRef.getResourceGroupName();
         String regionName = azureCreateVirtualMachineRef.getRegionName();
         String virtualMachineName = azureCreateVirtualMachineRef.getVirtualMachineName();
@@ -114,50 +113,45 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
         return Schedulers.from(this.virtualMachineExecutor);
     }
 
-    private NetworkInterface getNetworkInterface(String azureNetworkInterfaceId,
-                                                 Azure azure)
-            throws AzureException.ResourceNotFound {
-
-        try {
-            return NetworkApi.getNetworkInterface(azure, azureNetworkInterfaceId);
-        } catch (Exception e) {
-            throw new AzureException.ResourceNotFound(e);
-        }
-    }
-
     @Override
-    public String findVirtualMachineSizeName(int memoryRequired, int vCpuRequired, AzureCloudUser azureCloudUser)
-            throws AzureException.Unauthorized, AzureException.NoAvailableResourcesException {
+    public String findVirtualMachineSize(int memoryRequired, int vCpuRequired,
+                                         String regionName, AzureCloudUser azureCloudUser)
+            throws AzureException.Unauthorized, AzureException.NoAvailableResources,
+            AzureException.ResourceNotFound {
 
+        LOGGER.debug(String.format("Trying to find the VM size that fits with memory(%s) and vCpu(%s) at region %s"
+                , memoryRequired, vCpuRequired, regionName));
         Azure azure = AzureClientCacheManager.getAzure(azureCloudUser);
 
-        PagedList<VirtualMachineSize> virtualMachineSizes = ComputeApi.getVirtualMachineSizes(azure);
+        Region region = Region.findByLabelOrName(regionName);
+        PagedList<VirtualMachineSize> virtualMachineSizes =
+                AzureVirtualMachineSDK.getVirtualMachineSizes(azure, region);
         VirtualMachineSize firstVirtualMachineSize = virtualMachineSizes.stream()
                 .filter((virtualMachineSize) ->
-                        virtualMachineSize.memoryInMB() >= memoryRequired &&
+                                virtualMachineSize.memoryInMB() >= memoryRequired &&
                                 virtualMachineSize.numberOfCores() >= vCpuRequired
                 )
                 .sorted(Comparator
                         .comparingInt(VirtualMachineSize::memoryInMB)
                         .thenComparingInt(VirtualMachineSize::numberOfCores))
-                .findFirst().get();
-
-        if (firstVirtualMachineSize == null) {
-            throw new AzureException.NoAvailableResourcesException("");
-        }
+                .findFirst()
+                .orElseThrow(() -> new AzureException.NoAvailableResources(
+                        "There is no virtual machine that fits with the requirements"));
 
         return firstVirtualMachineSize.name();
     }
 
     @Override
-    public AzureGetVirtualMachineRef doGetInstance(String azureInstanceId, AzureCloudUser azureCloudUser)
-            throws AzureException.Unauthorized, AzureException.ResourceNotFound {
+    public AzureGetVirtualMachineRef doGetInstance(String azureInstanceId, String regionName,
+                                                   AzureCloudUser azureCloudUser)
+            throws AzureException.Unauthorized, AzureException.ResourceNotFound,
+            AzureException.NoAvailableResources {
 
         Azure azure = AzureClientCacheManager.getAzure(azureCloudUser);
 
-        VirtualMachine virtualMachine = ComputeApi.getVirtualMachineById(azure, azureInstanceId);
+        VirtualMachine virtualMachine = AzureVirtualMachineSDK.getVirtualMachineById(azure, azureInstanceId);
         String virtualMachineSizeName = virtualMachine.size().toString();
-        VirtualMachineSize virtualMachineSize = findVirtualMachineSizeByName(virtualMachineSizeName, azure);
+        VirtualMachineSize virtualMachineSize = findVirtualMachineSizeByName(virtualMachineSizeName, regionName, azure);
         int vCPU = virtualMachineSize.numberOfCores();
         int memory = virtualMachineSize.memoryInMB();
         int disk = virtualMachine.osDiskSize();
@@ -168,25 +162,27 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
         List<String> ipAddresses = Arrays.asList(primaryPrivateIp);
 
         return AzureGetVirtualMachineRef.builder()
-                .disk(disk)
-                .id(id)
                 .cloudState(cloudState)
                 .ipAddresses(ipAddresses)
+                .disk(disk)
                 .memory(memory)
                 .name(name)
                 .vCPU(vCPU)
+                .id(id)
                 .build();
     }
 
     @VisibleForTesting
-    VirtualMachineSize findVirtualMachineSizeByName(String virtualMachineSizeNameWanted,
-                                                           Azure azure) {
+    VirtualMachineSize findVirtualMachineSizeByName(String virtualMachineSizeNameWanted, String regionName, Azure azure)
+            throws AzureException.NoAvailableResources, AzureException.ResourceNotFound {
 
-        PagedList<VirtualMachineSize> virtualMachineSizes = ComputeApi.getVirtualMachineSizes(azure);
+        Region region = Region.findByLabelOrName(regionName);
+        PagedList<VirtualMachineSize> virtualMachineSizes = AzureVirtualMachineSDK.getVirtualMachineSizes(azure, region);
         return virtualMachineSizes.stream()
                 .filter((virtualMachineSize) -> virtualMachineSizeNameWanted.equals(virtualMachineSize.name()))
                 .findFirst()
-                .get();
+                .orElseThrow(() -> new AzureException.NoAvailableResources(
+                        "There is no virtual machine that fits with the requirements"));
     }
 
     /**

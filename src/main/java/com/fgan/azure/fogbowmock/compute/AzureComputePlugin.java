@@ -102,15 +102,17 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
     }
 
     private String getVirtualMachineSizeName(ComputeOrder computeOrder, AzureCloudUser azureCloudUser)
-            throws UnauthorizedRequestException, InstanceNotFoundException {
+            throws FogbowException {
 
         try {
-            return this.azureVirtualMachineOperation.findVirtualMachineSizeName(
-                    computeOrder.getMemory(), computeOrder.getvCPU(), azureCloudUser);
+            return this.azureVirtualMachineOperation.findVirtualMachineSize(
+                    computeOrder.getMemory(), computeOrder.getvCPU(), this.regionName, azureCloudUser);
         } catch (AzureException.Unauthorized e) {
             throw new UnauthorizedRequestException("", e);
-        } catch (AzureException.NoAvailableResourcesException e) {
+        } catch (AzureException.NoAvailableResources e) {
             throw new InstanceNotFoundException("", e);
+        } catch (AzureException.ResourceNotFound e) {
+            throw new FogbowException("", e);
         }
     }
 
@@ -139,9 +141,11 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
     String getNetworkInterfaceId(ComputeOrder computeOrder, AzureCloudUser azureCloudUser) throws FogbowException {
         String networkInterfaceId;
         List<String> networkIds = computeOrder.getNetworkIds();
-        if (networkIds.size() > 1) {
-            throw new FogbowException("Multiple networks not allowed yed");
-        } else if (networkIds.size() == 1) {
+        if (!networkIds.isEmpty()) {
+            if (networkIds.size() > 1) {
+                throw new FogbowException("Multiple networks not allowed yed");
+            }
+
             networkInterfaceId = networkIds.stream().findFirst().get();
         } else {
             networkInterfaceId = this.defaultNetworkInterfaceName;
@@ -167,14 +171,16 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
     }
 
     private AzureGetVirtualMachineRef doRequestInstance(AzureCloudUser azureCloudUser, String azureVirtualMachineId)
-            throws UnauthorizedRequestException, InstanceNotFoundException {
+            throws FogbowException {
 
         try {
-            return this.azureVirtualMachineOperation.doGetInstance(azureVirtualMachineId, azureCloudUser);
+            return this.azureVirtualMachineOperation.doGetInstance(azureVirtualMachineId, this.regionName, azureCloudUser);
         } catch (AzureException.Unauthorized e) {
             throw new UnauthorizedRequestException("", e);
         } catch (AzureException.ResourceNotFound e) {
             throw new InstanceNotFoundException("", e);
+        } catch (AzureException.NoAvailableResources e) {
+            throw new FogbowException("");
         }
     }
 

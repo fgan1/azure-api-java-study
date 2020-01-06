@@ -1,6 +1,7 @@
 package com.fgan.azure.api.network;
 
 import com.fgan.azure.api.ApiAzure;
+import com.fgan.azure.fogbowmock.exceptions.AzureException;
 import com.fgan.azure.util.PropertiesUtil;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.Azure;
@@ -22,7 +23,7 @@ public class NetworkApi extends ApiAzure {
         try {
             return azure.networkInterfaces().getById(networkId);
         } catch (RuntimeException e) {
-            throw new Exception("*", e);
+            throw new AzureException.ResourceNotFound(e);
         }
     }
 

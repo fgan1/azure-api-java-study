@@ -10,7 +10,10 @@ public class AzureCloudUser extends CloudUser {
     private String subscriptionId;
     private String resourceGroupName;
 
-    public AzureCloudUser(String userId, String userName, String clientId, String tenantId, String clientKey, String subscriptionId, String resourceGroupName) {
+    public AzureCloudUser(String userId, String userName, String clientId,
+                          String tenantId, String clientKey, String subscriptionId,
+                          String resourceGroupName) {
+
         super(userId, userName, "");
         this.clientId = clientId;
         this.tenantId = tenantId;

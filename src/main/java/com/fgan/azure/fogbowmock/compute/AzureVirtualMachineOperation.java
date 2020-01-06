@@ -1,6 +1,5 @@
 package com.fgan.azure.fogbowmock.compute;
 
-import cloud.fogbow.common.exceptions.FogbowException;
 import com.fgan.azure.fogbowmock.common.AzureCloudUser;
 import com.fgan.azure.fogbowmock.compute.model.AzureCreateVirtualMachineRef;
 import com.fgan.azure.fogbowmock.compute.model.AzureGetVirtualMachineRef;
@@ -12,11 +11,13 @@ public interface AzureVirtualMachineOperation<T> {
                           AzureCloudUser azureCloudUser)
             throws AzureException.Unauthorized, AzureException.ResourceNotFound;
 
-    String findVirtualMachineSizeName(int memoryRequired, int vCpuRequired, AzureCloudUser azureCloudUser)
-            throws AzureException.Unauthorized, AzureException.NoAvailableResourcesException;
+    String findVirtualMachineSize(int memoryRequired, int vCpuRequired,
+                                  String regionName, AzureCloudUser azureCloudUser)
+            throws AzureException.Unauthorized, AzureException.NoAvailableResources, AzureException.ResourceNotFound;
 
-    AzureGetVirtualMachineRef doGetInstance(String azureInstanceId, AzureCloudUser azureCloudUser)
-            throws AzureException.Unauthorized, AzureException.ResourceNotFound;
+    AzureGetVirtualMachineRef doGetInstance(String azureInstanceId, String regionName,
+                                            AzureCloudUser azureCloudUser)
+            throws AzureException.Unauthorized, AzureException.ResourceNotFound, AzureException.NoAvailableResources;
 
     void doDeleteInstance(String azureInstanceId, AzureCloudUser azureCloudUser)
             throws AzureException.Unauthorized;
