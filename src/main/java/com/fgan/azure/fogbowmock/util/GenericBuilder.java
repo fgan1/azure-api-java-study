@@ -1,5 +1,6 @@
 package com.fgan.azure.fogbowmock.util;
 
+import cloud.fogbow.common.exceptions.InvalidParameterException;
 import org.apache.log4j.Logger;
 
 import java.lang.annotation.ElementType;
@@ -35,20 +36,20 @@ public class GenericBuilder<T> {
         return this;
     }
 
-    public T checkAndBuild() throws GenericBuilderException {
+    public T checkAndBuild() throws InvalidParameterException {
         T object = build();
         checkParametersRequired(object);
         return object;
     }
 
-    private void checkParametersRequired(T object) throws GenericBuilderException {
+    private void checkParametersRequired(T object) throws InvalidParameterException {
         for (Field field : object.getClass().getDeclaredFields()) {
             if (field.isAnnotationPresent(Required.class)) {
                 Object value = getFieldValue(object, field);
                 if (value == null) {
                     String message = String.format(GenericBuilderException.FIELD_REQUIRED_MESSAGE,
                             field.getName(), object.getClass().getSimpleName());
-                    throw new GenericBuilderException(message);
+                    throw new InvalidParameterException(message);
                 }
             }
         }

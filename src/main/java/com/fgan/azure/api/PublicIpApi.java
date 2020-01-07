@@ -20,7 +20,7 @@ public class PublicIpApi {
     public static final String PUBLIC_IP_NAME_DEFAULT = Constants.PREFIX + "publicIp";
 
     public static void attachPublicIdToVm(Azure azure, String virtualMachineId, String publicIpAddressId)
-            throws AzureException.ResourceNotFound {
+            throws AzureException.Unexpected {
 
         VirtualMachine virtualMachine = ComputeApi.getVirtualMachineById(azure, virtualMachineId);
         PublicIPAddress publicIpAddress = getPublicIpAddress(azure, publicIpAddressId);
@@ -31,7 +31,7 @@ public class PublicIpApi {
     }
 
     public static void detachPublicIdToVm(Azure azure, String virtualMachineId)
-            throws AzureException.ResourceNotFound {
+            throws AzureException.Unexpected {
 
         VirtualMachine virtualMachine = ComputeApi.getVirtualMachineById(azure, virtualMachineId);
         NetworkInterface primaryNetworkInterface = virtualMachine.getPrimaryNetworkInterface();

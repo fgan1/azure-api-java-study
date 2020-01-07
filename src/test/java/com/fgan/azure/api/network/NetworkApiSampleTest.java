@@ -13,7 +13,6 @@ import com.microsoft.azure.management.network.NetworkSecurityGroup;
 import com.microsoft.azure.management.resources.fluentcore.model.Indexable;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -31,7 +30,7 @@ public class NetworkApiSampleTest extends TestUtil {
     private NetworkApiSample networkApiSample;
 
     @Before
-    public void setUp() throws IOException, AzureException.Unauthorized {
+    public void setUp() throws IOException, AzureException.Unauthenticated {
         super.setUp();
         this.azureMock = null;
         this.networkApiSample = Mockito.spy(NetworkApiSample.build(azureMock));

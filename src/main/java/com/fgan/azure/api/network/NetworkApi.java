@@ -23,7 +23,7 @@ public class NetworkApi extends ApiAzure {
         try {
             return azure.networkInterfaces().getById(networkId);
         } catch (RuntimeException e) {
-            throw new AzureException.ResourceNotFound(e);
+            throw new AzureException.Unexpected(e);
         }
     }
 

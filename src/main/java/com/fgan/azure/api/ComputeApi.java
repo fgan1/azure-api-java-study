@@ -1,6 +1,5 @@
 package com.fgan.azure.api;
 
-import cloud.fogbow.common.exceptions.FogbowException;
 import com.fgan.azure.Constants;
 import com.fgan.azure.api.network.NetworkApi;
 import com.fgan.azure.fogbowmock.exceptions.AzureException;
@@ -175,11 +174,11 @@ public class ComputeApi {
         return azure.virtualMachines().getById(virtualMachineId);
     }
 
-    public static VirtualMachine getVirtualMachineById(Azure azure, String virtualMachineId) throws AzureException.ResourceNotFound {
+    public static VirtualMachine getVirtualMachineById(Azure azure, String virtualMachineId) throws AzureException.Unexpected {
         try {
             return azure.virtualMachines().getById(virtualMachineId);
         } catch (RuntimeException e) {
-            throw new AzureException.ResourceNotFound(e);
+            throw new AzureException.Unexpected(e);
         }
     }
 

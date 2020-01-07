@@ -1,6 +1,5 @@
 package com.fgan.azure.api;
 
-import cloud.fogbow.common.exceptions.FogbowException;
 import com.fgan.azure.Constants;
 import com.fgan.azure.fogbowmock.exceptions.AzureException;
 import com.fgan.azure.util.GeneralPrintUtil;
@@ -30,7 +29,7 @@ public class VolumeApi {
     }
 
     public static void deleteDiskByVirtualMachine(Azure azure, String virtualMachineId)
-            throws AzureException.ResourceNotFound {
+            throws AzureException.Unexpected {
 
         VirtualMachine virtualMachine = ComputeApi.getVirtualMachineById(azure, virtualMachineId);
         String diskId = virtualMachine.osDiskId();

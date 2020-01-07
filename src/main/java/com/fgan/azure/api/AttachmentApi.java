@@ -17,7 +17,7 @@ import com.microsoft.azure.management.compute.VirtualMachine;
 public class AttachmentApi {
 
     public static void attackDiskByNameFromDefaultVmSync(Azure azure, String diskName)
-            throws AzureException.ResourceNotFound {
+            throws AzureException.Unexpected {
 
         String virtualMachineId = AzureIDBuilderGeneral.buildVirtualMachineId(ComputeApi.VM_NAME_DEFAULT);
         String diskId = AzureIDBuilderGeneral.buildDiskId(diskName);
@@ -31,7 +31,7 @@ public class AttachmentApi {
      * This operation is synchronous and spends more than 1 minute to complete.
      */
     private static void attackDiskSync(Azure azure, String diskId, String virtualMachineId)
-            throws  AzureException.ResourceNotFound {
+            throws AzureException.Unexpected {
 
         VirtualMachine virtualMachine = ComputeApi.getVirtualMachineById(azure, virtualMachineId);
         Disk disk = VolumeApi.getDisk(azure, diskId);
@@ -41,7 +41,7 @@ public class AttachmentApi {
     }
 
     public static void detackDiskByNameFromDefaultVmSync(Azure azure, String diskName)
-            throws AzureException.ResourceNotFound {
+            throws AzureException.Unexpected {
 
         String virtualMachineId = AzureIDBuilderGeneral.buildVirtualMachineId(ComputeApi.VM_NAME_DEFAULT);
         String diskId = AzureIDBuilderGeneral.buildDiskId(diskName);
@@ -55,7 +55,7 @@ public class AttachmentApi {
      * This operation is synchronous and spends more than 30 seconds to complete.
      */
     private static void detackDiskSync(Azure azure, String diskId, String virtualMachineId)
-            throws AzureException.ResourceNotFound {
+            throws AzureException.Unexpected {
 
         VirtualMachine virtualMachine = ComputeApi.getVirtualMachineById(azure, virtualMachineId);
         Disk disk = VolumeApi.getDisk(azure, diskId);

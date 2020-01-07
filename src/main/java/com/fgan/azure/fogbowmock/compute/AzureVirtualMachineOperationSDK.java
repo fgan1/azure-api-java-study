@@ -49,7 +49,7 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
     @Override
     public void doCreateInstance(AzureCreateVirtualMachineRef azureCreateVirtualMachineRef,
                                  AzureCloudUser azureCloudUser)
-            throws AzureException.Unauthorized, AzureException.ResourceNotFound {
+            throws AzureException.Unauthenticated, AzureException.ResourceNotFound {
 
         Azure azure = AzureClientCacheManager.getAzure(azureCloudUser);
 
@@ -117,8 +117,8 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
     @Override
     public String findVirtualMachineSize(int memoryRequired, int vCpuRequired,
                                          String regionName, AzureCloudUser azureCloudUser)
-            throws AzureException.Unauthorized, AzureException.NoAvailableResources,
-            AzureException.ResourceNotFound {
+            throws AzureException.Unauthenticated, AzureException.NoAvailableResources,
+            AzureException.Unexpected {
 
         LOGGER.debug(String.format("Trying to find the VM size that fits with memory(%s) and vCpu(%s) at region %s"
                 , memoryRequired, vCpuRequired, regionName));
@@ -145,7 +145,7 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
     @Override
     public AzureGetVirtualMachineRef doGetInstance(String azureInstanceId, String regionName,
                                                    AzureCloudUser azureCloudUser)
-            throws AzureException.Unauthorized, AzureException.ResourceNotFound,
+            throws AzureException.Unauthenticated, AzureException.Unexpected,
             AzureException.NoAvailableResources {
 
         Azure azure = AzureClientCacheManager.getAzure(azureCloudUser);
@@ -175,7 +175,7 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
 
     @VisibleForTesting
     VirtualMachineSize findVirtualMachineSizeByName(String virtualMachineSizeNameWanted, String regionName, Azure azure)
-            throws AzureException.NoAvailableResources, AzureException.ResourceNotFound {
+            throws AzureException.NoAvailableResources, AzureException.Unexpected {
 
         Region region = Region.findByLabelOrName(regionName);
         PagedList<VirtualMachineSize> virtualMachineSizes = AzureVirtualMachineSDK.getVirtualMachineSizes(azure, region);
@@ -191,7 +191,7 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
      */
     @Override
     public void doDeleteInstance(String azureInstanceId, AzureCloudUser azureCloudUser)
-            throws AzureException.Unauthorized {
+            throws AzureException.Unauthenticated {
 
         Azure azure = AzureClientCacheManager.getAzure(azureCloudUser);
 

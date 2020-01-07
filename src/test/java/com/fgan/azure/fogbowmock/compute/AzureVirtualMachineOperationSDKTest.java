@@ -40,7 +40,7 @@ public class AzureVirtualMachineOperationSDKTest {
     private Azure azure;
 
     @Before
-    public void setUp() throws AzureException.Unauthorized {
+    public void setUp() throws AzureException.Unauthenticated {
         this.azureVirtualMachineOperationSDK =
                 Mockito.spy(new AzureVirtualMachineOperationSDK());
         this.azureCloudUser = Mockito.mock(AzureCloudUser.class);
@@ -52,7 +52,7 @@ public class AzureVirtualMachineOperationSDKTest {
     // it must verify if It returns the right virtual machine size.
     @Test
     public void testFindVirtualMachineSizeByNameSuccessfully()
-            throws AzureException.Unauthorized, AzureException.NoAvailableResources, AzureException.ResourceNotFound {
+            throws AzureException.Unauthenticated, AzureException.NoAvailableResources, AzureException.Unexpected {
         // set up
         mockGetAzureClient();
         String virtualMachineSizeNameExpected = "nameExpected";
@@ -84,7 +84,7 @@ public class AzureVirtualMachineOperationSDKTest {
     // it must verify if It throws a NoAvailableResourcesException exception.
     @Test
     public void testFindVirtualMachineSizeByNameFail()
-            throws AzureException.Unauthorized, AzureException.NoAvailableResources, AzureException.ResourceNotFound {
+            throws AzureException.Unauthenticated, AzureException.NoAvailableResources, AzureException.Unexpected {
         // set up
         mockGetAzureClient();
         String virtualMachineSizeNameExpected = "nameExpected";
@@ -115,7 +115,7 @@ public class AzureVirtualMachineOperationSDKTest {
     // fits in the requirements, it must verify if It returns the smaller virtual machine size.
     @Test
     public void testFindVirtualMachineSizeSuccessfully()
-            throws AzureException.NoAvailableResources, AzureException.Unauthorized, AzureException.ResourceNotFound {
+            throws AzureException.NoAvailableResources, AzureException.Unauthenticated, AzureException.Unexpected {
 
         // set up
         mockGetAzureClient();
@@ -153,7 +153,7 @@ public class AzureVirtualMachineOperationSDKTest {
     // fits in the requirements, it must verify if It throws a NoAvailableResourcesException.
     @Test
     public void testFindVirtualMachineSizeFail()
-            throws AzureException.NoAvailableResources, AzureException.Unauthorized, AzureException.ResourceNotFound {
+            throws AzureException.NoAvailableResources, AzureException.Unauthenticated, AzureException.Unexpected {
 
         // set up
         mockGetAzureClient();
@@ -184,7 +184,7 @@ public class AzureVirtualMachineOperationSDKTest {
     // exception, it must verify if It throws an Unauthorized exception.
     @Test
     public void testFindVirtualMachineSizeFailWhenThrowUnauthorized()
-            throws AzureException.NoAvailableResources, AzureException.Unauthorized, AzureException.ResourceNotFound {
+            throws AzureException.NoAvailableResources, AzureException.Unauthenticated, AzureException.Unexpected {
 
         // set up
         mockGetAzureClientUnauthorized();
@@ -193,7 +193,7 @@ public class AzureVirtualMachineOperationSDKTest {
         String regionName = Region.US_EAST.name();
 
         // verify
-        this.expectedException.expect(AzureException.Unauthorized.class);
+        this.expectedException.expect(AzureException.Unauthenticated.class);
 
         // exercise
         this.azureVirtualMachineOperationSDK.findVirtualMachineSize(memory, vcpu, regionName, this.azureCloudUser);
@@ -265,7 +265,9 @@ public class AzureVirtualMachineOperationSDKTest {
 
     @Ignore
     @Test
-    public void testDoCreateInstanceSuccessfully() throws AzureException.ResourceNotFound, AzureException.Unauthorized {
+    public void testDoCreateInstanceSuccessfully()
+            throws AzureException.Unauthenticated, AzureException.ResourceNotFound {
+
         // set up
         AzureCreateVirtualMachineRef azureCreateVirtualMachineRef = AzureCreateVirtualMachineRef.builder()
                 .build();
@@ -295,15 +297,15 @@ public class AzureVirtualMachineOperationSDKTest {
         };
     }
 
-    private void mockGetAzureClient() throws AzureException.Unauthorized {
+    private void mockGetAzureClient() throws AzureException.Unauthenticated {
         PowerMockito.mockStatic(AzureClientCacheManager.class);
         PowerMockito.when(AzureClientCacheManager.getAzure(Mockito.eq(this.azureCloudUser))).thenReturn(azure);
     }
 
-    private void mockGetAzureClientUnauthorized() throws AzureException.Unauthorized {
+    private void mockGetAzureClientUnauthorized() throws AzureException.Unauthenticated {
         PowerMockito.mockStatic(AzureClientCacheManager.class);
         PowerMockito.when(AzureClientCacheManager.getAzure(Mockito.eq(this.azureCloudUser)))
-                .thenThrow(new AzureException.Unauthorized());
+                .thenThrow(new AzureException.Unauthenticated());
     }
 
     // TODO(chico) - Move it to a utils Class

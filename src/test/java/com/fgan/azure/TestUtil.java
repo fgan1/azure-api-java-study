@@ -20,7 +20,7 @@ public class TestUtil {
     static final String ID_DEFAULT = "id";
 
     @Before
-    public void setUp() throws IOException, AzureException.Unauthorized {
+    public void setUp() throws IOException, AzureException.Unauthenticated {
         PowerMockito.mockStatic(PropertiesUtil.class);
         Properties properties = new Properties();
         PowerMockito.when(PropertiesUtil.getInstance()).thenReturn(properties);

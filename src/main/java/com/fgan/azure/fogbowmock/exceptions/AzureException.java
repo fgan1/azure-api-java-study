@@ -1,24 +1,47 @@
 package com.fgan.azure.fogbowmock.exceptions;
 
+import cloud.fogbow.common.constants.Messages;
+import cloud.fogbow.common.exceptions.InstanceNotFoundException;
+import cloud.fogbow.common.exceptions.NoAvailableResourcesException;
+import cloud.fogbow.common.exceptions.UnauthenticatedUserException;
+import cloud.fogbow.common.exceptions.UnexpectedException;
+
 public class AzureException {
 
-    public static class Unauthorized extends Exception {
-        public Unauthorized() {}
+    public static class Unauthenticated extends UnauthenticatedUserException {
+        public Unauthenticated() {
+            super();
+        }
 
-        public Unauthorized(Throwable var2) {
-            super(var2);
+        public Unauthenticated(Throwable throwable) {
+            super(Messages.Exception.AUTHENTICATION_ERROR, throwable);
         }
     }
 
-    public static class ResourceNotFound extends Exception {
-        public ResourceNotFound(Throwable var2) {
-            super(var2);
+    public static class ResourceNotFound extends InstanceNotFoundException {
+
+        public ResourceNotFound(Throwable throwable) {
+            super(Messages.Exception.INSTANCE_NOT_FOUND, throwable);
+        }
+
+        public ResourceNotFound(String message, Throwable throwable) {
+            super(message, throwable);
         }
     }
 
-    public static class NoAvailableResources extends Exception {
-        public NoAvailableResources(String var1) {
-            super(var1);
+    public static class Unexpected extends UnexpectedException {
+        public Unexpected(Throwable throwable) {
+            super(Messages.Exception.UNEXPECTED, throwable);
+        }
+    }
+
+    public static class NoAvailableResources extends NoAvailableResourcesException {
+        public NoAvailableResources(String message, Throwable throwable) {
+            super(message, throwable);
+        }
+
+        public NoAvailableResources(String message) {
+            super(message);
         }
     }
 

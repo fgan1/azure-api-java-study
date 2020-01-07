@@ -137,7 +137,7 @@ public class AzureComputePluginTest {
     public void testGetNetworkInterfaceIdFail() throws FogbowException {
         // set up
         ComputeOrder computeOrder = Mockito.mock(ComputeOrder.class);
-        List<String> networks = Arrays.asList("", "", "");
+        List<String> networks = Arrays.asList("", "");
         Mockito.when(computeOrder.getNetworkIds()).thenReturn(networks);
 
         // verify

@@ -38,12 +38,12 @@ public class AzureClientCacheManager {
                 });
     }
 
-    public static Azure getAzure(AzureCloudUser azureCloudUser) throws AzureException.Unauthorized {
+    public static Azure getAzure(AzureCloudUser azureCloudUser) throws AzureException.Unauthenticated {
         try {
             LOGGER.debug("Trying to get Azure client in the cache");
             return loadingCache.get(azureCloudUser);
         } catch (ExecutionException e) {
-            throw new AzureException.Unauthorized(e);
+            throw new AzureException.Unauthenticated(e);
         }
     }
 

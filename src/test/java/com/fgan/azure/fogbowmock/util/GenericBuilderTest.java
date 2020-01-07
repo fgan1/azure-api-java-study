@@ -1,5 +1,6 @@
 package com.fgan.azure.fogbowmock.util;
 
+import cloud.fogbow.common.exceptions.InvalidParameterException;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -35,7 +36,8 @@ public class GenericBuilderTest {
     // check parameters method, it must verify if the Object was filled with the right values and
     // does not throw the exception.
     @Test
-    public void testBuildSuccessfullyWhenAllAttributesAreFilledAndWithChecking() throws GenericBuilderException {
+    public void testBuildSuccessfullyWhenAllAttributesAreFilledAndWithChecking()
+            throws InvalidParameterException {
         // set up
         String attributeRequired = "attributeRequired";
         String attributeOptional = "attributeOptional";
@@ -81,7 +83,7 @@ public class GenericBuilderTest {
             GenericObject.builder()
                     .atributeOptional(attributeOptional)
                     .checkAndBuild();
-        } catch (GenericBuilderException e) {
+        } catch (InvalidParameterException e) {
             // verify
             String exceptionMessageExpected = generateExceptionMessage();
             Assert.assertEquals(exceptionMessageExpected, e.getMessage());
@@ -92,7 +94,7 @@ public class GenericBuilderTest {
     // check parameters method, it must verify if it the Object was filled with the right values.
     @Test
     public void testBuildSuccessfullyWhenAnOpitionalAttributeIsNotFieldAndWithChecking()
-            throws GenericBuilderException {
+            throws InvalidParameterException {
 
         // set up
         String attributeRequired = "attributeRequired";

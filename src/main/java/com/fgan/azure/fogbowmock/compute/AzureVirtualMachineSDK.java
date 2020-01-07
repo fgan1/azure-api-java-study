@@ -63,23 +63,23 @@ public class AzureVirtualMachineSDK {
     }
 
     public static PagedList<VirtualMachineSize> getVirtualMachineSizes(Azure azure, Region region)
-            throws AzureException.ResourceNotFound {
+            throws AzureException.Unexpected {
 
         try {
             VirtualMachineSizes sizes = azure.virtualMachines().sizes();
             return sizes.listByRegion(region);
         } catch (RuntimeException e) {
-            throw new AzureException.ResourceNotFound(e);
+            throw new AzureException.Unexpected(e);
         }
     }
 
     public static VirtualMachine getVirtualMachineById(Azure azure, String virtualMachineId)
-            throws AzureException.ResourceNotFound {
+            throws AzureException.Unexpected {
 
         try {
             return azure.virtualMachines().getById(virtualMachineId);
         } catch (RuntimeException e) {
-            throw new AzureException.ResourceNotFound(e);
+            throw new AzureException.Unexpected(e);
         }
     }
 }

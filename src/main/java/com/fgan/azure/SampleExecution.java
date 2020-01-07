@@ -1,6 +1,5 @@
 package com.fgan.azure;
 
-import cloud.fogbow.common.exceptions.FogbowException;
 import com.fgan.azure.api.*;
 import com.fgan.azure.api.identity.IdentityApi;
 import com.fgan.azure.api.image.ImageApiSample;
@@ -122,7 +121,7 @@ public class SampleExecution {
     }
 
     public SampleExecution deleteDiskByVirtualMachine(Azure azure, String virtualMachineId)
-            throws AzureException.ResourceNotFound {
+            throws AzureException.Unexpected {
 
         VolumeApi.deleteDiskByVirtualMachine(azure, virtualMachineId);
         return this.instance;
@@ -150,14 +149,14 @@ public class SampleExecution {
      * Attachment Samples
      */
     public SampleExecution detackDiskByNameFromDefaultVmSync(Azure azure, String id)
-            throws AzureException.ResourceNotFound {
+            throws AzureException.Unexpected {
 
         AttachmentApi.detackDiskByNameFromDefaultVmSync(azure, id);
         return this.instance;
     }
 
     public SampleExecution attackDiskByNameFromDefaultVmSync(Azure azure, String id)
-            throws AzureException.ResourceNotFound {
+            throws AzureException.Unexpected {
 
         AttachmentApi.attackDiskByNameFromDefaultVmSync(azure, id);
         return this.instance;

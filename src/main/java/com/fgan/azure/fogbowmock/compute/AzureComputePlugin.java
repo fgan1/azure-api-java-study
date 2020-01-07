@@ -1,9 +1,7 @@
 package com.fgan.azure.fogbowmock.compute;
 
 import cloud.fogbow.common.exceptions.FogbowException;
-import cloud.fogbow.common.exceptions.InstanceNotFoundException;
 import cloud.fogbow.common.exceptions.UnauthorizedRequestException;
-import cloud.fogbow.common.exceptions.UnexpectedException;
 import cloud.fogbow.common.util.PropertiesUtil;
 import cloud.fogbow.ras.api.http.response.ComputeInstance;
 import cloud.fogbow.ras.api.http.response.InstanceState;
@@ -28,14 +26,12 @@ import java.util.Properties;
 
 public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
 
-    private static final Logger LOGGER = Logger.getLogger(AzureComputePlugin.class);
-
     protected static final String DEFAULT_NETWORK_INTERFACE_NAME_KEY = "default_network_interface_name";
     protected static final String DEFAULT_RESOURCE_GROUP_NAME_KEY = "resource_group_name";
     protected static final String DEFAULT_REGION_NAME_KEY = "region_name";
-
+    private static final Logger LOGGER = Logger.getLogger(AzureComputePlugin.class);
     private final AzureVirtualMachineOperation<AzureVirtualMachineOperationSDK> azureVirtualMachineOperation;
-//    private final DefaultLaunchCommandGenerator launchCommandGenerator;
+    //    private final DefaultLaunchCommandGenerator launchCommandGenerator;
     private final String defaultNetworkInterfaceName;
     private final Properties properties;
     private final String resourceGroupName;
@@ -97,31 +93,17 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
     private String getVirtualMachineSizeName(ComputeOrder computeOrder, AzureCloudUser azureCloudUser)
             throws FogbowException {
 
-        try {
-            return this.azureVirtualMachineOperation.findVirtualMachineSize(
-                    computeOrder.getMemory(), computeOrder.getvCPU(), this.regionName, azureCloudUser);
-        } catch (AzureException.Unauthorized e) {
-            throw new UnauthorizedRequestException("", e);
-        } catch (AzureException.NoAvailableResources e) {
-            throw new InstanceNotFoundException(Messages.Exception.NO_MATCHING_FLAVOR, e);
-        } catch (AzureException.ResourceNotFound e) {
-            throw new UnexpectedException(String.format(Messages.Exception.GENERIC_EXCEPTION, e), e);
-        }
+        return this.azureVirtualMachineOperation.findVirtualMachineSize(
+                computeOrder.getMemory(), computeOrder.getvCPU(), this.regionName, azureCloudUser);
     }
 
     @VisibleForTesting
     String doRequestInstance(ComputeOrder computeOrder, AzureCloudUser azureCloudUser,
-                                     AzureCreateVirtualMachineRef azureCreateVirtualMachineRef)
-            throws UnauthorizedRequestException, InstanceNotFoundException {
+                             AzureCreateVirtualMachineRef azureCreateVirtualMachineRef)
+            throws AzureException.Unauthenticated, AzureException.Unexpected, AzureException.ResourceNotFound {
 
-        try {
-            this.azureVirtualMachineOperation.doCreateInstance(azureCreateVirtualMachineRef, azureCloudUser);
-            return AzureResourceToInstancePolicy.generateFogbowInstanceIdBy(computeOrder);
-        } catch (AzureException.Unauthorized e) {
-            throw new UnauthorizedRequestException("", e);
-        } catch (AzureException.ResourceNotFound e) {
-            throw new InstanceNotFoundException("", e);
-        }
+        this.azureVirtualMachineOperation.doCreateInstance(azureCreateVirtualMachineRef, azureCloudUser);
+        return AzureResourceToInstancePolicy.generateFogbowInstanceIdBy(computeOrder);
     }
 
     private String getUserData() {
@@ -136,7 +118,8 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
         String networkInterfaceId;
         List<String> networkIds = computeOrder.getNetworkIds();
         if (!networkIds.isEmpty()) {
-            if (networkIds.size() > 1) throw new FogbowException("Multiple networks not allowed yed");
+            if (networkIds.size() > 1)
+                throw new FogbowException("Multiple networks not allowed yed");
 
             networkInterfaceId = networkIds.stream().findFirst().get();
         } else {
@@ -165,15 +148,7 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
     AzureGetVirtualMachineRef doRequestInstance(AzureCloudUser azureCloudUser, String azureVirtualMachineId)
             throws FogbowException {
 
-        try {
-            return this.azureVirtualMachineOperation.doGetInstance(azureVirtualMachineId, this.regionName, azureCloudUser);
-        } catch (AzureException.Unauthorized e) {
-            throw new UnauthorizedRequestException("", e);
-        } catch (AzureException.ResourceNotFound e) {
-            throw new InstanceNotFoundException("", e);
-        } catch (AzureException.NoAvailableResources e) {
-            throw new FogbowException("");
-        }
+        return this.azureVirtualMachineOperation.doGetInstance(azureVirtualMachineId, this.regionName, azureCloudUser);
     }
 
     @VisibleForTesting
@@ -205,7 +180,7 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
     private void doDeleteInstance(AzureCloudUser azureCloudUser, String azureVirtualMachineId) throws UnauthorizedRequestException {
         try {
             this.azureVirtualMachineOperation.doDeleteInstance(azureVirtualMachineId, azureCloudUser);
-        } catch (AzureException.Unauthorized e) {
+        } catch (AzureException.Unauthenticated e) {
             throw new UnauthorizedRequestException("", e);
         }
     }
