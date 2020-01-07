@@ -6,16 +6,26 @@ import java.util.function.Supplier;
 
 public class AzureCreateVirtualMachineRef {
 
+    @GenericBuilder.Required
     private AzureGetImageRef azureVirtualMachineImage;
+    @GenericBuilder.Required
     private String networkInterfaceId;
+    @GenericBuilder.Required
     private String resourceGroupName;
+    @GenericBuilder.Required
     private String virtualMachineName;
+    @GenericBuilder.Required
     private String osUserPassword;
+    @GenericBuilder.Required
     private String osComputeName;
+    @GenericBuilder.Required
     private String osUserName;
+    @GenericBuilder.Required
     private String regionName;
     private String userData;
+    @GenericBuilder.Required
     private int diskSize;
+    @GenericBuilder.Required
     private String size;
 
     public static Builder builder() {

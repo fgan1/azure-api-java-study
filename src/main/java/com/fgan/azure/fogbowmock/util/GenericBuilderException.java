@@ -1,6 +1,8 @@
 package com.fgan.azure.fogbowmock.util;
 
-public class GenericBuilderException extends Exception {
+import cloud.fogbow.common.exceptions.FogbowException;
+
+public class GenericBuilderException extends FogbowException {
 
     public static String FIELD_REQUIRED_MESSAGE = "The field %s is required in the class %s.";
 

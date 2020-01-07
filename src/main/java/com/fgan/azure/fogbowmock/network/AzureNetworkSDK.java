@@ -1,4 +1,4 @@
-package com.fgan.azure.fogbowmock.compute;
+package com.fgan.azure.fogbowmock.network;
 
 import com.fgan.azure.fogbowmock.exceptions.AzureException;
 import com.microsoft.azure.management.Azure;

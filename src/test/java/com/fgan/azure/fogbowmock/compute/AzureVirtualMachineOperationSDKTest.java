@@ -41,7 +41,6 @@ public class AzureVirtualMachineOperationSDKTest {
 
     @Before
     public void setUp() throws AzureException.Unauthorized {
-
         this.azureVirtualMachineOperationSDK =
                 Mockito.spy(new AzureVirtualMachineOperationSDK());
         this.azureCloudUser = Mockito.mock(AzureCloudUser.class);

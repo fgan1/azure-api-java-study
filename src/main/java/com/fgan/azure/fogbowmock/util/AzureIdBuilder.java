@@ -37,6 +37,5 @@ public class AzureIdBuilder {
             return String.format(structure, subscriptionId, resourceGroupName, name);
         }
 
-
     }
 }

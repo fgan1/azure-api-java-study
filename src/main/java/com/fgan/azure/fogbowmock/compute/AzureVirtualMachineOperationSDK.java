@@ -7,6 +7,7 @@ import com.fgan.azure.fogbowmock.compute.model.AzureCreateVirtualMachineRef;
 import com.fgan.azure.fogbowmock.compute.model.AzureGetImageRef;
 import com.fgan.azure.fogbowmock.compute.model.AzureGetVirtualMachineRef;
 import com.fgan.azure.fogbowmock.exceptions.AzureException;
+import com.fgan.azure.fogbowmock.network.AzureNetworkSDK;
 import com.fgan.azure.fogbowmock.util.AzureClientCacheManager;
 import com.fgan.azure.fogbowmock.util.AzureSchedulerManager;
 import com.google.common.annotations.VisibleForTesting;
