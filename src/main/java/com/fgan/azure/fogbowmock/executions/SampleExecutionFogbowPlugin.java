@@ -1,6 +1,7 @@
 package com.fgan.azure.fogbowmock.executions;
 
 import cloud.fogbow.common.exceptions.FogbowException;
+import cloud.fogbow.ras.api.http.response.ComputeInstance;
 import cloud.fogbow.ras.core.models.orders.ComputeOrder;
 import com.fgan.azure.api.identity.IdentityApi;
 import com.fgan.azure.fogbowmock.common.AzureCloudUser;
@@ -34,7 +35,19 @@ public class SampleExecutionFogbowPlugin {
         }
 
         public Compute create(ComputeOrder computeOrder) throws FogbowException {
-            this.azureComputePlugin.requestInstance(computeOrder, this.azureCloudUser);
+            String instanceId = this.azureComputePlugin.requestInstance(computeOrder, this.azureCloudUser);
+            computeOrder.setInstanceId(instanceId);
+            return this;
+        }
+
+        public Compute get(ComputeOrder computeOrder) throws FogbowException {
+            ComputeInstance instance = this.azureComputePlugin.getInstance(computeOrder, this.azureCloudUser);
+            System.out.println(instance.toString());
+            return this;
+        }
+
+        public Compute delete(ComputeOrder computeOrder) throws FogbowException {
+            this.azureComputePlugin.deleteInstance(computeOrder, this.azureCloudUser);
             return this;
         }
 

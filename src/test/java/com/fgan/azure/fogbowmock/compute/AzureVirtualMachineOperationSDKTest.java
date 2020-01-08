@@ -199,15 +199,26 @@ public class AzureVirtualMachineOperationSDKTest {
         this.azureVirtualMachineOperationSDK.findVirtualMachineSize(memory, vcpu, regionName, this.azureCloudUser);
     }
 
-    // test case: When calling the subscribeDeleteVirtualMachine method and the completable executes
+    @Test
+    public void testDoDeleteInstance() { Assert.fail(); }
+
+    // test case: When calling the buildDeleteVirtualMachineCompletable method and the completable executes
     // without any error, it must verify if It returns the right logs.
     @Test
-    public void testSubscribeDeleteVirtualMachineSuccessfully() {
+    public void testBuildDeleteVirtualMachineCompletableSuccessfully() {
         // set up
-        Completable virtualMachineCompletable = createSimpleCompletableSuccess();
+        String instanceId = "instanceId";
+        Completable virtualMachineCompletableSuccess = createSimpleCompletableSuccess();
+
+        PowerMockito.mockStatic(AzureVirtualMachineSDK.class);
+        PowerMockito.when(AzureVirtualMachineSDK
+                .buildDeleteVirtualMachineCompletable(Mockito.any(), Mockito.eq(instanceId)))
+                .thenReturn(virtualMachineCompletableSuccess);
 
         // exercise
-        this.azureVirtualMachineOperationSDK.subscribeDeleteVirtualMachine(virtualMachineCompletable);
+        Completable completable = this.azureVirtualMachineOperationSDK
+                .buildDeleteVirtualMachineCompletable(this.azure, instanceId);
+        completable.subscribe();
 
         // verify
         this.loggerAssert
@@ -215,15 +226,23 @@ public class AzureVirtualMachineOperationSDKTest {
                 .assertEqualsInOrder(Level.INFO, Messages.END_DELETE_VM_ASYNC_BEHAVIOUR);
     }
 
-    // test case: When calling the subscribeDeleteVirtualMachine method and the completable executes
-    // with an error, it must verify if It returns the right logs.
+    // test case: When calling the buildDeleteVirtualMachineCompletable method and the completable executes
+    // without any error, it must verify if It returns the right logs.
     @Test
-    public void testSubscribeDeleteVirtualMachineFail() {
+    public void testBuildDeleteVirtualMachineCompletableFail() {
         // set up
-        Completable virtualMachineCompletable = createSimpleCompletableFail();
+        String instanceId = "instanceId";
+
+        Completable virtualMachineCompletableFail = createSimpleCompletableFail();
+        PowerMockito.mockStatic(AzureVirtualMachineSDK.class);
+        PowerMockito.when(AzureVirtualMachineSDK
+                .buildDeleteVirtualMachineCompletable(Mockito.any(), Mockito.eq(instanceId)))
+                .thenReturn(virtualMachineCompletableFail);
 
         // exercise
-        this.azureVirtualMachineOperationSDK.subscribeDeleteVirtualMachine(virtualMachineCompletable);
+        Completable completable = this.azureVirtualMachineOperationSDK
+                .buildDeleteVirtualMachineCompletable(this.azure, instanceId);
+        completable.subscribe();
 
         // verify
         this.loggerAssert
@@ -308,11 +327,9 @@ public class AzureVirtualMachineOperationSDKTest {
                 .thenThrow(new AzureException.Unauthenticated());
     }
 
-    // TODO(chico) - Move it to a utils Class
     private void makeTheObservablesSynchronous() {
         // The scheduler trampolime makes the subscriptions execute in the current thread
-        Mockito.doReturn(Schedulers.trampoline())
-                .when(this.azureVirtualMachineOperationSDK).getScheduler();
+        this.azureVirtualMachineOperationSDK.setScheduler(Schedulers.trampoline());
     }
 
     private Completable createSimpleCompletableSuccess() {

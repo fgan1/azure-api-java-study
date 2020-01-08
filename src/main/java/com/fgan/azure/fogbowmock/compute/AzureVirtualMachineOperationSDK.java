@@ -1,6 +1,5 @@
 package com.fgan.azure.fogbowmock.compute;
 
-import com.fgan.azure.api.ComputeApi;
 import com.fgan.azure.fogbowmock.common.AzureCloudUser;
 import com.fgan.azure.fogbowmock.common.Messages;
 import com.fgan.azure.fogbowmock.compute.model.AzureCreateVirtualMachineRef;
@@ -10,6 +9,7 @@ import com.fgan.azure.fogbowmock.exceptions.AzureException;
 import com.fgan.azure.fogbowmock.network.AzureNetworkSDK;
 import com.fgan.azure.fogbowmock.util.AzureClientCacheManager;
 import com.fgan.azure.fogbowmock.util.AzureSchedulerManager;
+import com.fgan.azure.fogbowmock.volume.AzureVolumeSDK;
 import com.google.common.annotations.VisibleForTesting;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.Azure;
@@ -34,13 +34,14 @@ import java.util.concurrent.ExecutorService;
  */
 public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOperation {
 
-//    private static final Logger LOGGER = Logger.getLogger(AzureVirtualMachineOperationSDK.class);
+    //    private static final Logger LOGGER = Logger.getLogger(AzureVirtualMachineOperationSDK.class);
     private final static org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AzureVirtualMachineOperationSDK.class);
 
-    private final ExecutorService virtualMachineExecutor;
+    private Scheduler scheduler;
 
     public AzureVirtualMachineOperationSDK() {
-        this.virtualMachineExecutor = AzureSchedulerManager.getVirtualMachineExecutor();
+        ExecutorService virtualMachineExecutor = AzureSchedulerManager.getVirtualMachineExecutor();
+        this.scheduler = Schedulers.from(virtualMachineExecutor);
     }
 
     /**
@@ -92,10 +93,8 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
      */
     @VisibleForTesting
     void subscribeCreateVirtualMachine(Observable<Indexable> virtualMachineObservable) {
-        Scheduler scheduler = getScheduler();
-
         virtualMachineObservable
-                .subscribeOn(scheduler)
+                .subscribeOn(this.scheduler)
                 .doOnSubscribe(() -> {
                     LOGGER.info(Messages.START_CREATE_VM_ASYNC_BEHAVIOUR);
                 })
@@ -107,11 +106,6 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
                     LOGGER.info(Messages.END_CREATE_VM_ASYNC_BEHAVIOUR);
                 })
                 .subscribe();
-    }
-
-    @VisibleForTesting
-    Scheduler getScheduler() {
-        return Schedulers.from(this.virtualMachineExecutor);
     }
 
     @Override
@@ -129,7 +123,7 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
                 AzureVirtualMachineSDK.getVirtualMachineSizes(azure, region);
         VirtualMachineSize firstVirtualMachineSize = virtualMachineSizes.stream()
                 .filter((virtualMachineSize) ->
-                                virtualMachineSize.memoryInMB() >= memoryRequired &&
+                        virtualMachineSize.memoryInMB() >= memoryRequired &&
                                 virtualMachineSize.numberOfCores() >= vCpuRequired
                 )
                 .sorted(Comparator
@@ -146,21 +140,24 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
     public AzureGetVirtualMachineRef doGetInstance(String azureInstanceId, String regionName,
                                                    AzureCloudUser azureCloudUser)
             throws AzureException.Unauthenticated, AzureException.Unexpected,
-            AzureException.NoAvailableResources {
+            AzureException.NoAvailableResources, AzureException.ResourceNotFound {
 
         Azure azure = AzureClientCacheManager.getAzure(azureCloudUser);
 
-        VirtualMachine virtualMachine = AzureVirtualMachineSDK.getVirtualMachineById(azure, azureInstanceId);
+        VirtualMachine virtualMachine = AzureVirtualMachineSDK
+                .getVirtualMachineById(azure, azureInstanceId)
+                .orElseThrow(AzureException.ResourceNotFound::new);
         String virtualMachineSizeName = virtualMachine.size().toString();
+        String cloudState = virtualMachine.provisioningState();
+        String id = virtualMachine.name();
+        String name = virtualMachine.name();
+        String primaryPrivateIp = virtualMachine.getPrimaryNetworkInterface().primaryPrivateIP();
+        List<String> ipAddresses = Arrays.asList(primaryPrivateIp);
+
         VirtualMachineSize virtualMachineSize = findVirtualMachineSizeByName(virtualMachineSizeName, regionName, azure);
         int vCPU = virtualMachineSize.numberOfCores();
         int memory = virtualMachineSize.memoryInMB();
         int disk = virtualMachine.osDiskSize();
-        String id = virtualMachine.vmId();
-        String cloudState = virtualMachine.provisioningState();
-        String name = virtualMachine.name();
-        String primaryPrivateIp = virtualMachine.getPrimaryNetworkInterface().primaryPrivateIP();
-        List<String> ipAddresses = Arrays.asList(primaryPrivateIp);
 
         return AzureGetVirtualMachineRef.builder()
                 .cloudState(cloudState)
@@ -191,35 +188,66 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
      */
     @Override
     public void doDeleteInstance(String azureInstanceId, AzureCloudUser azureCloudUser)
-            throws AzureException.Unauthenticated {
+            throws AzureException.Unauthenticated, AzureException.ResourceNotFound, AzureException.Unexpected {
 
         Azure azure = AzureClientCacheManager.getAzure(azureCloudUser);
 
-        Completable completable = ComputeApi.deleteVirtualMachineAsync(azure, azureInstanceId);
+        Completable firstDeleteVirtualMachine = buildDeleteVirtualMachineCompletable(azure, azureInstanceId);
+        Completable secondDeleteVirtualMachineDisk = buildDeleteVirtualMachineDiskCompletable(azure, azureInstanceId);
 
-        subscribeDeleteVirtualMachine(completable);
-    }
-
-    /**
-     * Execute delete Virtual Machine observable and set its behaviour.
-     */
-    @VisibleForTesting
-    void subscribeDeleteVirtualMachine(Completable deleteVirtualMachineCompletable) {
-        Scheduler scheduler = getScheduler();
-
-        deleteVirtualMachineCompletable
-                .subscribeOn(scheduler)
-                .doOnSubscribe((a) -> {
-                    LOGGER.info(Messages.START_DELETE_VM_ASYNC_BEHAVIOUR);
-                })
-                .onErrorComplete((error -> {
-                    LOGGER.error(Messages.ERROR_DELETE_VM_ASYNC_BEHAVIOUR);
-                    return null;
-                }))
-                .doOnCompleted(() -> {
-                    LOGGER.info(Messages.END_DELETE_VM_ASYNC_BEHAVIOUR);
-                })
+        Completable.concat(firstDeleteVirtualMachine, secondDeleteVirtualMachineDisk)
+                .subscribeOn(this.scheduler)
                 .subscribe();
     }
 
+    private Completable buildDeleteVirtualMachineDiskCompletable(Azure azure, String azureInstanceId)
+            throws AzureException.ResourceNotFound, AzureException.Unexpected {
+
+        VirtualMachine virtualMachine = AzureVirtualMachineSDK
+                .getVirtualMachineById(azure, azureInstanceId)
+                .orElseThrow(AzureException.ResourceNotFound::new);
+        String osDiskId = virtualMachine.osDiskId();
+        Completable deleteVirutalMachineDisk = AzureVolumeSDK.buildDeleteDiskCompletable(azure, osDiskId);
+
+        return setDeleteVirtualMachineDiskBehaviour(deleteVirutalMachineDisk);
+    }
+
+    @VisibleForTesting
+    Completable buildDeleteVirtualMachineCompletable(Azure azure, String azureInstanceId) {
+        Completable deleteVirtualMachine = AzureVirtualMachineSDK
+                .buildDeleteVirtualMachineCompletable(azure, azureInstanceId);
+        return setDeleteVirtualMachineBehaviour(deleteVirtualMachine);
+    }
+
+
+    private Completable setDeleteVirtualMachineDiskBehaviour(Completable deleteVirutalMachineDisk) {
+        return deleteVirutalMachineDisk
+                .doOnSubscribe((a) -> {
+                    LOGGER.info(Messages.START_DELETE_DISK_ASYNC_BEHAVIOUR);
+                })
+                .doOnError((error -> {
+                    LOGGER.error(Messages.ERROR_DELETE_VM_ASYNC_BEHAVIOUR);
+                }))
+                .doOnCompleted(() -> {
+                    LOGGER.info(Messages.END_DELETE_VM_ASYNC_BEHAVIOUR);
+                });
+    }
+
+    private Completable setDeleteVirtualMachineBehaviour(Completable deleteVirtualMachineCompletable) {
+        return deleteVirtualMachineCompletable
+                .doOnSubscribe((a) -> {
+                    LOGGER.info(Messages.START_DELETE_VM_ASYNC_BEHAVIOUR);
+                })
+                .doOnError((error -> {
+                    LOGGER.error(Messages.ERROR_DELETE_VM_ASYNC_BEHAVIOUR, error);
+                }))
+                .doOnCompleted(() -> {
+                    LOGGER.info(Messages.END_DELETE_VM_ASYNC_BEHAVIOUR);
+                });
+    }
+
+    @VisibleForTesting
+    void setScheduler(Scheduler scheduler) {
+        this.scheduler = scheduler;
+    }
 }

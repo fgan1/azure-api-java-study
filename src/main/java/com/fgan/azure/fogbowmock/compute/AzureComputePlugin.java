@@ -16,6 +16,7 @@ import com.fgan.azure.fogbowmock.compute.model.AzureGetImageRef;
 import com.fgan.azure.fogbowmock.compute.model.AzureGetVirtualMachineRef;
 import com.fgan.azure.fogbowmock.exceptions.AzureException;
 import com.fgan.azure.fogbowmock.image.AzureImageOperation;
+import com.fgan.azure.fogbowmock.util.AzureGeneralPolicy;
 import com.fgan.azure.fogbowmock.util.AzureIdBuilder;
 import com.fgan.azure.fogbowmock.util.AzureResourceToInstancePolicy;
 import com.google.common.annotations.VisibleForTesting;
@@ -70,7 +71,7 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
         String virtualMachineName = AzureResourceToInstancePolicy.generateAzureResourceNameBy(computeOrder);
         String userData = getUserData();
         String osUserName = computeOrder.getId();
-        String osUserPassword = computeOrder.getId();
+        String osUserPassword = AzureGeneralPolicy.generatePassword();
         String osComputeName = computeOrder.getId();
 
         AzureCreateVirtualMachineRef azureCreateVirtualMachineRef = AzureCreateVirtualMachineRef.builder()
@@ -153,6 +154,7 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
 
     @VisibleForTesting
     ComputeInstance buildComputeInstance(AzureGetVirtualMachineRef azureGetVirtualMachineRef) {
+        // TODO(chico) - check if is necessary put the real ID(Azure)
         String id = azureGetVirtualMachineRef.getId();
         String cloudState = azureGetVirtualMachineRef.getCloudState();
         String name = azureGetVirtualMachineRef.getName();
@@ -177,12 +179,8 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
         doDeleteInstance(azureCloudUser, azureVirtualMachineId);
     }
 
-    private void doDeleteInstance(AzureCloudUser azureCloudUser, String azureVirtualMachineId) throws UnauthorizedRequestException {
-        try {
-            this.azureVirtualMachineOperation.doDeleteInstance(azureVirtualMachineId, azureCloudUser);
-        } catch (AzureException.Unauthenticated e) {
-            throw new UnauthorizedRequestException("", e);
-        }
+    private void doDeleteInstance(AzureCloudUser azureCloudUser, String azureVirtualMachineId) throws FogbowException {
+        this.azureVirtualMachineOperation.doDeleteInstance(azureVirtualMachineId, azureCloudUser);
     }
 
 }

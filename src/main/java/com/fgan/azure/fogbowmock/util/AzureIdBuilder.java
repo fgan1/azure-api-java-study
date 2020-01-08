@@ -10,6 +10,9 @@ public class AzureIdBuilder {
     // /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkInterfaces/{networkInterfaceName}
     private static String NETWORK_INTERFACE_STRUCTURE =
             "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/networkInterfaces/%s";
+    // /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/disks/{diskName}
+    private static String DISK_STRUCTURE =
+            "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/disks/%s";
 
     public static AzureIdBuilderConfigured configure(AzureCloudUser azureCloudUser) {
         return new AzureIdBuilderConfigured(azureCloudUser);
@@ -31,9 +34,13 @@ public class AzureIdBuilder {
             return buildId(NETWORK_INTERFACE_STRUCTURE, networkInterfaceName);
         }
 
+        public String buildDiskId(String diskName) {
+            return buildId(DISK_STRUCTURE, diskName);
+        }
+
         private String buildId(String structure, String name) {
             String subscriptionId = this.azureCloudUser.getSubscriptionId();
-            String resourceGroupName = this.azureCloudUser.getName();
+            String resourceGroupName = this.azureCloudUser.getResourceGroupName();
             return String.format(structure, subscriptionId, resourceGroupName, name);
         }
 

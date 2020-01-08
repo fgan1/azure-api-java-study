@@ -9,4 +9,8 @@ public class Messages {
     public static final String START_DELETE_VM_ASYNC_BEHAVIOUR = "Start asynchronous delete virtual machine";
     public static final String END_DELETE_VM_ASYNC_BEHAVIOUR = "End asynchronous delete virtual machine";
     public static final String ERROR_DELETE_VM_ASYNC_BEHAVIOUR = "Error while deleting virtual machine asynchonously";
+
+    public static final String START_DELETE_DISK_ASYNC_BEHAVIOUR = "Start asynchronous delete disk";
+    public static final String END_DELETE_DISK_ASYNC_BEHAVIOUR = "End asynchronous delete disk";
+    public static final String ERROR_DELETE_DISK_ASYNC_BEHAVIOUR = "Error while deleting disk asynchonously";
 }

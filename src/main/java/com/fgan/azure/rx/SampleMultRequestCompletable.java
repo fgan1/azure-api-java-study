@@ -13,6 +13,8 @@ public class SampleMultRequestCompletable {
         print("Run execution before", SampleMultRequestReadable.class, Thread.currentThread());
 //        runSampleSingleThread();
 //        runSampleMultipleThread();
+//        runSampleInOrder();
+        runSampleInOrderWithError();
         print("Run execution after", SampleMultRequestReadable.class, Thread.currentThread());
         sleepOneSecond();
     }
@@ -33,6 +35,30 @@ public class SampleMultRequestCompletable {
         obsevableTest
                 .subscribeOn(Schedulers.newThread())
                 .subscribe();
+    }
+
+    /*
+    Using a new thread
+     */
+    public static void runSampleInOrder() {
+        Completable first = ObservablesCreator.createRequestNoResponseCompletable("First Request");
+        Completable second = ObservablesCreator.createRequestNoResponseCompletable("Second Request");
+
+        first.doAfterTerminate(() -> {
+            second.subscribe();
+        }).subscribe();
+    }
+
+    /*
+    Using a new thread
+     */
+    public static void runSampleInOrderWithError() {
+        Completable first = Completable.error(new RuntimeException());
+        Completable second = ObservablesCreator.createRequestNoResponseCompletable("Second Request");
+
+        first.doAfterTerminate(() -> {
+            second.subscribe();
+        }).subscribe();
     }
 
     public static Completable createObsevable() {

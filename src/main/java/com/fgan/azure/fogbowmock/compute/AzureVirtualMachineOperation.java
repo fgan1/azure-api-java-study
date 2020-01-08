@@ -17,8 +17,8 @@ public interface AzureVirtualMachineOperation<T> {
 
     AzureGetVirtualMachineRef doGetInstance(String azureInstanceId, String regionName,
                                             AzureCloudUser azureCloudUser)
-            throws AzureException.Unauthenticated, AzureException.Unexpected, AzureException.NoAvailableResources;
+            throws AzureException.Unauthenticated, AzureException.Unexpected, AzureException.NoAvailableResources, AzureException.ResourceNotFound;
 
     void doDeleteInstance(String azureInstanceId, AzureCloudUser azureCloudUser)
-            throws AzureException.Unauthenticated;
+            throws AzureException.Unauthenticated, AzureException.ResourceNotFound, AzureException.Unexpected;
 }

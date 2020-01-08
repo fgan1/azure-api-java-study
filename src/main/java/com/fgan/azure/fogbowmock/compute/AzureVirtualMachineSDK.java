@@ -10,12 +10,14 @@ import com.microsoft.azure.management.compute.VirtualMachineSizes;
 import com.microsoft.azure.management.network.NetworkInterface;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azure.management.resources.fluentcore.model.Indexable;
+import rx.Completable;
 import rx.Observable;
 
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class AzureVirtualMachineSDK {
+public interface AzureVirtualMachineSDK {
 
     // TODO(chico) - Implement tests
     public static Observable<Indexable> buildVirtualMachineObservable(Azure azure, String virtualMachineName, Region region,
@@ -62,7 +64,7 @@ public class AzureVirtualMachineSDK {
         return matcherOffer.find();
     }
 
-    public static PagedList<VirtualMachineSize> getVirtualMachineSizes(Azure azure, Region region)
+    static PagedList<VirtualMachineSize> getVirtualMachineSizes(Azure azure, Region region)
             throws AzureException.Unexpected {
 
         try {
@@ -73,13 +75,17 @@ public class AzureVirtualMachineSDK {
         }
     }
 
-    public static VirtualMachine getVirtualMachineById(Azure azure, String virtualMachineId)
+    static Optional<VirtualMachine> getVirtualMachineById(Azure azure, String virtualMachineId)
             throws AzureException.Unexpected {
 
         try {
-            return azure.virtualMachines().getById(virtualMachineId);
+            return Optional.ofNullable(azure.virtualMachines().getById(virtualMachineId));
         } catch (RuntimeException e) {
             throw new AzureException.Unexpected(e);
         }
+    }
+
+    static Completable buildDeleteVirtualMachineCompletable(Azure azure, String virtualMachineId) {
+        return azure.virtualMachines().deleteByIdAsync(virtualMachineId);
     }
 }

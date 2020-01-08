@@ -20,6 +20,10 @@ public class AzureException {
 
     public static class ResourceNotFound extends InstanceNotFoundException {
 
+        public ResourceNotFound() {
+            super(Messages.Exception.INSTANCE_NOT_FOUND);
+        }
+
         public ResourceNotFound(Throwable throwable) {
             super(Messages.Exception.INSTANCE_NOT_FOUND, throwable);
         }

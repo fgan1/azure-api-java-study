@@ -3,6 +3,7 @@ package com.fgan.azure.fogbowmock.executions;
 import cloud.fogbow.ras.core.models.UserData;
 import cloud.fogbow.ras.core.models.orders.ComputeOrder;
 import com.fgan.azure.fogbowmock.image.AzureImageOperation;
+import com.fgan.azure.fogbowmock.util.AzureResourceToInstancePolicy;
 import com.fgan.azure.util.PropertiesUtil;
 
 import java.util.ArrayList;
@@ -26,12 +27,16 @@ public class AppFogbowPlugin {
                 .toString();
 
         String id = "123456789101112131415";
+        int diskSize = 33;
         ComputeOrder computeOrder = new ComputeOrder(
-                id, null, "", "", "", "", 0, 0, 0, imageId, new ArrayList<UserData>(), "", new ArrayList<>());
+                id, null, "", "", "", "", 0, 0, diskSize, imageId, new ArrayList<UserData>(), "", new ArrayList<>());
+        computeOrder.setInstanceId(AzureResourceToInstancePolicy.generateFogbowInstanceIdBy(computeOrder));
         SampleExecutionFogbowPlugin.start()
                 .compute(filePropertiesPath)
                     .start()
-                        .create(computeOrder)
+//                        .create(computeOrder)
+//                        .get(computeOrder)
+                        .delete(computeOrder)
                     .end()
                 .finish();
 
