@@ -2,7 +2,8 @@ package com.fgan.azure.fogbowmock.executions;
 
 import cloud.fogbow.ras.core.models.UserData;
 import cloud.fogbow.ras.core.models.orders.ComputeOrder;
-import com.fgan.azure.fogbowmock.image.AzureImageOperation;
+import com.fgan.azure.fogbowmock.image.AzureImageOperationSDK;
+import com.fgan.azure.fogbowmock.image.AzureImageOperationUtil;
 import com.fgan.azure.fogbowmock.util.AzureResourceToInstancePolicy;
 import com.fgan.azure.util.PropertiesUtil;
 
@@ -20,9 +21,9 @@ public class AppFogbowPlugin {
 
         String imageId = new StringBuilder()
                 .append("Canonical")
-                .append(AzureImageOperation.IMAGE_SUMMARY_ID_SEPARETOR)
+                .append(AzureImageOperationUtil.IMAGE_SUMMARY_ID_SEPARETOR)
                 .append("UbuntuServer")
-                .append(AzureImageOperation.IMAGE_SUMMARY_ID_SEPARETOR)
+                .append(AzureImageOperationUtil.IMAGE_SUMMARY_ID_SEPARETOR)
                 .append("18.04-LTS")
                 .toString();
 

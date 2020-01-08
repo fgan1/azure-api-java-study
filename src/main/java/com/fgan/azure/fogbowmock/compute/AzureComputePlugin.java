@@ -1,7 +1,6 @@
 package com.fgan.azure.fogbowmock.compute;
 
 import cloud.fogbow.common.exceptions.FogbowException;
-import cloud.fogbow.common.exceptions.UnauthorizedRequestException;
 import cloud.fogbow.common.util.PropertiesUtil;
 import cloud.fogbow.ras.api.http.response.ComputeInstance;
 import cloud.fogbow.ras.api.http.response.InstanceState;
@@ -15,7 +14,9 @@ import com.fgan.azure.fogbowmock.compute.model.AzureCreateVirtualMachineRef;
 import com.fgan.azure.fogbowmock.compute.model.AzureGetImageRef;
 import com.fgan.azure.fogbowmock.compute.model.AzureGetVirtualMachineRef;
 import com.fgan.azure.fogbowmock.exceptions.AzureException;
-import com.fgan.azure.fogbowmock.image.AzureImageOperation;
+import com.fgan.azure.fogbowmock.image.AzureImageOperationSDK;
+import com.fgan.azure.fogbowmock.image.AzureImageOperationUtil;
+import com.fgan.azure.fogbowmock.util.AzureConstants;
 import com.fgan.azure.fogbowmock.util.AzureGeneralPolicy;
 import com.fgan.azure.fogbowmock.util.AzureIdBuilder;
 import com.fgan.azure.fogbowmock.util.AzureResourceToInstancePolicy;
@@ -27,23 +28,19 @@ import java.util.Properties;
 
 public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
 
-    protected static final String DEFAULT_NETWORK_INTERFACE_NAME_KEY = "default_network_interface_name";
-    protected static final String DEFAULT_RESOURCE_GROUP_NAME_KEY = "resource_group_name";
-    protected static final String DEFAULT_REGION_NAME_KEY = "region_name";
     private static final Logger LOGGER = Logger.getLogger(AzureComputePlugin.class);
     private final AzureVirtualMachineOperation<AzureVirtualMachineOperationSDK> azureVirtualMachineOperation;
     //    private final DefaultLaunchCommandGenerator launchCommandGenerator;
     private final String defaultNetworkInterfaceName;
-    private final Properties properties;
     private final String resourceGroupName;
     private final String regionName;
 
     public AzureComputePlugin(String confFilePath) {
-        this.properties = PropertiesUtil.readProperties(confFilePath);
+        Properties properties = PropertiesUtil.readProperties(confFilePath);
 
-        this.defaultNetworkInterfaceName = this.properties.getProperty(DEFAULT_NETWORK_INTERFACE_NAME_KEY);
-        this.resourceGroupName = this.properties.getProperty(DEFAULT_RESOURCE_GROUP_NAME_KEY);
-        this.regionName = this.properties.getProperty(DEFAULT_REGION_NAME_KEY);
+        this.defaultNetworkInterfaceName = properties.getProperty(AzureConstants.DEFAULT_NETWORK_INTERFACE_NAME_KEY);
+        this.resourceGroupName = properties.getProperty(AzureConstants.DEFAULT_RESOURCE_GROUP_NAME_KEY);
+        this.regionName = properties.getProperty(AzureConstants.DEFAULT_REGION_NAME_KEY);
 //        this.launchCommandGenerator = new DefaultLaunchCommandGenerator();
         this.azureVirtualMachineOperation = new AzureVirtualMachineOperationSDK();
     }
@@ -66,8 +63,8 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
 
         String networkInterfaceId = getNetworkInterfaceId(computeOrder, azureCloudUser);
         String virtualMachineSizeName = getVirtualMachineSizeName(computeOrder, azureCloudUser);
-        int diskSize = computeOrder.getDisk();
-        AzureGetImageRef azureVirtualMachineImage = AzureImageOperation.buildAzureVirtualMachineImageBy(computeOrder.getImageId());
+        int diskSize = AzureGeneralPolicy.getDisk(computeOrder);
+        AzureGetImageRef azureVirtualMachineImage = AzureImageOperationUtil.buildAzureVirtualMachineImageBy(computeOrder.getImageId());
         String virtualMachineName = AzureResourceToInstancePolicy.generateAzureResourceNameBy(computeOrder);
         String userData = getUserData();
         String osUserName = computeOrder.getId();

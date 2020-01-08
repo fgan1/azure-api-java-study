@@ -22,20 +22,20 @@ public class AzureImageOperationTest {
 
         String summaryIdExpected = new StringBuilder()
                 .append(publisherExpected)
-                .append(AzureImageOperation.IMAGE_SUMMARY_ID_SEPARETOR)
+                .append(AzureImageOperationUtil.IMAGE_SUMMARY_ID_SEPARETOR)
                 .append(offerExpected)
-                .append(AzureImageOperation.IMAGE_SUMMARY_ID_SEPARETOR)
+                .append(AzureImageOperationUtil.IMAGE_SUMMARY_ID_SEPARETOR)
                 .append(skuExpected)
                 .toString();
 
         String summaryNameExpected = new StringBuilder()
                 .append(offerExpected)
-                .append(AzureImageOperation.IMAGE_SUMMARY_NAME_SEPARETOR)
+                .append(AzureImageOperationUtil.IMAGE_SUMMARY_NAME_SEPARETOR)
                 .append(skuExpected)
                 .toString();
 
         // execute
-        ImageSummary imageSummary = AzureImageOperation.buildImageSummaryBy(azureVirtualMachineImage);
+        ImageSummary imageSummary = AzureImageOperationUtil.buildImageSummaryBy(azureVirtualMachineImage);
 
         // verify
         Assert.assertEquals(summaryIdExpected, imageSummary.getId());
@@ -51,14 +51,14 @@ public class AzureImageOperationTest {
 
         String summaryIdExpected = new StringBuilder()
                 .append(publisherExpected)
-                .append(AzureImageOperation.IMAGE_SUMMARY_ID_SEPARETOR)
+                .append(AzureImageOperationUtil.IMAGE_SUMMARY_ID_SEPARETOR)
                 .append(offerExpected)
-                .append(AzureImageOperation.IMAGE_SUMMARY_ID_SEPARETOR)
+                .append(AzureImageOperationUtil.IMAGE_SUMMARY_ID_SEPARETOR)
                 .append(skuExpected)
                 .toString();
 
         // execute
-        AzureGetImageRef azureVirtualMachineImage = AzureImageOperation.buildAzureVirtualMachineImageBy(summaryIdExpected);
+        AzureGetImageRef azureVirtualMachineImage = AzureImageOperationUtil.buildAzureVirtualMachineImageBy(summaryIdExpected);
 
         // verify
         Assert.assertEquals(publisherExpected, azureVirtualMachineImage.getPublisher());

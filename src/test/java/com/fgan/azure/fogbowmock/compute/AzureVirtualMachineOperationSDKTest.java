@@ -202,6 +202,9 @@ public class AzureVirtualMachineOperationSDKTest {
     @Test
     public void testDoDeleteInstance() { Assert.fail(); }
 
+    @Test
+    public void testBuildDeleteVirtualMachineDiskCompletableSuccessfully() { Assert.fail(); }
+
     // test case: When calling the buildDeleteVirtualMachineCompletable method and the completable executes
     // without any error, it must verify if It returns the right logs.
     @Test

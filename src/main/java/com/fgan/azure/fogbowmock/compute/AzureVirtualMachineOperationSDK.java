@@ -200,7 +200,8 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
                 .subscribe();
     }
 
-    private Completable buildDeleteVirtualMachineDiskCompletable(Azure azure, String azureInstanceId)
+    @VisibleForTesting
+    Completable buildDeleteVirtualMachineDiskCompletable(Azure azure, String azureInstanceId)
             throws AzureException.ResourceNotFound, AzureException.Unexpected {
 
         VirtualMachine virtualMachine = AzureVirtualMachineSDK
