@@ -20,11 +20,11 @@ import java.util.regex.Pattern;
 public interface AzureVirtualMachineSDK {
 
     // TODO(chico) - Implement tests
-    public static Observable<Indexable> buildVirtualMachineObservable(Azure azure, String virtualMachineName, Region region,
-                                                                      String resourceGroupName, NetworkInterface networkInterface,
-                                                                      String imagePublished, String imageOffer, String imageSku,
-                                                                      String osUserName, String osUserPassword, String osComputeName,
-                                                                      String userData, int diskSize, String size) {
+    static Observable<Indexable> buildVirtualMachineObservable(Azure azure, String virtualMachineName, Region region,
+                                                               String resourceGroupName, NetworkInterface networkInterface,
+                                                               String imagePublished, String imageOffer, String imageSku,
+                                                               String osUserName, String osUserPassword, String osComputeName,
+                                                               String userData, int diskSize, String size) {
 
         VirtualMachine.DefinitionStages.WithOS osChoosen = azure.virtualMachines()
                 .define(virtualMachineName)
