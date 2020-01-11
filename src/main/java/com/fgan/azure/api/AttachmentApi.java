@@ -1,5 +1,6 @@
 package com.fgan.azure.api;
 
+import cloud.fogbow.common.exceptions.UnexpectedException;
 import com.fgan.azure.fogbowmock.exceptions.AzureException;
 import com.fgan.azure.util.AzureIDBuilderGeneral;
 import com.microsoft.azure.management.Azure;
@@ -17,7 +18,7 @@ import com.microsoft.azure.management.compute.VirtualMachine;
 public class AttachmentApi {
 
     public static void attackDiskByNameFromDefaultVmSync(Azure azure, String diskName)
-            throws AzureException.Unexpected {
+            throws UnexpectedException {
 
         String virtualMachineId = AzureIDBuilderGeneral.buildVirtualMachineId(ComputeApi.VM_NAME_DEFAULT);
         String diskId = AzureIDBuilderGeneral.buildDiskId(diskName);
@@ -31,7 +32,7 @@ public class AttachmentApi {
      * This operation is synchronous and spends more than 1 minute to complete.
      */
     private static void attackDiskSync(Azure azure, String diskId, String virtualMachineId)
-            throws AzureException.Unexpected {
+            throws UnexpectedException {
 
         VirtualMachine virtualMachine = ComputeApi.getVirtualMachineById(azure, virtualMachineId);
         Disk disk = VolumeApi.getDisk(azure, diskId);
@@ -41,7 +42,7 @@ public class AttachmentApi {
     }
 
     public static void detackDiskByNameFromDefaultVmSync(Azure azure, String diskName)
-            throws AzureException.Unexpected {
+            throws UnexpectedException {
 
         String virtualMachineId = AzureIDBuilderGeneral.buildVirtualMachineId(ComputeApi.VM_NAME_DEFAULT);
         String diskId = AzureIDBuilderGeneral.buildDiskId(diskName);
@@ -55,7 +56,7 @@ public class AttachmentApi {
      * This operation is synchronous and spends more than 30 seconds to complete.
      */
     private static void detackDiskSync(Azure azure, String diskId, String virtualMachineId)
-            throws AzureException.Unexpected {
+            throws UnexpectedException {
 
         VirtualMachine virtualMachine = ComputeApi.getVirtualMachineById(azure, virtualMachineId);
         Disk disk = VolumeApi.getDisk(azure, diskId);

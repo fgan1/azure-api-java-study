@@ -1,5 +1,9 @@
 package com.fgan.azure.fogbowmock.compute;
 
+import cloud.fogbow.common.exceptions.InstanceNotFoundException;
+import cloud.fogbow.common.exceptions.NoAvailableResourcesException;
+import cloud.fogbow.common.exceptions.UnauthenticatedUserException;
+import cloud.fogbow.common.exceptions.UnexpectedException;
 import com.fgan.azure.fogbowmock.common.AzureCloudUser;
 import com.fgan.azure.fogbowmock.common.Messages;
 import com.fgan.azure.fogbowmock.compute.model.AzureCreateVirtualMachineRef;
@@ -50,7 +54,7 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
     @Override
     public void doCreateInstance(AzureCreateVirtualMachineRef azureCreateVirtualMachineRef,
                                  AzureCloudUser azureCloudUser)
-            throws AzureException.Unauthenticated, AzureException.ResourceNotFound {
+            throws UnauthenticatedUserException, InstanceNotFoundException {
 
         Azure azure = AzureClientCacheManager.getAzure(azureCloudUser);
 
@@ -63,7 +67,7 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
     @VisibleForTesting
     Observable<Indexable> buildAzureVirtualMachineObservable(
             AzureCreateVirtualMachineRef azureCreateVirtualMachineRef,
-            Azure azure) throws AzureException.ResourceNotFound {
+            Azure azure) throws InstanceNotFoundException {
 
         String networkInterfaceId = azureCreateVirtualMachineRef.getNetworkInterfaceId();
         NetworkInterface networkInterface = AzureNetworkSDK.getNetworkInterface(azure, networkInterfaceId);
@@ -111,8 +115,8 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
     @Override
     public String findVirtualMachineSize(int memoryRequired, int vCpuRequired,
                                          String regionName, AzureCloudUser azureCloudUser)
-            throws AzureException.Unauthenticated, AzureException.NoAvailableResources,
-            AzureException.Unexpected {
+            throws UnauthenticatedUserException, NoAvailableResourcesException,
+            UnexpectedException {
 
         LOGGER.debug(String.format("Trying to find the VM size that fits with memory(%s) and vCpu(%s) at region %s"
                 , memoryRequired, vCpuRequired, regionName));
@@ -130,7 +134,7 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
                         .comparingInt(VirtualMachineSize::memoryInMB)
                         .thenComparingInt(VirtualMachineSize::numberOfCores))
                 .findFirst()
-                .orElseThrow(() -> new AzureException.NoAvailableResources(
+                .orElseThrow(() -> new NoAvailableResourcesException(
                         "There is no virtual machine that fits with the requirements"));
 
         return firstVirtualMachineSize.name();
@@ -138,14 +142,14 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
 
     @Override
     public AzureGetVirtualMachineRef doGetInstance(String azureInstanceId, AzureCloudUser azureCloudUser)
-            throws AzureException.Unauthenticated, AzureException.Unexpected,
-            AzureException.NoAvailableResources, AzureException.ResourceNotFound {
+            throws UnauthenticatedUserException, UnexpectedException,
+            NoAvailableResourcesException, InstanceNotFoundException {
 
         Azure azure = AzureClientCacheManager.getAzure(azureCloudUser);
 
         VirtualMachine virtualMachine = AzureVirtualMachineSDK
                 .getVirtualMachineById(azure, azureInstanceId)
-                .orElseThrow(AzureException.ResourceNotFound::new);
+                .orElseThrow(InstanceNotFoundException::new);
         String virtualMachineSizeName = virtualMachine.size().toString();
         String cloudState = virtualMachine.provisioningState();
         String id = virtualMachine.name();
@@ -172,14 +176,14 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
 
     @VisibleForTesting
     VirtualMachineSize findVirtualMachineSizeByName(String virtualMachineSizeNameWanted, String regionName, Azure azure)
-            throws AzureException.NoAvailableResources, AzureException.Unexpected {
+            throws NoAvailableResourcesException, UnexpectedException {
 
         Region region = Region.findByLabelOrName(regionName);
         PagedList<VirtualMachineSize> virtualMachineSizes = AzureVirtualMachineSDK.getVirtualMachineSizes(azure, region);
         return virtualMachineSizes.stream()
                 .filter((virtualMachineSize) -> virtualMachineSizeNameWanted.equals(virtualMachineSize.name()))
                 .findFirst()
-                .orElseThrow(() -> new AzureException.NoAvailableResources(
+                .orElseThrow(() -> new NoAvailableResourcesException(
                         "There is no virtual machine that fits with the requirements"));
     }
 
@@ -188,7 +192,7 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
      */
     @Override
     public void doDeleteInstance(String azureInstanceId, AzureCloudUser azureCloudUser)
-            throws AzureException.Unauthenticated, AzureException.ResourceNotFound, AzureException.Unexpected {
+            throws UnauthenticatedUserException, InstanceNotFoundException, UnexpectedException {
 
         Azure azure = AzureClientCacheManager.getAzure(azureCloudUser);
 
@@ -202,11 +206,11 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
 
     @VisibleForTesting
     Completable buildDeleteVirtualMachineDiskCompletable(Azure azure, String azureInstanceId)
-            throws AzureException.ResourceNotFound, AzureException.Unexpected {
+            throws InstanceNotFoundException, UnexpectedException {
 
         VirtualMachine virtualMachine = AzureVirtualMachineSDK
                 .getVirtualMachineById(azure, azureInstanceId)
-                .orElseThrow(AzureException.ResourceNotFound::new);
+                .orElseThrow(InstanceNotFoundException::new);
         String osDiskId = virtualMachine.osDiskId();
         Completable deleteVirutalMachineDisk = AzureVolumeSDK.buildDeleteDiskCompletable(azure, osDiskId);
 

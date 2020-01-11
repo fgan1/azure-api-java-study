@@ -1,7 +1,6 @@
 package com.fgan.azure.fogbowmock.compute;
 
-import cloud.fogbow.common.exceptions.FogbowException;
-import cloud.fogbow.common.exceptions.InvalidParameterException;
+import cloud.fogbow.common.exceptions.*;
 import cloud.fogbow.common.util.PropertiesUtil;
 import cloud.fogbow.ras.api.http.response.ComputeInstance;
 import cloud.fogbow.ras.api.http.response.InstanceState;
@@ -99,7 +98,7 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
     @VisibleForTesting
     String doRequestInstance(ComputeOrder computeOrder, AzureCloudUser azureCloudUser,
                              AzureCreateVirtualMachineRef azureCreateVirtualMachineRef)
-            throws AzureException.Unauthenticated, AzureException.Unexpected, AzureException.ResourceNotFound, InvalidParameterException {
+            throws UnauthenticatedUserException, UnexpectedException, InstanceNotFoundException, InvalidParameterException {
 
         this.azureVirtualMachineOperation.doCreateInstance(azureCreateVirtualMachineRef, azureCloudUser);
         return AzureResourceToInstancePolicy.generateFogbowInstanceIdBy(computeOrder, azureCloudUser,
@@ -136,19 +135,12 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
             throws FogbowException {
 
         LOGGER.info(String.format(Messages.Info.GETTING_INSTANCE_S, computeOrder.getInstanceId()));
-        String azureVirtualMachineId = AzureIdBuilder
-                .configure(azureCloudUser)
-                .buildVirtualMachineId(computeOrder.getInstanceId());
+        String azureVirtualMachineId = computeOrder.getInstanceId();
 
-        AzureGetVirtualMachineRef azureGetVirtualMachineRef = doRequestInstance(azureCloudUser, azureVirtualMachineId);
+        AzureGetVirtualMachineRef azureGetVirtualMachineRef = this.azureVirtualMachineOperation
+                .doGetInstance(azureVirtualMachineId, azureCloudUser);
 
         return buildComputeInstance(azureGetVirtualMachineRef);
-    }
-
-    AzureGetVirtualMachineRef doRequestInstance(AzureCloudUser azureCloudUser, String azureVirtualMachineId)
-            throws FogbowException {
-
-        return this.azureVirtualMachineOperation.doGetInstance(azureVirtualMachineId, azureCloudUser);
     }
 
     @VisibleForTesting
@@ -171,14 +163,7 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
 
         LOGGER.info(String.format(Messages.Info.DELETING_INSTANCE_S, computeOrder.getInstanceId()));
 
-        String azureVirtualMachineId = AzureIdBuilder
-                .configure(azureCloudUser)
-                .buildVirtualMachineId(computeOrder.getInstanceId());
-
-        doDeleteInstance(azureCloudUser, azureVirtualMachineId);
-    }
-
-    private void doDeleteInstance(AzureCloudUser azureCloudUser, String azureVirtualMachineId) throws FogbowException {
+        String azureVirtualMachineId = computeOrder.getInstanceId();
         this.azureVirtualMachineOperation.doDeleteInstance(azureVirtualMachineId, azureCloudUser);
     }
 

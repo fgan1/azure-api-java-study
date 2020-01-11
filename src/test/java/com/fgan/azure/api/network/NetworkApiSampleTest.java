@@ -1,6 +1,7 @@
 package com.fgan.azure.api.network;
 
 import ch.qos.logback.classic.Level;
+import cloud.fogbow.common.exceptions.UnauthenticatedUserException;
 import com.fgan.azure.LoggerAssert;
 import com.fgan.azure.TestUtil;
 import com.fgan.azure.api.network.exceptions.CreateNetworkException;
@@ -30,7 +31,7 @@ public class NetworkApiSampleTest extends TestUtil {
     private NetworkApiSample networkApiSample;
 
     @Before
-    public void setUp() throws IOException, AzureException.Unauthenticated {
+    public void setUp() throws IOException, UnauthenticatedUserException {
         super.setUp();
         this.azureMock = null;
         this.networkApiSample = Mockito.spy(NetworkApiSample.build(azureMock));

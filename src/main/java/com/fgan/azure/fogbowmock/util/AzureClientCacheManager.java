@@ -1,6 +1,7 @@
 package com.fgan.azure.fogbowmock.util;
 
 import cloud.fogbow.common.exceptions.FogbowException;
+import cloud.fogbow.common.exceptions.UnauthenticatedUserException;
 import com.fgan.azure.fogbowmock.common.AzureCloudUser;
 import com.fgan.azure.fogbowmock.exceptions.AzureException;
 import com.google.common.cache.CacheBuilder;
@@ -38,12 +39,12 @@ public class AzureClientCacheManager {
                 });
     }
 
-    public static Azure getAzure(AzureCloudUser azureCloudUser) throws AzureException.Unauthenticated {
+    public static Azure getAzure(AzureCloudUser azureCloudUser) throws UnauthenticatedUserException {
         try {
             LOGGER.debug("Trying to get Azure client in the cache");
             return loadingCache.get(azureCloudUser);
         } catch (ExecutionException e) {
-            throw new AzureException.Unauthenticated(e);
+            throw new UnauthenticatedUserException(e.getMessage(), e);
         }
     }
 

@@ -1,5 +1,6 @@
 package com.fgan.azure.fogbowmock.compute;
 
+import cloud.fogbow.common.exceptions.UnexpectedException;
 import com.fgan.azure.fogbowmock.exceptions.AzureException;
 import com.google.common.annotations.VisibleForTesting;
 import com.microsoft.azure.PagedList;
@@ -65,23 +66,23 @@ public interface AzureVirtualMachineSDK {
     }
 
     static PagedList<VirtualMachineSize> getVirtualMachineSizes(Azure azure, Region region)
-            throws AzureException.Unexpected {
+            throws UnexpectedException {
 
         try {
             VirtualMachineSizes sizes = azure.virtualMachines().sizes();
             return sizes.listByRegion(region);
         } catch (RuntimeException e) {
-            throw new AzureException.Unexpected(e);
+            throw new UnexpectedException(e.getMessage(), e);
         }
     }
 
     static Optional<VirtualMachine> getVirtualMachineById(Azure azure, String virtualMachineId)
-            throws AzureException.Unexpected {
+            throws UnexpectedException {
 
         try {
             return Optional.ofNullable(azure.virtualMachines().getById(virtualMachineId));
         } catch (RuntimeException e) {
-            throw new AzureException.Unexpected(e);
+            throw new UnexpectedException(e.getMessage(), e);
         }
     }
 

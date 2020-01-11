@@ -1,5 +1,6 @@
 package com.fgan.azure.fogbowmock.network;
 
+import cloud.fogbow.common.exceptions.InstanceNotFoundException;
 import com.fgan.azure.fogbowmock.exceptions.AzureException;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.network.Network;
@@ -12,12 +13,12 @@ import rx.Observable;
 public class AzureNetworkSDK {
 
     public static NetworkInterface getNetworkInterface(Azure azure, String azureNetworkInterfaceId)
-            throws AzureException.ResourceNotFound {
+            throws InstanceNotFoundException {
 
         try {
             return azure.networkInterfaces().getById(azureNetworkInterfaceId);
         } catch (RuntimeException e) {
-            throw new AzureException.ResourceNotFound(e);
+            throw new InstanceNotFoundException(e.getMessage(), e);
         }
     }
 

@@ -1,5 +1,6 @@
 package com.fgan.azure.api.network;
 
+import cloud.fogbow.common.exceptions.UnexpectedException;
 import com.fgan.azure.api.ApiAzure;
 import com.fgan.azure.fogbowmock.exceptions.AzureException;
 import com.fgan.azure.util.PropertiesUtil;
@@ -23,7 +24,7 @@ public class NetworkApi extends ApiAzure {
         try {
             return azure.networkInterfaces().getById(networkId);
         } catch (RuntimeException e) {
-            throw new AzureException.Unexpected(e);
+            throw new UnexpectedException(e.getMessage(), e);
         }
     }
 

@@ -1,11 +1,14 @@
 package com.fgan.azure.fogbowmock.compute;
 
 import ch.qos.logback.classic.Level;
+import cloud.fogbow.common.exceptions.InstanceNotFoundException;
+import cloud.fogbow.common.exceptions.NoAvailableResourcesException;
+import cloud.fogbow.common.exceptions.UnauthenticatedUserException;
+import cloud.fogbow.common.exceptions.UnexpectedException;
 import com.fgan.azure.LoggerAssert;
 import com.fgan.azure.fogbowmock.common.AzureCloudUser;
 import com.fgan.azure.fogbowmock.common.Messages;
 import com.fgan.azure.fogbowmock.compute.model.AzureCreateVirtualMachineRef;
-import com.fgan.azure.fogbowmock.exceptions.AzureException;
 import com.fgan.azure.fogbowmock.util.AzureClientCacheManager;
 import com.microsoft.azure.Page;
 import com.microsoft.azure.PagedList;
@@ -40,7 +43,7 @@ public class AzureVirtualMachineOperationSDKTest {
     private Azure azure;
 
     @Before
-    public void setUp() throws AzureException.Unauthenticated {
+    public void setUp() throws UnauthenticatedUserException {
         this.azureVirtualMachineOperationSDK =
                 Mockito.spy(new AzureVirtualMachineOperationSDK());
         this.azureCloudUser = Mockito.mock(AzureCloudUser.class);
@@ -52,7 +55,7 @@ public class AzureVirtualMachineOperationSDKTest {
     // it must verify if It returns the right virtual machine size.
     @Test
     public void testFindVirtualMachineSizeByNameSuccessfully()
-            throws AzureException.Unauthenticated, AzureException.NoAvailableResources, AzureException.Unexpected {
+            throws UnauthenticatedUserException, NoAvailableResourcesException, UnexpectedException {
         // set up
         mockGetAzureClient();
         String virtualMachineSizeNameExpected = "nameExpected";
@@ -84,7 +87,7 @@ public class AzureVirtualMachineOperationSDKTest {
     // it must verify if It throws a NoAvailableResourcesException exception.
     @Test
     public void testFindVirtualMachineSizeByNameFail()
-            throws AzureException.Unauthenticated, AzureException.NoAvailableResources, AzureException.Unexpected {
+            throws UnauthenticatedUserException, NoAvailableResourcesException, UnexpectedException {
         // set up
         mockGetAzureClient();
         String virtualMachineSizeNameExpected = "nameExpected";
@@ -103,7 +106,7 @@ public class AzureVirtualMachineOperationSDKTest {
                 .thenReturn(virtualMachines);
 
         // verify
-        this.expectedException.expect(AzureException.NoAvailableResources.class);
+        this.expectedException.expect(NoAvailableResourcesException.class);
 
         // exercise
         this.azureVirtualMachineOperationSDK
@@ -115,7 +118,7 @@ public class AzureVirtualMachineOperationSDKTest {
     // fits in the requirements, it must verify if It returns the smaller virtual machine size.
     @Test
     public void testFindVirtualMachineSizeSuccessfully()
-            throws AzureException.NoAvailableResources, AzureException.Unauthenticated, AzureException.Unexpected {
+            throws NoAvailableResourcesException, UnauthenticatedUserException, UnexpectedException {
 
         // set up
         mockGetAzureClient();
@@ -153,7 +156,7 @@ public class AzureVirtualMachineOperationSDKTest {
     // fits in the requirements, it must verify if It throws a NoAvailableResourcesException.
     @Test
     public void testFindVirtualMachineSizeFail()
-            throws AzureException.NoAvailableResources, AzureException.Unauthenticated, AzureException.Unexpected {
+            throws NoAvailableResourcesException, UnauthenticatedUserException, UnexpectedException {
 
         // set up
         mockGetAzureClient();
@@ -174,7 +177,7 @@ public class AzureVirtualMachineOperationSDKTest {
                 .thenReturn(virtualMachines);
 
         // verify
-        this.expectedException.expect(AzureException.NoAvailableResources.class);
+        this.expectedException.expect(NoAvailableResourcesException.class);
 
         // exercise
         this.azureVirtualMachineOperationSDK.findVirtualMachineSize(memory, vcpu, regionName, this.azureCloudUser);
@@ -184,7 +187,7 @@ public class AzureVirtualMachineOperationSDKTest {
     // exception, it must verify if It throws an Unauthorized exception.
     @Test
     public void testFindVirtualMachineSizeFailWhenThrowUnauthorized()
-            throws AzureException.NoAvailableResources, AzureException.Unauthenticated, AzureException.Unexpected {
+            throws NoAvailableResourcesException, UnauthenticatedUserException, UnexpectedException {
 
         // set up
         mockGetAzureClientUnauthorized();
@@ -193,7 +196,7 @@ public class AzureVirtualMachineOperationSDKTest {
         String regionName = Region.US_EAST.name();
 
         // verify
-        this.expectedException.expect(AzureException.Unauthenticated.class);
+        this.expectedException.expect(UnauthenticatedUserException.class);
 
         // exercise
         this.azureVirtualMachineOperationSDK.findVirtualMachineSize(memory, vcpu, regionName, this.azureCloudUser);
@@ -288,7 +291,7 @@ public class AzureVirtualMachineOperationSDKTest {
     @Ignore
     @Test
     public void testDoCreateInstanceSuccessfully()
-            throws AzureException.Unauthenticated, AzureException.ResourceNotFound {
+            throws UnauthenticatedUserException, InstanceNotFoundException {
 
         // set up
         AzureCreateVirtualMachineRef azureCreateVirtualMachineRef = AzureCreateVirtualMachineRef.builder()
@@ -319,15 +322,15 @@ public class AzureVirtualMachineOperationSDKTest {
         };
     }
 
-    private void mockGetAzureClient() throws AzureException.Unauthenticated {
+    private void mockGetAzureClient() throws UnauthenticatedUserException {
         PowerMockito.mockStatic(AzureClientCacheManager.class);
         PowerMockito.when(AzureClientCacheManager.getAzure(Mockito.eq(this.azureCloudUser))).thenReturn(azure);
     }
 
-    private void mockGetAzureClientUnauthorized() throws AzureException.Unauthenticated {
+    private void mockGetAzureClientUnauthorized() throws UnauthenticatedUserException {
         PowerMockito.mockStatic(AzureClientCacheManager.class);
         PowerMockito.when(AzureClientCacheManager.getAzure(Mockito.eq(this.azureCloudUser)))
-                .thenThrow(new AzureException.Unauthenticated());
+                .thenThrow(new UnauthenticatedUserException());
     }
 
     private void makeTheObservablesSynchronous() {

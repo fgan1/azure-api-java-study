@@ -1,5 +1,9 @@
 package com.fgan.azure.fogbowmock.compute;
 
+import cloud.fogbow.common.exceptions.InstanceNotFoundException;
+import cloud.fogbow.common.exceptions.NoAvailableResourcesException;
+import cloud.fogbow.common.exceptions.UnauthenticatedUserException;
+import cloud.fogbow.common.exceptions.UnexpectedException;
 import com.fgan.azure.fogbowmock.common.AzureCloudUser;
 import com.fgan.azure.fogbowmock.compute.model.AzureCreateVirtualMachineRef;
 import com.fgan.azure.fogbowmock.compute.model.AzureGetVirtualMachineRef;
@@ -9,15 +13,18 @@ public interface AzureVirtualMachineOperation<T> {
 
     void doCreateInstance(AzureCreateVirtualMachineRef azureCreateVirtualMachineRef,
                           AzureCloudUser azureCloudUser)
-            throws AzureException.Unauthenticated, AzureException.Unexpected, AzureException.ResourceNotFound;
+            throws UnauthenticatedUserException, UnexpectedException, InstanceNotFoundException,
+            InstanceNotFoundException;
 
     String findVirtualMachineSize(int memoryRequired, int vCpuRequired,
                                   String regionName, AzureCloudUser azureCloudUser)
-            throws AzureException.Unauthenticated, AzureException.NoAvailableResources, AzureException.Unexpected;
+            throws UnauthenticatedUserException, NoAvailableResourcesException, UnexpectedException;
 
     AzureGetVirtualMachineRef doGetInstance(String azureInstanceId, AzureCloudUser azureCloudUser)
-            throws AzureException.Unauthenticated, AzureException.Unexpected, AzureException.NoAvailableResources, AzureException.ResourceNotFound;
+            throws UnauthenticatedUserException, UnexpectedException, NoAvailableResourcesException,
+            InstanceNotFoundException, InstanceNotFoundException;
 
     void doDeleteInstance(String azureInstanceId, AzureCloudUser azureCloudUser)
-            throws AzureException.Unauthenticated, AzureException.ResourceNotFound, AzureException.Unexpected;
+            throws UnauthenticatedUserException, InstanceNotFoundException, UnexpectedException,
+            InstanceNotFoundException;
 }

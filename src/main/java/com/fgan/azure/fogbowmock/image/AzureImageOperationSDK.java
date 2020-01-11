@@ -1,5 +1,8 @@
 package com.fgan.azure.fogbowmock.image;
 
+import cloud.fogbow.common.exceptions.NoAvailableResourcesException;
+import cloud.fogbow.common.exceptions.UnauthenticatedUserException;
+import cloud.fogbow.common.exceptions.UnexpectedException;
 import com.fgan.azure.fogbowmock.common.AzureCloudUser;
 import com.fgan.azure.fogbowmock.compute.model.AzureGetImageRef;
 import com.fgan.azure.fogbowmock.exceptions.AzureException;
@@ -17,7 +20,7 @@ import java.util.List;
 public class AzureImageOperationSDK implements AzureImageOperation {
 
     private static List<AzureGetImageRef> recoverImages(Azure azure, Region region, List<String> allowedPublishersNames)
-            throws AzureException.Unexpected, AzureException.NoAvailableResources {
+            throws UnexpectedException, NoAvailableResourcesException {
 
         List<AzureGetImageRef> azureVirtualMachineImages = new ArrayList<>();
         PagedList<VirtualMachinePublisher> imagePublishersByRegion = AzureVirtualMachineImageSDK.getImagePublishersByRegion(azure, region);
@@ -38,7 +41,7 @@ public class AzureImageOperationSDK implements AzureImageOperation {
                             });
                 });
 
-        if (azureVirtualMachineImages.isEmpty()) throw new AzureException.NoAvailableResources("");
+        if (azureVirtualMachineImages.isEmpty()) throw new NoAvailableResourcesException("");
 
         return azureVirtualMachineImages;
     }
@@ -47,7 +50,7 @@ public class AzureImageOperationSDK implements AzureImageOperation {
     public List<AzureGetImageRef> getImagesRef(String regionName,
                                                List<String> allowedPublishersNames,
                                                AzureCloudUser azureCloudUser)
-            throws AzureException.Unexpected, AzureException.NoAvailableResources, AzureException.Unauthenticated {
+            throws UnexpectedException, NoAvailableResourcesException, UnauthenticatedUserException {
 
         Azure azure = AzureClientCacheManager.getAzure(azureCloudUser);
 

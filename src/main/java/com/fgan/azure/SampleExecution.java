@@ -1,5 +1,6 @@
 package com.fgan.azure;
 
+import cloud.fogbow.common.exceptions.UnexpectedException;
 import com.fgan.azure.api.*;
 import com.fgan.azure.api.identity.IdentityApi;
 import com.fgan.azure.api.image.ImageApiSample;
@@ -121,7 +122,7 @@ public class SampleExecution {
     }
 
     public SampleExecution deleteDiskByVirtualMachine(Azure azure, String virtualMachineId)
-            throws AzureException.Unexpected {
+            throws UnexpectedException {
 
         VolumeApi.deleteDiskByVirtualMachine(azure, virtualMachineId);
         return this.instance;
@@ -149,14 +150,14 @@ public class SampleExecution {
      * Attachment Samples
      */
     public SampleExecution detackDiskByNameFromDefaultVmSync(Azure azure, String id)
-            throws AzureException.Unexpected {
+            throws UnexpectedException {
 
         AttachmentApi.detackDiskByNameFromDefaultVmSync(azure, id);
         return this.instance;
     }
 
     public SampleExecution attackDiskByNameFromDefaultVmSync(Azure azure, String id)
-            throws AzureException.Unexpected {
+            throws UnexpectedException {
 
         AttachmentApi.attackDiskByNameFromDefaultVmSync(azure, id);
         return this.instance;
