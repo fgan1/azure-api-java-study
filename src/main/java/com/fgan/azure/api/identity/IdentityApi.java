@@ -77,7 +77,9 @@ public class IdentityApi {
         String clientKey = credentials.getProperty(AzureClientCacheManager.CredentialSettings.CLIENT_KEY.toString());
         String subscriptionId = credentials.getProperty(AzureClientCacheManager.CredentialSettings.SUBSCRIPTION_ID.toString());;
         String resourceGroupName =  credentials.getProperty(AzureClientCacheManager.CredentialSettings.RESOURCE_GROUP_NAME.toString());
-        return new AzureCloudUser("", "", clientId, tenantId, clientKey, subscriptionId, resourceGroupName);
+        String regionName =  credentials.getProperty(AzureClientCacheManager.CredentialSettings.REGION_NAME.toString());
+        return new AzureCloudUser("", "", clientId, tenantId,
+                clientKey, subscriptionId, resourceGroupName, regionName);
     }
 
     /**

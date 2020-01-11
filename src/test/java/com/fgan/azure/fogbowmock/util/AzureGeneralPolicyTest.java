@@ -31,7 +31,7 @@ public class AzureGeneralPolicyTest {
     }
 
     // test case: When calling the getDisk method with disk value invalid in the compute order,
-    // it must verify if it throws an excepyion.
+    // it must verify if it throws an InvalidParameterException.
     @Test
     public void testGetDiskFail() throws InvalidParameterException {
         // set up

@@ -87,6 +87,7 @@ public class AzureClientCacheManager {
     public enum CredentialSettings {
         SUBSCRIPTION_ID("subscription"),
         RESOURCE_GROUP_NAME("resourceGroupName"),
+        REGION_NAME("regionName"),
         TENANT_ID("tenant"),
         CLIENT_ID("client"),
         CLIENT_KEY("key"),

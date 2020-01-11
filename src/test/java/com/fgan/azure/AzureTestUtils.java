@@ -10,6 +10,7 @@ import java.io.File;
 public class AzureTestUtils {
 
     private static final String SUBSCRIPTION_ID_DEFAULT = "subscriptionId";
+    private static final String RESOURCE_GROUP_NAME_DEFAULT = "resourceGroupName";
     private static String CLOUD_NAME = "azure";
 
     public static String AZURE_CONF_FILE_PATH = HomeDir.getPath()
@@ -19,6 +20,7 @@ public class AzureTestUtils {
     public static AzureCloudUser createAzureCloudUser() {
         AzureCloudUser azureCloudUser = Mockito.mock(AzureCloudUser.class);
         Mockito.when(azureCloudUser.getSubscriptionId()).thenReturn(SUBSCRIPTION_ID_DEFAULT);
+        Mockito.when(azureCloudUser.getResourceGroupName()).thenReturn(RESOURCE_GROUP_NAME_DEFAULT);
         return azureCloudUser;
     }
 }

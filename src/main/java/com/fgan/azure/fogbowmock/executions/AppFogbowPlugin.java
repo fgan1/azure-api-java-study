@@ -31,7 +31,7 @@ public class AppFogbowPlugin {
         int diskSize = 33;
         ComputeOrder computeOrder = new ComputeOrder(
                 id, null, "", "", "", "", 0, 0, diskSize, imageId, new ArrayList<UserData>(), "", new ArrayList<>());
-        computeOrder.setInstanceId(AzureResourceToInstancePolicy.generateFogbowInstanceIdBy(computeOrder));
+//        computeOrder.setInstanceId(AzureResourceToInstancePolicy.generateFogbowInstanceIdBy(computeOrder));
         SampleExecutionFogbowPlugin.start()
                 .compute(filePropertiesPath)
                     .start()

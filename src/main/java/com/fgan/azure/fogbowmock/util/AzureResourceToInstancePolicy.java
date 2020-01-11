@@ -1,28 +1,63 @@
 package com.fgan.azure.fogbowmock.util;
 
-import cloud.fogbow.ras.core.models.orders.Order;
+import cloud.fogbow.common.exceptions.InvalidParameterException;
+import cloud.fogbow.ras.constants.SystemConstants;
+import cloud.fogbow.ras.core.models.orders.ComputeOrder;
+import com.fgan.azure.fogbowmock.common.AzureCloudUser;
+import com.sun.istack.internal.Nullable;
+
+import java.util.function.BiFunction;
 
 public class AzureResourceToInstancePolicy {
 
     /**
-     * Generate the Azure Resource Name. The Azure resource name is equals to Fogbow instance Id
-     * in order to main a pattern in the Fogbow context. Also, the resource name is used to
-     * generate the real Azure Resource ID thus It is important to the all plugins operations.
+     * Generate the Azure Resource Name and check if It's in accordance with the policy.
      */
-    public static String generateAzureResourceNameBy(Order order) {
-        return generateFogbowInstanceIdBy(order);
+    private static String generateAzureResourceNameBy(@Nullable String orderName, String orderId,
+                                                      AzureCloudUser azureCloudUser)
+            throws InvalidParameterException {
+
+        if (orderName == null) {
+            orderName = SystemConstants.FOGBOW_INSTANCE_NAME_PREFIX + orderId;
+        }
+
+        AzureIdBuilder.configure(azureCloudUser).checkIdSizePolicy(orderName);
+        return orderName;
     }
 
-    /**
-     * Generate the Fogbow Instance Id. The Fogbow Instance Id does not to be the Azure Resource Id
-     * due to the fact that the Azure Resource Id is a URL thus It would annoying the Fogbow Rest api.
-     */
-    public static String generateFogbowInstanceIdBy(Order order) {
-        return order.getId();
+    public static String generateAzureResourceNameBy(
+            ComputeOrder computeOrder, AzureCloudUser azureCloudUser) throws InvalidParameterException {
+
+        return generateAzureResourceNameBy(computeOrder.getName(), computeOrder.getId(), azureCloudUser);
     }
 
-    public static String generateAzureResourceNameBy(String fogbowIntanceId) {
-        return fogbowIntanceId;
+    public static String generateAzureResourceNameBy(String orderId, AzureCloudUser azureCloudUser)
+            throws InvalidParameterException {
+
+        return generateAzureResourceNameBy(null, orderId, azureCloudUser);
+    }
+
+    public static String generateFogbowInstanceIdBy(String orderId, AzureCloudUser azureCloudUser,
+                                                    BiFunction<String, AzureCloudUser, String> builderId)
+            throws InvalidParameterException {
+
+        String resourceName = generateAzureResourceNameBy(orderId, azureCloudUser);
+        return generateFogbowIstanceId(resourceName, azureCloudUser, builderId);
+    }
+
+    public static String generateFogbowInstanceIdBy(ComputeOrder order,
+                                                    AzureCloudUser azureCloudUser,
+                                                    BiFunction<String, AzureCloudUser, String> builderId)
+            throws InvalidParameterException {
+
+        String resourceName = generateAzureResourceNameBy(order, azureCloudUser);
+        return generateFogbowIstanceId(resourceName, azureCloudUser, builderId);
+    }
+
+    private static String generateFogbowIstanceId(String resourceName,
+                                                  AzureCloudUser azureCloudUser,
+                                                  BiFunction<String, AzureCloudUser, String> builderId) {
+        return builderId.apply(resourceName, azureCloudUser);
     }
 
 }

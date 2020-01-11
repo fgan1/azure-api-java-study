@@ -10,4 +10,8 @@ cloud_user_credentials_tenant_id=
 # Required
 cloud_user_credentials_subscription_id=
 
-# resourceGroupName
+# Required
+resource_group_name=
+
+# Required
+region_name=

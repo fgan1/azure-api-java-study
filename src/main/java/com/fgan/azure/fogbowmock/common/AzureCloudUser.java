@@ -9,10 +9,11 @@ public class AzureCloudUser extends CloudUser {
     private String clientKey;
     private String subscriptionId;
     private String resourceGroupName;
+    private String regionName;
 
     public AzureCloudUser(String userId, String userName, String clientId,
                           String tenantId, String clientKey, String subscriptionId,
-                          String resourceGroupName) {
+                          String resourceGroupName, String regionName) {
 
         super(userId, userName, "");
         this.clientId = clientId;
@@ -20,6 +21,7 @@ public class AzureCloudUser extends CloudUser {
         this.clientKey = clientKey;
         this.subscriptionId = subscriptionId;
         this.resourceGroupName = resourceGroupName;
+        this.regionName = regionName;
     }
 
     public String getClientId() {
@@ -40,5 +42,9 @@ public class AzureCloudUser extends CloudUser {
 
     public String getResourceGroupName() {
         return resourceGroupName;
+    }
+
+    public String getRegionName() {
+        return regionName;
     }
 }

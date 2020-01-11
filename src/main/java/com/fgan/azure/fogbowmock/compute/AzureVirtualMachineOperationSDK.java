@@ -137,8 +137,7 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
     }
 
     @Override
-    public AzureGetVirtualMachineRef doGetInstance(String azureInstanceId, String regionName,
-                                                   AzureCloudUser azureCloudUser)
+    public AzureGetVirtualMachineRef doGetInstance(String azureInstanceId, AzureCloudUser azureCloudUser)
             throws AzureException.Unauthenticated, AzureException.Unexpected,
             AzureException.NoAvailableResources, AzureException.ResourceNotFound {
 
@@ -154,6 +153,7 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
         String primaryPrivateIp = virtualMachine.getPrimaryNetworkInterface().primaryPrivateIP();
         List<String> ipAddresses = Arrays.asList(primaryPrivateIp);
 
+        String regionName = azureCloudUser.getRegionName();
         VirtualMachineSize virtualMachineSize = findVirtualMachineSizeByName(virtualMachineSizeName, regionName, azure);
         int vCPU = virtualMachineSize.numberOfCores();
         int memory = virtualMachineSize.memoryInMB();
