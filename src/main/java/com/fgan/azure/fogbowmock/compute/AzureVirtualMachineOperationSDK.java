@@ -54,14 +54,14 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
 
         Azure azure = AzureClientCacheManager.getAzure(azureCloudUser);
 
-        Observable<Indexable> virtualMachineAsync = getAzureVirtualMachineObservable(
+        Observable<Indexable> virtualMachineAsync = buildAzureVirtualMachineObservable(
                 azureCreateVirtualMachineRef, azure);
 
         subscribeCreateVirtualMachine(virtualMachineAsync);
     }
 
     @VisibleForTesting
-    Observable<Indexable> getAzureVirtualMachineObservable(
+    Observable<Indexable> buildAzureVirtualMachineObservable(
             AzureCreateVirtualMachineRef azureCreateVirtualMachineRef,
             Azure azure) throws AzureException.ResourceNotFound {
 

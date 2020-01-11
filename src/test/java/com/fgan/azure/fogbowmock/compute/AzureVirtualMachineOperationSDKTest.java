@@ -295,7 +295,7 @@ public class AzureVirtualMachineOperationSDKTest {
                 .build();
 
         Observable<Indexable> observableMocked = Mockito.mock(Observable.class);
-        Mockito.doReturn(observableMocked).when(this.azureVirtualMachineOperationSDK).getAzureVirtualMachineObservable(
+        Mockito.doReturn(observableMocked).when(this.azureVirtualMachineOperationSDK).buildAzureVirtualMachineObservable(
                 Mockito.eq(azureCreateVirtualMachineRef), Mockito.eq(this.azure));
 
         Mockito.doNothing().when(this.azureVirtualMachineOperationSDK)

@@ -46,7 +46,7 @@ public interface AzureVirtualMachineSDK {
         }
         return optionsManaged
                 .withCustomData(userData)
-                .withOSDiskSizeInGB(diskSize)
+//                .withOSDiskSizeInGB(diskSize)
                 .withSize(size)
                 .createAsync();
     }

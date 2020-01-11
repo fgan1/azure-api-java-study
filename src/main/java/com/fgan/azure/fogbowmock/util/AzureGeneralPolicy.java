@@ -2,8 +2,11 @@ package com.fgan.azure.fogbowmock.util;
 
 import cloud.fogbow.common.exceptions.InvalidParameterException;
 import cloud.fogbow.ras.core.models.orders.ComputeOrder;
+import com.fgan.azure.fogbowmock.common.Messages;
 
 public interface AzureGeneralPolicy {
+
+    final int MINIMUM_DISK = 30;
 
     /**
      * Azure Password Policy:
@@ -21,14 +24,13 @@ public interface AzureGeneralPolicy {
 
     /**
      * Azure Disk Policy
-     * 1) Greater then 30GB
+     * 1) Greater than 30GB
      */
-    // TODO(chico) - confirm this information
-    // TODO(chico) - implement tests
     public static int getDisk(ComputeOrder computeOrder) throws InvalidParameterException {
         int disk = computeOrder.getDisk();
-        // TODO (chico) - Add in the constans
-        if (disk < 30) throw new InvalidParameterException("The disk size must be greater than 30GB");
+        if (disk < MINIMUM_DISK) {
+            throw new InvalidParameterException(Messages.DISK_PARAMETER_AZURE_POLICY);
+        }
 
         return disk;
     }
