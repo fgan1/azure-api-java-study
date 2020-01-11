@@ -7,6 +7,7 @@ import cloud.fogbow.ras.core.models.orders.ComputeOrder;
 import com.fgan.azure.AzureTestUtils;
 import com.fgan.azure.fogbowmock.common.AzureCloudUser;
 import com.fgan.azure.fogbowmock.compute.model.AzureGetVirtualMachineRef;
+import com.fgan.azure.fogbowmock.util.AzureConstants;
 import com.fgan.azure.fogbowmock.util.AzureIdBuilder;
 import org.junit.Assert;
 import org.junit.Before;
@@ -18,8 +19,6 @@ import org.mockito.Mockito;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-
-import static com.fgan.azure.fogbowmock.compute.AzureComputePlugin.DEFAULT_NETWORK_INTERFACE_NAME_KEY;
 
 public class AzureComputePluginTest {
 
@@ -34,7 +33,7 @@ public class AzureComputePluginTest {
     public void setUp() {
         String azureConfFilePath = AzureTestUtils.AZURE_CONF_FILE_PATH;
         Properties properties = PropertiesUtil.readProperties(azureConfFilePath);
-        this.defaultNetworkInterfaceName = properties.getProperty(DEFAULT_NETWORK_INTERFACE_NAME_KEY);
+        this.defaultNetworkInterfaceName = properties.getProperty(AzureConstants.DEFAULT_NETWORK_INTERFACE_NAME_KEY);
 //        this.resourceGroupName = this.properties.getProperty(DEFAULT_RESOURCE_GROUP_NAME_KEY);
 //        this.regionName = this.properties.getProperty(DEFAULT_REGION_NAME_KEY);
         this.azureComputePlugin = Mockito.spy(new AzureComputePlugin(azureConfFilePath));
