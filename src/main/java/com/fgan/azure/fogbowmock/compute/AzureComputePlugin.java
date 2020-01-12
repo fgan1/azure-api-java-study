@@ -27,7 +27,7 @@ import java.util.Properties;
 public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
 
     private static final Logger LOGGER = Logger.getLogger(AzureComputePlugin.class);
-    private final AzureVirtualMachineOperation<AzureVirtualMachineOperationSDK> azureVirtualMachineOperation;
+    private AzureVirtualMachineOperation<AzureVirtualMachineOperationSDK> azureVirtualMachineOperation;
     //    private final DefaultLaunchCommandGenerator launchCommandGenerator;
     private final String defaultNetworkInterfaceName;
 
@@ -166,4 +166,8 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
         this.azureVirtualMachineOperation.doDeleteInstance(azureVirtualMachineId, azureCloudUser);
     }
 
+    @VisibleForTesting
+    void setAzureVirtualMachineOperation(AzureVirtualMachineOperation<AzureVirtualMachineOperationSDK> azureVirtualMachineOperation) {
+        this.azureVirtualMachineOperation = azureVirtualMachineOperation;
+    }
 }

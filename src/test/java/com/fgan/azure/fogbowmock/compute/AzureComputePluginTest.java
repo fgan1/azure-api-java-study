@@ -1,11 +1,14 @@
 package com.fgan.azure.fogbowmock.compute;
 
 import cloud.fogbow.common.exceptions.FogbowException;
+import cloud.fogbow.common.exceptions.UnexpectedException;
 import cloud.fogbow.common.util.PropertiesUtil;
+import cloud.fogbow.ras.api.http.response.ComputeInstance;
 import cloud.fogbow.ras.core.models.orders.ComputeOrder;
 import com.fgan.azure.AzureTestUtils;
 import com.fgan.azure.fogbowmock.common.AzureCloudUser;
 import com.fgan.azure.fogbowmock.common.Messages;
+import com.fgan.azure.fogbowmock.compute.model.AzureGetVirtualMachineRef;
 import com.fgan.azure.fogbowmock.util.AzureConstants;
 import com.fgan.azure.fogbowmock.util.AzureIdBuilder;
 import org.junit.Assert;
@@ -28,6 +31,7 @@ public class AzureComputePluginTest {
     private AzureComputePlugin azureComputePlugin;
     private AzureCloudUser azureCloudUser;
     private String defaultNetworkInterfaceName;
+    private AzureVirtualMachineOperation<AzureVirtualMachineOperationSDK> azureVirtualMachineOperation;
 
     @Before
     public void setUp() {
@@ -35,6 +39,8 @@ public class AzureComputePluginTest {
         Properties properties = PropertiesUtil.readProperties(azureConfFilePath);
         this.defaultNetworkInterfaceName = properties.getProperty(AzureConstants.DEFAULT_NETWORK_INTERFACE_NAME_KEY);
         this.azureComputePlugin = Mockito.spy(new AzureComputePlugin(azureConfFilePath));
+        this.azureVirtualMachineOperation = Mockito.mock(AzureVirtualMachineOperationSDK.class);
+        this.azureComputePlugin.setAzureVirtualMachineOperation(this.azureVirtualMachineOperation);
         this.azureCloudUser = AzureTestUtils.createAzureCloudUser();
     }
 
@@ -98,53 +104,45 @@ public class AzureComputePluginTest {
     // test case: When calling the getInstance method, it must verify if It returns the right computeInstance.
     @Test
     public void testGetInstanceSuccessfully() throws FogbowException {
-//        // set up
-//        ComputeOrder computeOrder = new ComputeOrder();
-//        String instanceId = "instanceId";
-//        computeOrder.setInstanceId(instanceId);
-//
-//        String azureVirtualMachineId = AzureIdBuilder
-//                .configure(this.azureCloudUser)
-//                .buildVirtualMachineId(computeOrder.getInstanceId());
-//
-//        AzureGetVirtualMachineRef azureGetVirtualMachineRef = Mockito.mock(AzureGetVirtualMachineRef.class);
-//        Mockito.doReturn(azureGetVirtualMachineRef).when(this.azureComputePlugin)
-//                .doRequestInstance(Mockito.eq(computeOrder),
-//                        Mockito.eq(this.azureCloudUser),
-//                        Mockito.eq(azureGetVirtualMachineRef));
-//
-//        ComputeInstance computeInstanceExpected = Mockito.mock(ComputeInstance.class);
-//        Mockito.doReturn(computeInstanceExpected).when(this.azureComputePlugin)
-//                .buildComputeInstance(Mockito.eq(azureGetVirtualMachineRef));
-//
-//        // exercise
-//        ComputeInstance computeInstance = this.azureComputePlugin.getInstance(computeOrder, this.azureCloudUser);
-//
-//        // verify
-//        Assert.assertEquals(computeInstanceExpected, computeInstance);
+        // set up
+        ComputeOrder computeOrder = new ComputeOrder();
+        String instanceId = "instanceId";
+        computeOrder.setInstanceId(instanceId);
+
+        AzureGetVirtualMachineRef azureGetVirtualMachineRef = Mockito.mock(AzureGetVirtualMachineRef.class);
+        Mockito.when(this.azureVirtualMachineOperation
+                .doGetInstance(Mockito.eq(instanceId), Mockito.eq(this.azureCloudUser)))
+                .thenReturn(azureGetVirtualMachineRef);
+
+        ComputeInstance computeInstanceExpected = Mockito.mock(ComputeInstance.class);
+        Mockito.doReturn(computeInstanceExpected)
+                .when(this.azureComputePlugin).buildComputeInstance(Mockito.eq(azureGetVirtualMachineRef));
+
+        // exercise
+        ComputeInstance computeInstance = this.azureComputePlugin.getInstance(computeOrder, this.azureCloudUser);
+
+        // verify
+        Assert.assertEquals(computeInstanceExpected, computeInstance);
     }
 
     // test case: When calling the getInstance method and throws a Exception,
     // it must verify if It does not treat and rethrow the same exception.
     @Test
     public void testGetInstanceFail() throws FogbowException {
-//        // set up
-//        ComputeOrder computeOrder = new ComputeOrder();
-//        String instanceId = "instanceId";
-//        computeOrder.setInstanceId(instanceId);
-//
-//        String azureVirtualMachineId = AzureIdBuilder
-//                .configure(this.azureCloudUser)
-//                .buildVirtualMachineId(computeOrder.getInstanceId());
-//
-//        Mockito.doThrow(new FogbowException()).when(this.azureComputePlugin)
-//                .doRequestInstance(Mockito.eq(this.azureCloudUser), Mockito.eq(azureVirtualMachineId));
-//
-//        // verify
-//        this.expectedException.expect(FogbowException.class);
-//
-//        // exercise
-//        this.azureComputePlugin.getInstance(computeOrder, this.azureCloudUser);
+        // set up
+        ComputeOrder computeOrder = new ComputeOrder();
+        String instanceId = "instanceId";
+        computeOrder.setInstanceId(instanceId);
+
+        Mockito.when(this.azureVirtualMachineOperation
+                .doGetInstance(Mockito.eq(instanceId), Mockito.eq(this.azureCloudUser)))
+                .thenThrow(new UnexpectedException());
+
+        // verify
+        this.expectedException.expect(UnexpectedException.class);
+
+        // exercise
+        this.azureComputePlugin.getInstance(computeOrder, this.azureCloudUser);
     }
 
 }
