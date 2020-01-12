@@ -2,11 +2,10 @@ package com.fgan.azure.fogbowmock.compute;
 
 import cloud.fogbow.common.exceptions.FogbowException;
 import cloud.fogbow.common.util.PropertiesUtil;
-import cloud.fogbow.ras.api.http.response.ComputeInstance;
 import cloud.fogbow.ras.core.models.orders.ComputeOrder;
 import com.fgan.azure.AzureTestUtils;
 import com.fgan.azure.fogbowmock.common.AzureCloudUser;
-import com.fgan.azure.fogbowmock.compute.model.AzureGetVirtualMachineRef;
+import com.fgan.azure.fogbowmock.common.Messages;
 import com.fgan.azure.fogbowmock.util.AzureConstants;
 import com.fgan.azure.fogbowmock.util.AzureIdBuilder;
 import org.junit.Assert;
@@ -16,6 +15,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
@@ -34,10 +34,65 @@ public class AzureComputePluginTest {
         String azureConfFilePath = AzureTestUtils.AZURE_CONF_FILE_PATH;
         Properties properties = PropertiesUtil.readProperties(azureConfFilePath);
         this.defaultNetworkInterfaceName = properties.getProperty(AzureConstants.DEFAULT_NETWORK_INTERFACE_NAME_KEY);
-//        this.resourceGroupName = this.properties.getProperty(DEFAULT_RESOURCE_GROUP_NAME_KEY);
-//        this.regionName = this.properties.getProperty(DEFAULT_REGION_NAME_KEY);
         this.azureComputePlugin = Mockito.spy(new AzureComputePlugin(azureConfFilePath));
         this.azureCloudUser = AzureTestUtils.createAzureCloudUser();
+    }
+
+    // test case: When calling the getNetworkInterfaceId method without network in the order,
+    // it must verify if It returns the default networkInterfaceId.
+    @Test
+    public void testGetNetworkInterfaceIdSuccessfullyWhenEmptyNetworkInOrder() throws FogbowException {
+        // set up
+        ComputeOrder computeOrder = Mockito.mock(ComputeOrder.class);
+        List<String> networds = new ArrayList<>();
+        Mockito.when(computeOrder.getNetworkIds()).thenReturn(networds);
+
+        String networkInsterfaceIdExpected = AzureIdBuilder
+                .configure(this.azureCloudUser)
+                .buildNetworkInterfaceId(this.defaultNetworkInterfaceName);
+
+        // exercise
+        String networkInterfaceId = this.azureComputePlugin.getNetworkInterfaceId(computeOrder, this.azureCloudUser);
+
+        // verify
+        Assert.assertEquals(networkInsterfaceIdExpected, networkInterfaceId);
+    }
+
+    // test case: When calling the getNetworkInterfaceId method with one network in the order,
+    // it must verify if It returns the network in the order.
+    @Test
+    public void testGetNetworkInterfaceIdSuccessfullyWhenOneNetworkInOrder() throws FogbowException {
+        // set up
+        String nertworkIdExpeceted = "networkId";
+        ComputeOrder computeOrder = Mockito.mock(ComputeOrder.class);
+        List<String> networds = new ArrayList<>();
+        networds.add(nertworkIdExpeceted);
+        Mockito.when(computeOrder.getNetworkIds()).thenReturn(networds);
+
+        // exercise
+        String networkInterfaceId = this.azureComputePlugin
+                .getNetworkInterfaceId(computeOrder, this.azureCloudUser);
+
+        // verify
+        Assert.assertEquals(nertworkIdExpeceted, networkInterfaceId);
+    }
+
+    // test case: When calling the getNetworkInterfaceId method with more than one network in the order,
+    // it must verify if It throws a FogbowException.
+    @Test
+    public void testGetNetworkInterfaceIdFailWhenMoreThanOneNetworkInOrder() throws FogbowException {
+        // set up
+        ComputeOrder computeOrder = Mockito.mock(ComputeOrder.class);
+        List<String> networds = Arrays.asList("one", "two");
+        Mockito.when(computeOrder.getNetworkIds()).thenReturn(networds);
+
+        // verify
+        this.expectedException.expect(FogbowException.class);
+        this.expectedException.expectMessage(Messages.MULTIPLE_NETWORKS_NOT_ALLOWED);
+
+        // exercise
+        this.azureComputePlugin.getNetworkInterfaceId(computeOrder, this.azureCloudUser);
+
     }
 
     // test case: When calling the getInstance method, it must verify if It returns the right computeInstance.
@@ -90,62 +145,6 @@ public class AzureComputePluginTest {
 //
 //        // exercise
 //        this.azureComputePlugin.getInstance(computeOrder, this.azureCloudUser);
-    }
-
-    // test case: When calling the getNetworkInterfaceId method without networks in the order,
-    // it must verify if It returns the rigth networkInterfaceId.
-    @Test
-    public void testGetNetworkInterfaceIdSuccessfullyWhenGetNetworkDefault() throws FogbowException {
-        // set up
-        ComputeOrder computeOrder = new ComputeOrder();
-
-        String networkInterfaceIdExpected = AzureIdBuilder
-                .configure(this.azureCloudUser)
-                .buildNetworkInterfaceId(this.defaultNetworkInterfaceName);
-
-        // verify
-        String networkInterfaceId = this.azureComputePlugin.getNetworkInterfaceId(computeOrder, this.azureCloudUser);
-
-        // exercise
-        Assert.assertEquals(networkInterfaceIdExpected, networkInterfaceId);
-    }
-
-    // test case: When calling the getNetworkInterfaceId method with one network in the order,
-    // it must verify if It returns the rigth networkInterfaceId.
-    @Test
-    public void testGetNetworkInterfaceIdSuccessfullyWhenGetUserNetwork() throws FogbowException {
-        // set up
-        ComputeOrder computeOrder = Mockito.mock(ComputeOrder.class);
-        String fogbowNetworkInterfaceIdPassedByUser = "networkInterfaceId";
-        List<String> networks = Arrays.asList(fogbowNetworkInterfaceIdPassedByUser);
-        Mockito.when(computeOrder.getNetworkIds()).thenReturn(networks);
-
-        String networkInterfaceIdExpected = AzureIdBuilder
-                .configure(this.azureCloudUser)
-                .buildNetworkInterfaceId(fogbowNetworkInterfaceIdPassedByUser);
-
-        // verify
-        String networkInterfaceId = this.azureComputePlugin.getNetworkInterfaceId(computeOrder, this.azureCloudUser);
-
-        // exercise
-        Assert.assertEquals(networkInterfaceIdExpected, networkInterfaceId);
-    }
-
-    // TODO (chico) - review it
-    // test case: When calling the getNetworkInterfaceId method with many networks in the order,
-    // it must verify if It throws an .
-    @Test
-    public void testGetNetworkInterfaceIdFail() throws FogbowException {
-        // set up
-        ComputeOrder computeOrder = Mockito.mock(ComputeOrder.class);
-        List<String> networks = Arrays.asList("", "");
-        Mockito.when(computeOrder.getNetworkIds()).thenReturn(networks);
-
-        // verify
-        this.expectedException.expect(FogbowException.class);
-
-        // verify
-        this.azureComputePlugin.getNetworkInterfaceId(computeOrder, this.azureCloudUser);
     }
 
 }

@@ -110,23 +110,23 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
         return com.fgan.azure.util.PropertiesUtil.getUserData();
     }
 
-    // TODO(chico) - Finish; Study multi network interfaces behaviour.
     @VisibleForTesting
-    String getNetworkInterfaceId(ComputeOrder computeOrder, AzureCloudUser azureCloudUser) throws FogbowException {
-        String networkInterfaceId;
+    String getNetworkInterfaceId(ComputeOrder computeOrder, AzureCloudUser azureCloudUser)
+            throws FogbowException {
+
         List<String> networkIds = computeOrder.getNetworkIds();
-        if (!networkIds.isEmpty()) {
-            if (networkIds.size() > 1)
-                throw new FogbowException("Multiple networks not allowed yed");
-
-            networkInterfaceId = networkIds.stream().findFirst().get();
+        if (networkIds.isEmpty()) {
+            return AzureIdBuilder
+                    .configure(azureCloudUser)
+                    .buildNetworkInterfaceId(this.defaultNetworkInterfaceName);
         } else {
-            networkInterfaceId = this.defaultNetworkInterfaceName;
-        }
+            if (networkIds.size() > AzureGeneralPolicy.MAXIMUM_NETWORK_PER_VIRTUAL_MACHINE) {
+                throw new FogbowException(com.fgan.azure.fogbowmock.common.Messages.MULTIPLE_NETWORKS_NOT_ALLOWED);
+            }
 
-        return AzureIdBuilder
-                .configure(azureCloudUser)
-                .buildNetworkInterfaceId(networkInterfaceId);
+            return networkIds.stream()
+                    .findFirst().get();
+        }
     }
 
     @Override

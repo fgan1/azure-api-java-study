@@ -17,4 +17,5 @@ public class Messages {
     public static final String ERROR_DELETE_DISK_ASYNC_BEHAVIOUR = "Error while deleting disk asynchonously";
 
     public static final String DISK_PARAMETER_AZURE_POLICY = "The disk size must be greater than 30GB";
+    public static final String MULTIPLE_NETWORKS_NOT_ALLOWED = "Multiple networks not allowed";
 }

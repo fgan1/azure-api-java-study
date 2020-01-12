@@ -1,5 +1,6 @@
 package com.fgan.azure.fogbowmock.util;
 
+import cloud.fogbow.common.exceptions.FogbowException;
 import cloud.fogbow.common.exceptions.InvalidParameterException;
 import cloud.fogbow.ras.core.models.orders.ComputeOrder;
 import com.fgan.azure.fogbowmock.common.Messages;
@@ -7,6 +8,7 @@ import com.fgan.azure.fogbowmock.common.Messages;
 public interface AzureGeneralPolicy {
 
     final int MINIMUM_DISK = 30;
+    final int MAXIMUM_NETWORK_PER_VIRTUAL_MACHINE = 1;
 
     /**
      * Azure Password Policy:
