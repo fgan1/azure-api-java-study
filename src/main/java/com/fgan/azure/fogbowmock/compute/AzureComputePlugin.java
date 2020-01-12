@@ -139,15 +139,18 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
         AzureGetVirtualMachineRef azureGetVirtualMachineRef = this.azureVirtualMachineOperation
                 .doGetInstance(azureVirtualMachineId, azureCloudUser);
 
-        return buildComputeInstance(azureGetVirtualMachineRef);
+        return buildComputeInstance(azureGetVirtualMachineRef, azureCloudUser);
     }
 
     @VisibleForTesting
-    ComputeInstance buildComputeInstance(AzureGetVirtualMachineRef azureGetVirtualMachineRef) {
-        // TODO(chico) - check if is necessary put the real ID(Azure)
-        String id = azureGetVirtualMachineRef.getId();
-        String cloudState = azureGetVirtualMachineRef.getCloudState();
+    ComputeInstance buildComputeInstance(AzureGetVirtualMachineRef azureGetVirtualMachineRef,
+                                         AzureCloudUser azureCloudUser) {
+
         String name = azureGetVirtualMachineRef.getName();
+        String id = AzureIdBuilder
+                .configure(azureCloudUser)
+                .buildVirtualMachineId(name);
+        String cloudState = azureGetVirtualMachineRef.getCloudState();
         int vCPU = azureGetVirtualMachineRef.getvCPU();
         int memory = azureGetVirtualMachineRef.getMemory();
         int disk = azureGetVirtualMachineRef.getDisk();

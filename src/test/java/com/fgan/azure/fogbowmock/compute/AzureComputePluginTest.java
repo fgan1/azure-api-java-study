@@ -7,6 +7,7 @@ import cloud.fogbow.ras.api.http.response.ComputeInstance;
 import cloud.fogbow.ras.core.models.orders.ComputeOrder;
 import com.fgan.azure.AzureTestUtils;
 import com.fgan.azure.fogbowmock.common.AzureCloudUser;
+import com.fgan.azure.fogbowmock.common.AzureStateMapper;
 import com.fgan.azure.fogbowmock.common.Messages;
 import com.fgan.azure.fogbowmock.compute.model.AzureGetVirtualMachineRef;
 import com.fgan.azure.fogbowmock.util.AzureConstants;
@@ -115,8 +116,8 @@ public class AzureComputePluginTest {
                 .thenReturn(azureGetVirtualMachineRef);
 
         ComputeInstance computeInstanceExpected = Mockito.mock(ComputeInstance.class);
-        Mockito.doReturn(computeInstanceExpected)
-                .when(this.azureComputePlugin).buildComputeInstance(Mockito.eq(azureGetVirtualMachineRef));
+        Mockito.doReturn(computeInstanceExpected).when(this.azureComputePlugin)
+                .buildComputeInstance(Mockito.eq(azureGetVirtualMachineRef), Mockito.eq(this.azureCloudUser));
 
         // exercise
         ComputeInstance computeInstance = this.azureComputePlugin.getInstance(computeOrder, this.azureCloudUser);
@@ -143,6 +144,41 @@ public class AzureComputePluginTest {
 
         // exercise
         this.azureComputePlugin.getInstance(computeOrder, this.azureCloudUser);
+    }
+
+    // test case: When calling the buildComputeInstance method,
+    // it must verify if it retuns the right ComputeInstance.
+    @Test
+    public void testBuildComputeInstanceSuccessfully() {
+        // set up
+        int diskExpected = 1;
+        String nameExpected = "name";
+        int memoryExpected = 2;
+        int vcpuExpected = 3;
+        String cloudStateExpected = AzureStateMapper.SUCCEEDED_STATE;
+        List<String> ipAddressExpected = Arrays.asList("id");
+        String idExpected = AzureIdBuilder.configure(this.azureCloudUser).buildVirtualMachineId(nameExpected);
+        AzureGetVirtualMachineRef azureGetVirtualMachineRef = AzureGetVirtualMachineRef.builder()
+                .disk(diskExpected)
+                .vCPU(vcpuExpected)
+                .memory(memoryExpected)
+                .cloudState(cloudStateExpected)
+                .name(nameExpected)
+                .ipAddresses(ipAddressExpected)
+                .build();
+
+
+        // exercise
+        ComputeInstance computeInstance = this.azureComputePlugin
+                .buildComputeInstance(azureGetVirtualMachineRef, this.azureCloudUser);
+
+        // verify
+        Assert.assertEquals(diskExpected, computeInstance.getDisk());
+        Assert.assertEquals(memoryExpected, computeInstance.getMemory());
+        Assert.assertEquals(vcpuExpected, computeInstance.getvCPU());
+        Assert.assertEquals(idExpected, computeInstance.getId());
+        Assert.assertEquals(cloudStateExpected, computeInstance.getCloudState());
+        Assert.assertEquals(ipAddressExpected, computeInstance.getIpAddresses());
     }
 
 }
