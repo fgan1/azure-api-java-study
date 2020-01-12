@@ -27,6 +27,7 @@ import java.util.Properties;
 public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
 
     private static final Logger LOGGER = Logger.getLogger(AzureComputePlugin.class);
+
     private AzureVirtualMachineOperation<AzureVirtualMachineOperationSDK> azureVirtualMachineOperation;
     //    private final DefaultLaunchCommandGenerator launchCommandGenerator;
     private final String defaultNetworkInterfaceName;
@@ -71,7 +72,7 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
 
         AzureCreateVirtualMachineRef azureCreateVirtualMachineRef = AzureCreateVirtualMachineRef.builder()
                 .virtualMachineName(virtualMachineName)
-                .azureVirtualMachineImage(azureVirtualMachineImage)
+                .azureGetImageRef(azureVirtualMachineImage)
                 .networkInterfaceId(networkInterfaceId)
                 .diskSize(diskSize)
                 .size(virtualMachineSizeName)
@@ -86,7 +87,8 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
         return doRequestInstance(computeOrder, azureCloudUser, azureCreateVirtualMachineRef);
     }
 
-    private String getVirtualMachineSizeName(ComputeOrder computeOrder, AzureCloudUser azureCloudUser)
+    @VisibleForTesting
+    String getVirtualMachineSizeName(ComputeOrder computeOrder, AzureCloudUser azureCloudUser)
             throws FogbowException {
 
         return this.azureVirtualMachineOperation.findVirtualMachineSize(
@@ -104,7 +106,8 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
                 (name, cloudUser) -> AzureIdBuilder.configure(cloudUser).buildVirtualMachineId(name));
     }
 
-    private String getUserData() {
+    @VisibleForTesting
+    String getUserData() {
 //        return this.launchCommandGenerator.createLaunchCommand(computeOrder);
         // TODO(chico) - Remove when It goes to the Fogbow context
         return com.fgan.azure.util.PropertiesUtil.getUserData();

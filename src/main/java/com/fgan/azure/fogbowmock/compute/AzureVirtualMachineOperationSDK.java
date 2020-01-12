@@ -79,7 +79,7 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
         String userData = azureCreateVirtualMachineRef.getUserData();
         String size = azureCreateVirtualMachineRef.getSize();
         int diskSize = azureCreateVirtualMachineRef.getDiskSize();
-        AzureGetImageRef azureVirtualMachineImage = azureCreateVirtualMachineRef.getAzureVirtualMachineImage();
+        AzureGetImageRef azureVirtualMachineImage = azureCreateVirtualMachineRef.getAzureGetImageRef();
         Region region = Region.findByLabelOrName(regionName);
         String imagePublished = azureVirtualMachineImage.getPublisher();
         String imageOffer = azureVirtualMachineImage.getOffer();

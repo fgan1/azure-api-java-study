@@ -33,18 +33,18 @@ public class AzureImageOperationUtil {
         return new AzureGetImageRef(published, offer, sku);
     }
 
-    static String convertToImageSummaryId(AzureGetImageRef azureVirtualMachineImage) {
+    static String convertToImageSummaryId(AzureGetImageRef azureGetImageRef) {
         String[] list = new String[SUMMARY_ID_PARAMETER_SIZE];
-        list[PUBLISHER_ID_SUMMARY_POSITION] = azureVirtualMachineImage.getPublisher();
-        list[OFFER_ID_SUMMARY_POSITION] = azureVirtualMachineImage.getOffer();
-        list[SKU_ID_SUMMARY_POSITION] = azureVirtualMachineImage.getSku();
+        list[PUBLISHER_ID_SUMMARY_POSITION] = azureGetImageRef.getPublisher();
+        list[OFFER_ID_SUMMARY_POSITION] = azureGetImageRef.getOffer();
+        list[SKU_ID_SUMMARY_POSITION] = azureGetImageRef.getSku();
         return StringUtils.join(list, IMAGE_SUMMARY_ID_SEPARETOR);
     }
 
-    static String convertToImageSummaryName(AzureGetImageRef azureVirtualMachineImage) {
+    static String convertToImageSummaryName(AzureGetImageRef azureGetImageRef) {
         String[] list = new String[SUMMARY_NAME_PARAMETER_SIZE];
-        list[OFFER_NAME_SUMMARY_POSITION] = azureVirtualMachineImage.getOffer();
-        list[SKU_NAME_SUMMARY_POSITION] = azureVirtualMachineImage.getSku();
+        list[OFFER_NAME_SUMMARY_POSITION] = azureGetImageRef.getOffer();
+        list[SKU_NAME_SUMMARY_POSITION] = azureGetImageRef.getSku();
         return StringUtils.join(list, IMAGE_SUMMARY_NAME_SEPARETOR);
     }
 

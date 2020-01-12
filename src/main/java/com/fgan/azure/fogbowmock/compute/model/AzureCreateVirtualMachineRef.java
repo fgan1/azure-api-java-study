@@ -2,12 +2,13 @@ package com.fgan.azure.fogbowmock.compute.model;
 
 import com.fgan.azure.fogbowmock.util.GenericBuilder;
 
+import java.util.Objects;
 import java.util.function.Supplier;
 
 public class AzureCreateVirtualMachineRef {
 
     @GenericBuilder.Required
-    private AzureGetImageRef azureVirtualMachineImage;
+    private AzureGetImageRef azureGetImageRef;
     @GenericBuilder.Required
     private String networkInterfaceId;
     @GenericBuilder.Required
@@ -32,12 +33,12 @@ public class AzureCreateVirtualMachineRef {
         return new Builder(AzureCreateVirtualMachineRef::new);
     }
 
-    public AzureGetImageRef getAzureVirtualMachineImage() {
-        return azureVirtualMachineImage;
+    public AzureGetImageRef getAzureGetImageRef() {
+        return azureGetImageRef;
     }
 
-    private void setAzureVirtualMachineImage(AzureGetImageRef azureVirtualMachineImage) {
-        this.azureVirtualMachineImage = azureVirtualMachineImage;
+    private void setAzureGetImageRef(AzureGetImageRef azureGetImageRef) {
+        this.azureGetImageRef = azureGetImageRef;
     }
 
     public String getNetworkInterfaceId() {
@@ -120,14 +121,32 @@ public class AzureCreateVirtualMachineRef {
         this.size = size;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AzureCreateVirtualMachineRef that = (AzureCreateVirtualMachineRef) o;
+        return diskSize == that.diskSize &&
+                Objects.equals(azureGetImageRef, that.azureGetImageRef) &&
+                Objects.equals(networkInterfaceId, that.networkInterfaceId) &&
+                Objects.equals(resourceGroupName, that.resourceGroupName) &&
+                Objects.equals(virtualMachineName, that.virtualMachineName) &&
+                Objects.equals(osUserPassword, that.osUserPassword) &&
+                Objects.equals(osComputeName, that.osComputeName) &&
+                Objects.equals(osUserName, that.osUserName) &&
+                Objects.equals(regionName, that.regionName) &&
+                Objects.equals(userData, that.userData) &&
+                Objects.equals(size, that.size);
+    }
+
     public static class Builder extends GenericBuilder<AzureCreateVirtualMachineRef> {
 
         Builder(Supplier instantiator) {
             super(instantiator);
         }
 
-        public Builder azureVirtualMachineImage(AzureGetImageRef azureVirtualMachineImage) {
-            with(AzureCreateVirtualMachineRef::setAzureVirtualMachineImage, azureVirtualMachineImage);
+        public Builder azureGetImageRef(AzureGetImageRef azureGetImageRef) {
+            with(AzureCreateVirtualMachineRef::setAzureGetImageRef, azureGetImageRef);
             return this;
         }
 
