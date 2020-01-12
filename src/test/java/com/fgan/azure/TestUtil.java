@@ -1,7 +1,6 @@
 package com.fgan.azure;
 
 import cloud.fogbow.common.exceptions.UnauthenticatedUserException;
-import com.fgan.azure.fogbowmock.exceptions.AzureException;
 import com.fgan.azure.util.AzureIDBuilderGeneral;
 import com.fgan.azure.util.PropertiesUtil;
 import org.junit.Before;

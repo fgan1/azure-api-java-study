@@ -2,7 +2,6 @@ package com.fgan.azure.api.network;
 
 import cloud.fogbow.common.exceptions.UnexpectedException;
 import com.fgan.azure.api.ApiAzure;
-import com.fgan.azure.fogbowmock.exceptions.AzureException;
 import com.fgan.azure.util.PropertiesUtil;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.Azure;

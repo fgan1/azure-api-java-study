@@ -1,7 +1,6 @@
 package com.fgan.azure.fogbowmock.compute;
 
 import cloud.fogbow.common.exceptions.UnexpectedException;
-import com.fgan.azure.fogbowmock.exceptions.AzureException;
 import com.google.common.annotations.VisibleForTesting;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.Azure;

@@ -1,7 +1,6 @@
 package com.fgan.azure.api;
 
 import cloud.fogbow.common.exceptions.UnexpectedException;
-import com.fgan.azure.fogbowmock.exceptions.AzureException;
 import com.fgan.azure.util.AzureIDBuilderGeneral;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.Disk;

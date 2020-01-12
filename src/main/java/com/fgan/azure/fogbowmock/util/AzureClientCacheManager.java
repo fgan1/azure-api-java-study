@@ -3,7 +3,6 @@ package com.fgan.azure.fogbowmock.util;
 import cloud.fogbow.common.exceptions.FogbowException;
 import cloud.fogbow.common.exceptions.UnauthenticatedUserException;
 import com.fgan.azure.fogbowmock.common.AzureCloudUser;
-import com.fgan.azure.fogbowmock.exceptions.AzureException;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;

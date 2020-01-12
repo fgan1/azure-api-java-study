@@ -5,7 +5,6 @@ import cloud.fogbow.common.exceptions.UnauthenticatedUserException;
 import cloud.fogbow.common.exceptions.UnexpectedException;
 import com.fgan.azure.fogbowmock.common.AzureCloudUser;
 import com.fgan.azure.fogbowmock.compute.model.AzureGetImageRef;
-import com.fgan.azure.fogbowmock.exceptions.AzureException;
 
 import java.util.List;
 

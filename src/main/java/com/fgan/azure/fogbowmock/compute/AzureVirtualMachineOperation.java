@@ -7,7 +7,6 @@ import cloud.fogbow.common.exceptions.UnexpectedException;
 import com.fgan.azure.fogbowmock.common.AzureCloudUser;
 import com.fgan.azure.fogbowmock.compute.model.AzureCreateVirtualMachineRef;
 import com.fgan.azure.fogbowmock.compute.model.AzureGetVirtualMachineRef;
-import com.fgan.azure.fogbowmock.exceptions.AzureException;
 
 public interface AzureVirtualMachineOperation<T> {
 

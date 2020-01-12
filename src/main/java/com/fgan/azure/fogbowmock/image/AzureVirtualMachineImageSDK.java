@@ -1,7 +1,6 @@
 package com.fgan.azure.fogbowmock.image;
 
 import cloud.fogbow.common.exceptions.UnexpectedException;
-import com.fgan.azure.fogbowmock.exceptions.AzureException;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.VirtualMachinePublisher;

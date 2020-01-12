@@ -3,7 +3,6 @@ package com.fgan.azure.api;
 import cloud.fogbow.common.exceptions.UnexpectedException;
 import com.fgan.azure.Constants;
 import com.fgan.azure.api.network.NetworkApi;
-import com.fgan.azure.fogbowmock.exceptions.AzureException;
 import com.fgan.azure.util.AzureIDBuilderGeneral;
 import com.fgan.azure.util.GeneralPrintUtil;
 import com.fgan.azure.util.PropertiesUtil;
