@@ -96,19 +96,20 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
      */
     @VisibleForTesting
     void subscribeCreateVirtualMachine(Observable<Indexable> virtualMachineObservable) {
-        virtualMachineObservable
+        setCreateVirtualMachineBehaviour(virtualMachineObservable)
                 .subscribeOn(this.scheduler)
-                .doOnSubscribe(() -> {
-                    LOGGER.info(Messages.START_CREATE_VM_ASYNC_BEHAVIOUR);
-                })
+                .subscribe();
+    }
+
+    private Observable<Indexable> setCreateVirtualMachineBehaviour(Observable<Indexable> virtualMachineObservable) {
+        return virtualMachineObservable
                 .onErrorReturn((error -> {
                     LOGGER.error(Messages.ERROR_CREATE_VM_ASYNC_BEHAVIOUR, error);
                     return null;
                 }))
                 .doOnCompleted(() -> {
                     LOGGER.info(Messages.END_CREATE_VM_ASYNC_BEHAVIOUR);
-                })
-                .subscribe();
+                });
     }
 
     @Override
@@ -133,8 +134,7 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
                         .comparingInt(VirtualMachineSize::memoryInMB)
                         .thenComparingInt(VirtualMachineSize::numberOfCores))
                 .findFirst()
-                .orElseThrow(() -> new NoAvailableResourcesException(
-                        "There is no virtual machine that fits with the requirements"));
+                .orElseThrow(() -> new NoAvailableResourcesException());
 
         return firstVirtualMachineSize.name();
     }
@@ -151,7 +151,6 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
                 .orElseThrow(InstanceNotFoundException::new);
         String virtualMachineSizeName = virtualMachine.size().toString();
         String cloudState = virtualMachine.provisioningState();
-        String id = virtualMachine.name();
         String name = virtualMachine.name();
         String primaryPrivateIp = virtualMachine.getPrimaryNetworkInterface().primaryPrivateIP();
         List<String> ipAddresses = Arrays.asList(primaryPrivateIp);
@@ -169,7 +168,6 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
                 .memory(memory)
                 .name(name)
                 .vCPU(vCPU)
-                .id(id)
                 .build();
     }
 
@@ -226,22 +224,16 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
 
     private Completable setDeleteVirtualMachineDiskBehaviour(Completable deleteVirutalMachineDisk) {
         return deleteVirutalMachineDisk
-                .doOnSubscribe((a) -> {
-                    LOGGER.info(Messages.START_DELETE_DISK_ASYNC_BEHAVIOUR);
-                })
                 .doOnError((error -> {
-                    LOGGER.error(Messages.ERROR_DELETE_VM_ASYNC_BEHAVIOUR);
+                    LOGGER.error(Messages.ERROR_DELETE_DISK_ASYNC_BEHAVIOUR);
                 }))
                 .doOnCompleted(() -> {
-                    LOGGER.info(Messages.END_DELETE_VM_ASYNC_BEHAVIOUR);
+                    LOGGER.info(Messages.END_DELETE_DISK_ASYNC_BEHAVIOUR);
                 });
     }
 
     private Completable setDeleteVirtualMachineBehaviour(Completable deleteVirtualMachineCompletable) {
         return deleteVirtualMachineCompletable
-                .doOnSubscribe((a) -> {
-                    LOGGER.info(Messages.START_DELETE_VM_ASYNC_BEHAVIOUR);
-                })
                 .doOnError((error -> {
                     LOGGER.error(Messages.ERROR_DELETE_VM_ASYNC_BEHAVIOUR, error);
                 }))

@@ -1,14 +1,15 @@
 package com.fgan.azure.fogbowmock.util;
 
-import cloud.fogbow.common.exceptions.FogbowException;
 import cloud.fogbow.common.exceptions.InvalidParameterException;
 import cloud.fogbow.ras.core.models.orders.ComputeOrder;
 import com.fgan.azure.fogbowmock.common.Messages;
+import org.apache.commons.lang3.RandomStringUtils;
 
 public interface AzureGeneralPolicy {
 
     final int MINIMUM_DISK = 30;
     final int MAXIMUM_NETWORK_PER_VIRTUAL_MACHINE = 1;
+    String PASSWORD_PREFIX = "P4ss@";
 
     /**
      * Azure Password Policy:
@@ -18,10 +19,8 @@ public interface AzureGeneralPolicy {
      * 4) Contains a special character
      * 5) Control characters are not allowed
      */
-    // TODO(chico) - finish
-    // TODO(chico) - implement tests
     public static String generatePassword() {
-        return "AAAaaa111";
+        return PASSWORD_PREFIX + RandomStringUtils.randomAlphabetic(PASSWORD_PREFIX.length());
     }
 
     /**

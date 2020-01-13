@@ -12,8 +12,7 @@ public interface AzureVirtualMachineOperation<T> {
 
     void doCreateInstance(AzureCreateVirtualMachineRef azureCreateVirtualMachineRef,
                           AzureCloudUser azureCloudUser)
-            throws UnauthenticatedUserException, UnexpectedException, InstanceNotFoundException,
-            InstanceNotFoundException;
+            throws UnauthenticatedUserException, UnexpectedException, InstanceNotFoundException;
 
     String findVirtualMachineSize(int memoryRequired, int vCpuRequired,
                                   String regionName, AzureCloudUser azureCloudUser)
@@ -21,9 +20,8 @@ public interface AzureVirtualMachineOperation<T> {
 
     AzureGetVirtualMachineRef doGetInstance(String azureInstanceId, AzureCloudUser azureCloudUser)
             throws UnauthenticatedUserException, UnexpectedException, NoAvailableResourcesException,
-            InstanceNotFoundException, InstanceNotFoundException;
+            InstanceNotFoundException;
 
     void doDeleteInstance(String azureInstanceId, AzureCloudUser azureCloudUser)
-            throws UnauthenticatedUserException, InstanceNotFoundException, UnexpectedException,
-            InstanceNotFoundException;
+            throws UnauthenticatedUserException, UnexpectedException, InstanceNotFoundException;
 }

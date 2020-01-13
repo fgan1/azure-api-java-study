@@ -38,6 +38,12 @@ public class LoggerAssert {
         return this;
     }
 
+    public void verifyLogEnd() {
+        if (this.globalPosition <= this.listAppender.list.size()) {
+            Assert.fail("The log is not on the end");
+        }
+    }
+
     private int getPositionList(int logPosition) {
         return logPosition - 1;
     }

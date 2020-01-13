@@ -3,6 +3,7 @@ package com.fgan.azure.fogbowmock.compute.model;
 import com.fgan.azure.fogbowmock.util.GenericBuilder;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 public class AzureGetVirtualMachineRef {
@@ -73,6 +74,20 @@ public class AzureGetVirtualMachineRef {
 
     private void setIpAddresses(List<String> ipAddresses) {
         this.ipAddresses = ipAddresses;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AzureGetVirtualMachineRef that = (AzureGetVirtualMachineRef) o;
+        return vCPU == that.vCPU &&
+                memory == that.memory &&
+                disk == that.disk &&
+                Objects.equals(id, that.id) &&
+                Objects.equals(cloudState, that.cloudState) &&
+                Objects.equals(name, that.name) &&
+                Objects.equals(ipAddresses, that.ipAddresses);
     }
 
     public static class Builder extends GenericBuilder<AzureGetVirtualMachineRef> {

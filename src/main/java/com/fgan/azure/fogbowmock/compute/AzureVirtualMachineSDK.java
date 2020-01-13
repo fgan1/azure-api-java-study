@@ -20,6 +20,12 @@ import java.util.regex.Pattern;
 public interface AzureVirtualMachineSDK {
 
     // TODO(chico) - Implement tests
+    @VisibleForTesting
+    static boolean isWindowsImage(String imageOffer, String imageSku) {
+        return constainsWindownsOn(imageOffer) || constainsWindownsOn(imageSku);
+    }
+
+    // TODO(chico) - Implement tests
     static Observable<Indexable> buildVirtualMachineObservable(Azure azure, String virtualMachineName, Region region,
                                                                String resourceGroupName, NetworkInterface networkInterface,
                                                                String imagePublished, String imageOffer, String imageSku,
@@ -46,14 +52,9 @@ public interface AzureVirtualMachineSDK {
         }
         return optionsManaged
                 .withCustomData(userData)
-//                .withOSDiskSizeInGB(diskSize)
+                .withOSDiskSizeInGB(diskSize)
                 .withSize(size)
                 .createAsync();
-    }
-
-    @VisibleForTesting
-    static boolean isWindowsImage(String imageOffer, String imageSku) {
-        return constainsWindownsOn(imageOffer) || constainsWindownsOn(imageSku);
     }
 
     @VisibleForTesting
