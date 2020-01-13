@@ -1,15 +1,14 @@
 package com.fgan.azure.fogbowmock.compute;
 
 import ch.qos.logback.classic.Level;
-import cloud.fogbow.common.exceptions.InstanceNotFoundException;
-import cloud.fogbow.common.exceptions.NoAvailableResourcesException;
-import cloud.fogbow.common.exceptions.UnauthenticatedUserException;
-import cloud.fogbow.common.exceptions.UnexpectedException;
+import cloud.fogbow.common.exceptions.*;
 import com.fgan.azure.LoggerAssert;
 import com.fgan.azure.fogbowmock.common.AzureCloudUser;
 import com.fgan.azure.fogbowmock.common.Messages;
 import com.fgan.azure.fogbowmock.compute.model.AzureCreateVirtualMachineRef;
+import com.fgan.azure.fogbowmock.compute.model.AzureGetImageRef;
 import com.fgan.azure.fogbowmock.compute.model.AzureGetVirtualMachineRef;
+import com.fgan.azure.fogbowmock.network.AzureNetworkSDK;
 import com.fgan.azure.fogbowmock.util.AzureClientCacheManager;
 import com.fgan.azure.fogbowmock.volume.AzureVolumeSDK;
 import com.microsoft.azure.Page;
@@ -24,10 +23,14 @@ import com.microsoft.azure.management.resources.fluentcore.model.Indexable;
 import com.microsoft.rest.RestException;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.mockito.internal.verification.VerificationModeFactory;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -41,7 +44,8 @@ import java.util.List;
 import java.util.Optional;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({AzureClientCacheManager.class, AzureVirtualMachineSDK.class, AzureVolumeSDK.class})
+@PrepareForTest({AzureClientCacheManager.class, AzureVirtualMachineSDK.class,
+        AzureVolumeSDK.class, AzureNetworkSDK.class})
 public class AzureVirtualMachineOperationSDKTest {
 
     //    private static final Logger LOGGER = Logger.getLogger(AzureVirtualMachineOperationSDK.class);
@@ -127,9 +131,27 @@ public class AzureVirtualMachineOperationSDKTest {
         Assert.assertEquals(azureGetVirtualMachineRefExpected, azureGetVirtualMachineRef);
     }
 
+    // test case: When calling the doGetInstance method with methods mocked and throw any exception,
+    // it must verify if It retrows the same exception.
     @Test
-    public void testDoGetInstanceFail() {
-        Assert.fail();
+    public void testDoGetInstanceFailWhenThrowException()
+            throws UnauthenticatedUserException, UnexpectedException,
+            InstanceNotFoundException, NoAvailableResourcesException {
+
+        // set up
+        mockGetAzureClient();
+        String instanceId = "instanceId";
+
+        PowerMockito.mockStatic(AzureVirtualMachineSDK.class);
+        PowerMockito.when(AzureVirtualMachineSDK.getVirtualMachineById(
+                Mockito.eq(this.azure), Mockito.eq(instanceId)))
+                .thenThrow(new UnexpectedException());
+
+        // verify
+        this.expectedException.expect(UnexpectedException.class);
+
+        // exercise
+        this.azureVirtualMachineOperationSDK.doGetInstance(instanceId, this.azureCloudUser);
     }
 
     // test case: When calling the findVirtualMachineSizeByName method and find one the virtual machine size,
@@ -141,7 +163,8 @@ public class AzureVirtualMachineOperationSDKTest {
         mockGetAzureClient();
         String virtualMachineSizeNameExpected = "nameExpected";
 
-        String regionName = Region.US_EAST.name();
+        Region region = Region.US_EAST;
+        String regionName = region.name();
         PagedList<VirtualMachineSize> virtualMachines = getVirtualMachineSizesMock();
 
         VirtualMachineSize virtualMachineSizeNotMactchOne = buildVirtualMachineSizeMock("notmatch");
@@ -153,7 +176,7 @@ public class AzureVirtualMachineOperationSDKTest {
         virtualMachines.add(virtualMachineSizeNotMactchTwo);
 
         PowerMockito.mockStatic(AzureVirtualMachineSDK.class);
-        PowerMockito.when(AzureVirtualMachineSDK.getVirtualMachineSizes(Mockito.any(), Mockito.any()))
+        PowerMockito.when(AzureVirtualMachineSDK.getVirtualMachineSizes(Mockito.eq(this.azure), Mockito.eq(region)))
                 .thenReturn(virtualMachines);
 
         // exercise
@@ -173,7 +196,8 @@ public class AzureVirtualMachineOperationSDKTest {
         mockGetAzureClient();
         String virtualMachineSizeNameExpected = "nameExpected";
 
-        String regionName = Region.US_EAST.name();
+        Region region = Region.US_EAST;
+        String regionName = region.name();
         PagedList<VirtualMachineSize> virtualMachines = getVirtualMachineSizesMock();
 
         VirtualMachineSize virtualMachineSizeNotMactchOne = buildVirtualMachineSizeMock("notmatch");
@@ -183,7 +207,7 @@ public class AzureVirtualMachineOperationSDKTest {
         virtualMachines.add(virtualMachineSizeNotMactchTwo);
 
         PowerMockito.mockStatic(AzureVirtualMachineSDK.class);
-        PowerMockito.when(AzureVirtualMachineSDK.getVirtualMachineSizes(Mockito.any(), Mockito.any()))
+        PowerMockito.when(AzureVirtualMachineSDK.getVirtualMachineSizes(Mockito.eq(this.azure), Mockito.eq(region)))
                 .thenReturn(virtualMachines);
 
         // verify
@@ -206,7 +230,8 @@ public class AzureVirtualMachineOperationSDKTest {
 
         int memory = 1;
         int vcpu = 2;
-        String regionName = Region.US_EAST.name();
+        Region region = Region.US_EAST;
+        String regionName = region.name();
 
         PagedList<VirtualMachineSize> virtualMachines = getVirtualMachineSizesMock();
 
@@ -221,7 +246,7 @@ public class AzureVirtualMachineOperationSDKTest {
         virtualMachines.add(virtualMachineSizeFitsBigger);
 
         PowerMockito.mockStatic(AzureVirtualMachineSDK.class);
-        PowerMockito.when(AzureVirtualMachineSDK.getVirtualMachineSizes(Mockito.any(), Mockito.any()))
+        PowerMockito.when(AzureVirtualMachineSDK.getVirtualMachineSizes(Mockito.eq(this.azure), Mockito.eq(region)))
                 .thenReturn(virtualMachines);
 
         // exercise
@@ -244,7 +269,8 @@ public class AzureVirtualMachineOperationSDKTest {
 
         int memory = 1;
         int vcpu = 2;
-        String regionName = Region.US_EAST.name();
+        Region region = Region.US_EAST;
+        String regionName = region.name();
 
         PagedList<VirtualMachineSize> virtualMachines = getVirtualMachineSizesMock();
 
@@ -254,7 +280,7 @@ public class AzureVirtualMachineOperationSDKTest {
         virtualMachines.add(virtualMachineSizeNotFits);
 
         PowerMockito.mockStatic(AzureVirtualMachineSDK.class);
-        PowerMockito.when(AzureVirtualMachineSDK.getVirtualMachineSizes(Mockito.any(), Mockito.any()))
+        PowerMockito.when(AzureVirtualMachineSDK.getVirtualMachineSizes(Mockito.eq(this.azure), Mockito.eq(region)))
                 .thenReturn(virtualMachines);
 
         // verify
@@ -446,7 +472,7 @@ public class AzureVirtualMachineOperationSDKTest {
 
         PowerMockito.mockStatic(AzureVirtualMachineSDK.class);
         PowerMockito.when(AzureVirtualMachineSDK
-                .buildDeleteVirtualMachineCompletable(Mockito.any(), Mockito.eq(instanceId)))
+                .buildDeleteVirtualMachineCompletable(Mockito.eq(this.azure), Mockito.eq(instanceId)))
                 .thenReturn(virtualMachineCompletableSuccess);
 
         // exercise
@@ -469,7 +495,7 @@ public class AzureVirtualMachineOperationSDKTest {
         Completable virtualMachineCompletableFail = createSimpleCompletableFail();
         PowerMockito.mockStatic(AzureVirtualMachineSDK.class);
         PowerMockito.when(AzureVirtualMachineSDK
-                .buildDeleteVirtualMachineCompletable(Mockito.any(), Mockito.eq(instanceId)))
+                .buildDeleteVirtualMachineCompletable(Mockito.eq(this.azure), Mockito.eq(instanceId)))
                 .thenReturn(virtualMachineCompletableFail);
 
         // exercise
@@ -512,12 +538,13 @@ public class AzureVirtualMachineOperationSDKTest {
                 .assertEqualsInOrder(Level.ERROR, Messages.ERROR_CREATE_VM_ASYNC_BEHAVIOUR);
     }
 
-    @Ignore
+    // test case: When calling the doCreateInstance method, it must verify if It finishes without error.
     @Test
     public void testDoCreateInstanceSuccessfully()
             throws UnauthenticatedUserException, InstanceNotFoundException {
 
         // set up
+        mockGetAzureClient();
         AzureCreateVirtualMachineRef azureCreateVirtualMachineRef = AzureCreateVirtualMachineRef.builder()
                 .build();
 
@@ -534,6 +561,64 @@ public class AzureVirtualMachineOperationSDKTest {
         // verify
         Mockito.verify(this.azureVirtualMachineOperationSDK, Mockito.times(1))
                 .subscribeCreateVirtualMachine(Mockito.eq(observableMocked));
+    }
+
+    // test case: When calling the buildAzureVirtualMachineObservable method, it must verify if
+    // It calls the method with the right parameters.
+    @Test
+    public void testBuildAzureVirtualMachineObservable() throws InvalidParameterException, InstanceNotFoundException {
+        // set up
+        String imagePublishedExpected = "publisher";
+        String imageSkuExpected = "sku";
+        String imageOfferExpected = "offer";
+        AzureGetImageRef azureVirtualMachineImageExpected =
+                new AzureGetImageRef(imagePublishedExpected, imageOfferExpected, imageSkuExpected);
+        String virtualMachineNameExpected = "virtualMachineNameExpected";
+        String networkInterfaceIdExpected = "networkInterfaceIdExpected";
+        int diskSize = 1;
+        String virtualMachineSizeNameExpected = "virtualMachineSizeNameExpected";
+        String osComputeNameExpected = "osComputeNameExpected";
+        String osUserNameExpected = "osUserNameExpected";
+        String osUserPasswordExpected = "osUserPasswordExpected";
+        String regionNameExpected = "regionNameExpected";
+        String resourceGroupNameExpected = "resourceGroupNameExpected";
+        String userDataExpected = "userDataExpected";
+
+        AzureCreateVirtualMachineRef azureCreateVirtualMachineRef = AzureCreateVirtualMachineRef.builder()
+                .virtualMachineName(virtualMachineNameExpected)
+                .azureGetImageRef(azureVirtualMachineImageExpected)
+                .networkInterfaceId(networkInterfaceIdExpected)
+                .diskSize(diskSize)
+                .size(virtualMachineSizeNameExpected)
+                .osComputeName(osComputeNameExpected)
+                .osUserName(osUserNameExpected)
+                .osUserPassword(osUserPasswordExpected)
+                .regionName(regionNameExpected)
+                .resourceGroupName(resourceGroupNameExpected)
+                .userData(userDataExpected)
+                .checkAndBuild();
+
+        PowerMockito.mockStatic(AzureNetworkSDK.class);
+        NetworkInterface networkInterfaceExcepted = Mockito.mock(NetworkInterface.class);
+        PowerMockito.when(AzureNetworkSDK
+                .getNetworkInterface(Mockito.eq(this.azure), Mockito.eq(networkInterfaceIdExpected)))
+                .thenReturn(networkInterfaceExcepted);
+
+        PowerMockito.mockStatic(AzureVirtualMachineSDK.class);
+        Region regionExpected = Region.fromName(regionNameExpected);
+
+        // exercise
+        this.azureVirtualMachineOperationSDK.buildAzureVirtualMachineObservable(
+                        azureCreateVirtualMachineRef, this.azure);
+
+        // verify
+        PowerMockito.verifyStatic(AzureVirtualMachineSDK.class, VerificationModeFactory.times(1));
+        AzureVirtualMachineSDK.buildVirtualMachineObservable(
+                Mockito.eq(this.azure), Mockito.eq(virtualMachineNameExpected), Mockito.eq(regionExpected),
+                Mockito.eq(resourceGroupNameExpected), Mockito.eq(networkInterfaceExcepted),
+                Mockito.eq(imagePublishedExpected), Mockito.eq(imageOfferExpected), Mockito.eq(imageSkuExpected),
+                Mockito.eq(osUserNameExpected), Mockito.eq(osUserPasswordExpected), Mockito.eq(osComputeNameExpected),
+                Mockito.eq(userDataExpected), Mockito.eq(diskSize), Mockito.eq(virtualMachineSizeNameExpected));
     }
 
     @NotNull
