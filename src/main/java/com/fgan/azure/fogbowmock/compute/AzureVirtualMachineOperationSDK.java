@@ -48,7 +48,7 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
     }
 
     /**
-     * Create asynchronously because this operation takes a long time.
+     * Create asynchronously because this operation takes a long time to finish.
      */
     @Override
     public void doCreateInstance(AzureCreateVirtualMachineRef azureCreateVirtualMachineRef,
@@ -185,7 +185,7 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
     }
 
     /**
-     * Delete asynchronously because this operation takes a long time.
+     * Delete asynchronously because this operation takes a long time to finish.
      */
     @Override
     public void doDeleteInstance(String azureInstanceId, AzureCloudUser azureCloudUser)

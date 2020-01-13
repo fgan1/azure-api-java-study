@@ -14,4 +14,5 @@ public class Messages {
     public static final String DISK_PARAMETER_AZURE_POLICY = "The disk size must be greater than 30GB";
     public static final String MULTIPLE_NETWORKS_NOT_ALLOWED = "Multiple networks not allowed";
 
+    public static final String CREATE_NEW_AZURE_CLIENTE = "Creating a new Azure client";
 }

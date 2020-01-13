@@ -3,6 +3,8 @@ package com.fgan.azure.fogbowmock.util;
 import cloud.fogbow.common.exceptions.FogbowException;
 import cloud.fogbow.common.exceptions.UnauthenticatedUserException;
 import com.fgan.azure.fogbowmock.common.AzureCloudUser;
+import com.fgan.azure.fogbowmock.common.Messages;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -15,10 +17,8 @@ import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-// TODO(chico) - implement tests
 public class AzureClientCacheManager {
     private static final Logger LOGGER = Logger.getLogger(AzureClientCacheManager.class);
 
@@ -32,79 +32,67 @@ public class AzureClientCacheManager {
                 .build(new CacheLoader<AzureCloudUser, Azure>() {
                     @Override
                     public Azure load(AzureCloudUser azureCloudUser) throws Exception {
-                        LOGGER.debug("Creating a new Azure client");
-                        return getAzureProperly(azureCloudUser);
+                        LOGGER.debug(Messages.CREATE_NEW_AZURE_CLIENTE);
+                        return createAzure(azureCloudUser);
                     }
                 });
     }
 
     public static Azure getAzure(AzureCloudUser azureCloudUser) throws UnauthenticatedUserException {
         try {
-            LOGGER.debug("Trying to get Azure client in the cache");
             return loadingCache.get(azureCloudUser);
-        } catch (ExecutionException e) {
+        } catch (Exception e) {
             throw new UnauthenticatedUserException(e.getMessage(), e);
         }
     }
 
-    public static Azure getAzureProperly(AzureCloudUser azureCloudUser) throws FogbowException {
-        AzureTokenCredentials azureTokenCredentials = getAzureTokenCredentials(azureCloudUser);
-
+    @VisibleForTesting
+    static Azure createAzure(AzureCloudUser azureCloudUser) throws FogbowException {
         try {
+            AzureTokenCredentials azureTokenCredentials = buildAzureTokenCredentials(azureCloudUser);
             return Azure.configure()
                     .withLogLevel(LogLevel.BASIC)
                     .authenticate(azureTokenCredentials)
                     .withDefaultSubscription();
-        } catch (IOException e) {
+        } catch (IOException | Error e) {
             throw new FogbowException("It was not possible create the Azure Client", e);
         }
     }
 
-    private static AzureTokenCredentials getAzureTokenCredentials(AzureCloudUser azureCloudUser) {
+    @VisibleForTesting
+    static AzureTokenCredentials buildAzureTokenCredentials(AzureCloudUser azureCloudUser) {
         String clientId = azureCloudUser.getClientId();
         String tenantId = azureCloudUser.getTenantId();
         String clientKey = azureCloudUser.getClientKey();
-        String defaultSubscriptionId = azureCloudUser.getSubscriptionId();
+        String subscriptionId = azureCloudUser.getSubscriptionId();
 
-        final String mgmtUri = AzureEnvironment.AZURE.managementEndpoint();
-        final String authUrl = AzureEnvironment.AZURE.activeDirectoryEndpoint();
-        final String baseUrl = AzureEnvironment.AZURE.resourceManagerEndpoint();
-        final String graphUrl = AzureEnvironment.AZURE.graphEndpoint();
-        final String vaultSuffix = AzureEnvironment.AZURE.keyVaultDnsSuffix();
-        AzureEnvironment azureEnvironment = new AzureEnvironment(new HashMap<String, String>() {
-            {
-                this.put(AzureEnvironment.Endpoint.ACTIVE_DIRECTORY.toString(), authUrl.endsWith("/") ? authUrl : authUrl + "/");
-                this.put(AzureEnvironment.Endpoint.MANAGEMENT.toString(), mgmtUri);
-                this.put(AzureEnvironment.Endpoint.RESOURCE_MANAGER.toString(), baseUrl);
-                this.put(AzureEnvironment.Endpoint.GRAPH.toString(), graphUrl);
-                this.put(AzureEnvironment.Endpoint.KEYVAULT.toString(), vaultSuffix);
-            }
-        });
-        return new ApplicationTokenCredentials(clientId, tenantId, clientKey, azureEnvironment)
-                .withDefaultSubscriptionId(defaultSubscriptionId);
+        final String managementEndpoint = AzureEnvironment.AZURE.managementEndpoint();
+        final String activeDirectoryEndpoint = AzureEnvironment.AZURE.activeDirectoryEndpoint();
+        final String resourceManagerEndpoint = AzureEnvironment.AZURE.resourceManagerEndpoint();
+        final String graphEndpoint = AzureEnvironment.AZURE.graphEndpoint();
+        final String keyVaultDnsSuffix = AzureEnvironment.AZURE.keyVaultDnsSuffix();
+        AzureEnvironment azureEnvironment = getAzureEnvironment(managementEndpoint, activeDirectoryEndpoint, resourceManagerEndpoint, graphEndpoint, keyVaultDnsSuffix);
+        return getApplicationTokenCredentials(clientId, tenantId, clientKey, azureEnvironment)
+                .withDefaultSubscriptionId(subscriptionId);
     }
 
-    public enum CredentialSettings {
-        SUBSCRIPTION_ID("subscription"),
-        RESOURCE_GROUP_NAME("resourceGroupName"),
-        REGION_NAME("regionName"),
-        TENANT_ID("tenant"),
-        CLIENT_ID("client"),
-        CLIENT_KEY("key"),
-        MANAGEMENT_URI("managementURI"),
-        BASE_URL("baseURL"),
-        AUTH_URL("authURL"),
-        GRAPH_URL("graphURL");
-
-        private final String name;
-
-        private CredentialSettings(String name) {
-            this.name = name;
-        }
-
-        public String toString() {
-            return this.name;
-        }
+    @VisibleForTesting
+    static AzureEnvironment getAzureEnvironment(String managementEndpoint, String activeDirectoryEndpoint, String resourceManagerEndpoint, String graphEndpoint, String keyVaultDnsSuffix) {
+        return new AzureEnvironment(new HashMap<String, String>() {
+                {
+                    this.put(AzureEnvironment.Endpoint.ACTIVE_DIRECTORY.toString(), activeDirectoryEndpoint.endsWith("/") ? activeDirectoryEndpoint : activeDirectoryEndpoint + "/");
+                    this.put(AzureEnvironment.Endpoint.MANAGEMENT.toString(), managementEndpoint);
+                    this.put(AzureEnvironment.Endpoint.RESOURCE_MANAGER.toString(), resourceManagerEndpoint);
+                    this.put(AzureEnvironment.Endpoint.GRAPH.toString(), graphEndpoint);
+                    this.put(AzureEnvironment.Endpoint.KEYVAULT.toString(), keyVaultDnsSuffix);
+                }
+            });
     }
+
+    @VisibleForTesting
+    static ApplicationTokenCredentials getApplicationTokenCredentials(String clientId, String tenantId, String clientKey, AzureEnvironment azureEnvironment) {
+        return new ApplicationTokenCredentials(clientId, tenantId, clientKey, azureEnvironment);
+    }
+
 
 }

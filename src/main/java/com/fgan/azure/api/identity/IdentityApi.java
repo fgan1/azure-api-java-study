@@ -72,12 +72,12 @@ public class IdentityApi {
     public static AzureCloudUser getAzureCloudUser() throws Exception {
         Properties credentials = getAzureCredentialsProperties();
 
-        String clientId = credentials.getProperty(AzureClientCacheManager.CredentialSettings.CLIENT_ID.toString());
-        String tenantId = credentials.getProperty(AzureClientCacheManager.CredentialSettings.TENANT_ID.toString());
-        String clientKey = credentials.getProperty(AzureClientCacheManager.CredentialSettings.CLIENT_KEY.toString());
-        String subscriptionId = credentials.getProperty(AzureClientCacheManager.CredentialSettings.SUBSCRIPTION_ID.toString());;
-        String resourceGroupName =  credentials.getProperty(AzureClientCacheManager.CredentialSettings.RESOURCE_GROUP_NAME.toString());
-        String regionName =  credentials.getProperty(AzureClientCacheManager.CredentialSettings.REGION_NAME.toString());
+        String clientId = credentials.getProperty(CredentialSettings.CLIENT_ID.toString());
+        String tenantId = credentials.getProperty(CredentialSettings.TENANT_ID.toString());
+        String clientKey = credentials.getProperty(CredentialSettings.CLIENT_KEY.toString());
+        String subscriptionId = credentials.getProperty(CredentialSettings.SUBSCRIPTION_ID.toString());;
+        String resourceGroupName =  credentials.getProperty(CredentialSettings.RESOURCE_GROUP_NAME.toString());
+        String regionName =  credentials.getProperty(CredentialSettings.REGION_NAME.toString());
         return new AzureCloudUser("", "", clientId, tenantId,
                 clientKey, subscriptionId, resourceGroupName, regionName);
     }
@@ -163,5 +163,28 @@ public class IdentityApi {
         }
 
         throw new ServiceUnavailableException("Authentication result was null");
+    }
+
+    public enum CredentialSettings {
+        SUBSCRIPTION_ID("subscription"),
+        RESOURCE_GROUP_NAME("resourceGroupName"),
+        REGION_NAME("regionName"),
+        TENANT_ID("tenant"),
+        CLIENT_ID("client"),
+        CLIENT_KEY("key"),
+        MANAGEMENT_URI("managementURI"),
+        BASE_URL("baseURL"),
+        AUTH_URL("authURL"),
+        GRAPH_URL("graphURL");
+
+        private final String name;
+
+        private CredentialSettings(String name) {
+            this.name = name;
+        }
+
+        public String toString() {
+            return this.name;
+        }
     }
 }
