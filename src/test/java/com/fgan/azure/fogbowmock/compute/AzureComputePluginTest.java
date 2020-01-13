@@ -217,7 +217,7 @@ public class AzureComputePluginTest {
         AzureGetImageRef azureGetImageRef = new AzureGetImageRef("", "", "");
         PowerMockito.mockStatic(AzureImageOperationUtil.class);
         Mockito.when(AzureImageOperationUtil.buildAzureVirtualMachineImageBy(Mockito.eq(imageId)))
-            .thenReturn(azureGetImageRef);
+                .thenReturn(azureGetImageRef);
 
         String virtualMachineName = "virtualMachineName";
         PowerMockito.mockStatic(AzureResourceToInstancePolicy.class);
@@ -293,14 +293,29 @@ public class AzureComputePluginTest {
 
         // verify
         Mockito.verify(this.azureVirtualMachineOperation, Mockito.times(1)).findVirtualMachineSize(
-                Mockito.eq(memory), Mockito.eq(vcpu), Mockito.eq(regionName) ,Mockito.eq(this.azureCloudUser)
+                Mockito.eq(memory), Mockito.eq(vcpu), Mockito.eq(regionName), Mockito.eq(this.azureCloudUser)
         );
     }
 
-    // TODO(chico) - Finish implementation
+    // test case: When calling the deleteInstance method,
+    // it must verify if it calls the method with right parameters.
     @Test
-    public void testDeleteInstance() {
-        Assert.fail();
+    public void testDeleteInstanceSuccessfully() throws FogbowException {
+        // set up
+        ComputeOrder computeOrder = Mockito.mock(ComputeOrder.class);
+        String instanceId = "instanceId";
+        Mockito.when(computeOrder.getInstanceId()).thenReturn(instanceId);
+
+        Mockito.doNothing()
+                .when(this.azureVirtualMachineOperation)
+                .doDeleteInstance(Mockito.any(), Mockito.any());
+
+        // exercise
+        this.azureComputePlugin.deleteInstance(computeOrder, this.azureCloudUser);
+
+        // verify
+        Mockito.verify(this.azureVirtualMachineOperation, Mockito.times(1))
+                .doDeleteInstance(Mockito.eq(instanceId), Mockito.eq(this.azureCloudUser));
     }
 
 }

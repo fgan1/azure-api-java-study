@@ -3,19 +3,19 @@ package com.fgan.azure.fogbowmock.util;
 import cloud.fogbow.common.exceptions.InvalidParameterException;
 import cloud.fogbow.ras.core.models.orders.Order;
 import com.fgan.azure.fogbowmock.common.AzureCloudUser;
+import com.fgan.azure.fogbowmock.common.Messages;
+import com.google.common.annotations.VisibleForTesting;
 
 public class AzureIdBuilder {
 
     // /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachines/{virtualMachineName}
-    private static String VIRTUAL_MACHINE_STRUCTURE =
+    @VisibleForTesting static String VIRTUAL_MACHINE_STRUCTURE =
             "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachines/%s";
     // /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkInterfaces/{networkInterfaceName}
-    private static String NETWORK_INTERFACE_STRUCTURE =
+    @VisibleForTesting static String NETWORK_INTERFACE_STRUCTURE =
             "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/networkInterfaces/%s";
     // /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/disks/{diskName}
-    private static String DISK_STRUCTURE =
-            "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/disks/%s";
-    private static final String BIGGER_STRUCTURE = NETWORK_INTERFACE_STRUCTURE;
+    @VisibleForTesting static final String BIGGER_STRUCTURE = NETWORK_INTERFACE_STRUCTURE;
 
 
     public static AzureIdBuilderConfigured configure(AzureCloudUser azureCloudUser) {
@@ -40,24 +40,20 @@ public class AzureIdBuilder {
 
         /**
          * It checks the resource name size in relation to Database Instance Order Id Maximum Size.
-         * It happens because the resource name makes up the instance Id.
+         * It happens because the resource name makes up the instance Id. Also, it might happen due
+         * to the fact that the user choose some values such as resourceName and resourceGroupName.
          */
-        // TODO (chico) - implement tests
         public void checkIdSizePolicy(String resourceName) throws InvalidParameterException {
             String idBuilt = buildId(BIGGER_STRUCTURE, resourceName);
             int sizeExceeded = idBuilt.length() - Order.FIELDS_MAX_SIZE;
             if (sizeExceeded > 0) {
-                // TODO (chico) - add in the contanst
-                String msg = "The resource name exceeded %s characters of the limit";
-                throw new InvalidParameterException(String.format(msg, sizeExceeded));
+                throw new InvalidParameterException(
+                        String.format(Messages.ERROR_ID_LIMIT_SIZE_EXCEEDED, sizeExceeded));
             }
         }
 
-        public String buildDiskId(String diskName) {
-            return buildId(DISK_STRUCTURE, diskName);
-        }
-
-        private String buildId(String structure, String name) {
+        @VisibleForTesting
+        String buildId(String structure, String name) {
             String subscriptionId = this.azureCloudUser.getSubscriptionId();
             String resourceGroupName = this.azureCloudUser.getResourceGroupName();
             return String.format(structure, subscriptionId, resourceGroupName, name);

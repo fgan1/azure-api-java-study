@@ -9,7 +9,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class AzureGeneralPolicyTest {
