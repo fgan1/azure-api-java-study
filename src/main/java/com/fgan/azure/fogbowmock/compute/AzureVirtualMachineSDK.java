@@ -7,6 +7,7 @@ import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.compute.VirtualMachineSize;
 import com.microsoft.azure.management.compute.VirtualMachineSizes;
+import com.microsoft.azure.management.compute.VirtualMachines;
 import com.microsoft.azure.management.network.NetworkInterface;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azure.management.resources.fluentcore.model.Indexable;
@@ -19,20 +20,20 @@ import java.util.regex.Pattern;
 
 public interface AzureVirtualMachineSDK {
 
-    // TODO(chico) - Implement tests
     @VisibleForTesting
     static boolean isWindowsImage(String imageOffer, String imageSku) {
         return constainsWindownsOn(imageOffer) || constainsWindownsOn(imageSku);
     }
 
-    // TODO(chico) - Implement tests
     static Observable<Indexable> buildVirtualMachineObservable(Azure azure, String virtualMachineName, Region region,
                                                                String resourceGroupName, NetworkInterface networkInterface,
                                                                String imagePublished, String imageOffer, String imageSku,
                                                                String osUserName, String osUserPassword, String osComputeName,
                                                                String userData, int diskSize, String size) {
 
-        VirtualMachine.DefinitionStages.WithOS osChoosen = azure.virtualMachines()
+        VirtualMachines virtualMachine = getVirtualMachineObject(azure);
+
+        VirtualMachine.DefinitionStages.WithOS osChoosen = virtualMachine
                 .define(virtualMachineName)
                 .withRegion(region)
                 .withExistingResourceGroup(resourceGroupName)
@@ -57,6 +58,12 @@ public interface AzureVirtualMachineSDK {
                 .createAsync();
     }
 
+    // This class is used only for test proposes
+    @VisibleForTesting
+    static VirtualMachines getVirtualMachineObject(Azure azure) {
+        return azure.virtualMachines();
+    }
+
     @VisibleForTesting
     static boolean constainsWindownsOn(String text) {
         String regex = ".*windows.*";
@@ -65,6 +72,7 @@ public interface AzureVirtualMachineSDK {
         return matcherOffer.find();
     }
 
+    @VisibleForTesting
     static PagedList<VirtualMachineSize> getVirtualMachineSizes(Azure azure, Region region)
             throws UnexpectedException {
 
