@@ -16,4 +16,8 @@ public class Messages {
 
     public static final String CREATE_NEW_AZURE_CLIENTE = "Creating a new Azure client";
     public static final String ERROR_ID_LIMIT_SIZE_EXCEEDED = "The resource name exceeded %s characters of the limit";
+    public static final String SEEK_VIRTUAL_MACHINE_SIZE_NAME =
+            "Seek for the Virtual Machine Size that fits with memory(%s) and vCpu(%s) at region %s";
+    public static final String SEEK_VIRTUAL_MACHINE_SIZE_BY_NAME =
+            "Seek for the Virtual Machine Size by name %s at region %s";
 }

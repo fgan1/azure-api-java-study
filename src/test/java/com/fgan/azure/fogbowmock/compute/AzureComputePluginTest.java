@@ -292,7 +292,7 @@ public class AzureComputePluginTest {
         this.azureComputePlugin.getVirtualMachineSizeName(computeOrder, this.azureCloudUser);
 
         // verify
-        Mockito.verify(this.azureVirtualMachineOperation, Mockito.times(1)).findVirtualMachineSize(
+        Mockito.verify(this.azureVirtualMachineOperation, Mockito.times(1)).findVirtualMachineSizeName(
                 Mockito.eq(memory), Mockito.eq(vcpu), Mockito.eq(regionName), Mockito.eq(this.azureCloudUser)
         );
     }

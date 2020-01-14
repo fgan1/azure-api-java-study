@@ -14,8 +14,8 @@ public interface AzureVirtualMachineOperation {
                           AzureCloudUser azureCloudUser)
             throws UnauthenticatedUserException, UnexpectedException, InstanceNotFoundException;
 
-    String findVirtualMachineSize(int memoryRequired, int vCpuRequired,
-                                  String regionName, AzureCloudUser azureCloudUser)
+    String findVirtualMachineSizeName(int memoryRequired, int vCpuRequired,
+                                      String regionName, AzureCloudUser azureCloudUser)
             throws UnauthenticatedUserException, NoAvailableResourcesException, UnexpectedException;
 
     AzureGetVirtualMachineRef doGetInstance(String azureInstanceId, AzureCloudUser azureCloudUser)

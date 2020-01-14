@@ -219,10 +219,10 @@ public class AzureVirtualMachineOperationSDKTest {
     }
 
 
-    // test case: When calling the findVirtualMachineSize method with two virtual machine size that
+    // test case: When calling the findVirtualMachineSizeName method with two virtual machine size name that
     // fits in the requirements, it must verify if It returns the smaller virtual machine size.
     @Test
-    public void testFindVirtualMachineSizeSuccessfully()
+    public void testFindVirtualMachineSizeNameSuccessfully()
             throws NoAvailableResourcesException, UnauthenticatedUserException, UnexpectedException {
 
         // set up
@@ -251,17 +251,17 @@ public class AzureVirtualMachineOperationSDKTest {
 
         // exercise
         String virtualMachineSize = this.azureVirtualMachineOperationSDK
-                .findVirtualMachineSize(memory, vcpu, regionName, this.azureCloudUser);
+                .findVirtualMachineSizeName(memory, vcpu, regionName, this.azureCloudUser);
 
         // verify
         Assert.assertNotEquals(virtualMachineSizeFitsBigger.name(), virtualMachineSize);
         Assert.assertEquals(virtualMachineSizeFitsSmaller.name(), virtualMachineSize);
     }
 
-    // test case: When calling the findVirtualMachineSize method with any virtual machine size that
+    // test case: When calling the findVirtualMachineSizeName method with any virtual machine size name that
     // fits in the requirements, it must verify if It throws a NoAvailableResourcesException.
     @Test
-    public void testFindVirtualMachineSizeFail()
+    public void testFindVirtualMachineSizeNameFail()
             throws NoAvailableResourcesException, UnauthenticatedUserException, UnexpectedException {
 
         // set up
@@ -287,10 +287,10 @@ public class AzureVirtualMachineOperationSDKTest {
         this.expectedException.expect(NoAvailableResourcesException.class);
 
         // exercise
-        this.azureVirtualMachineOperationSDK.findVirtualMachineSize(memory, vcpu, regionName, this.azureCloudUser);
+        this.azureVirtualMachineOperationSDK.findVirtualMachineSizeName(memory, vcpu, regionName, this.azureCloudUser);
     }
 
-    // test case: When calling the findVirtualMachineSize method with throw an Unauthorized
+    // test case: When calling the findVirtualMachineSizeName method with throws an Unauthorized
     // exception, it must verify if It throws an Unauthorized exception.
     @Test
     public void testFindVirtualMachineSizeFailWhenThrowUnauthorized()
@@ -306,7 +306,7 @@ public class AzureVirtualMachineOperationSDKTest {
         this.expectedException.expect(UnauthenticatedUserException.class);
 
         // exercise
-        this.azureVirtualMachineOperationSDK.findVirtualMachineSize(
+        this.azureVirtualMachineOperationSDK.findVirtualMachineSizeName(
                 memory, vcpu, regionName, this.azureCloudUser);
     }
 

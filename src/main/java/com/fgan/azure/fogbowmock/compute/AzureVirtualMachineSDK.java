@@ -20,18 +20,13 @@ import java.util.regex.Pattern;
 
 public interface AzureVirtualMachineSDK {
 
-    @VisibleForTesting
-    static boolean isWindowsImage(String imageOffer, String imageSku) {
-        return constainsWindownsOn(imageOffer) || constainsWindownsOn(imageSku);
-    }
-
     static Observable<Indexable> buildVirtualMachineObservable(Azure azure, String virtualMachineName, Region region,
                                                                String resourceGroupName, NetworkInterface networkInterface,
                                                                String imagePublished, String imageOffer, String imageSku,
                                                                String osUserName, String osUserPassword, String osComputeName,
                                                                String userData, int diskSize, String size) {
 
-        VirtualMachines virtualMachine = getVirtualMachineObject(azure);
+        VirtualMachines virtualMachine = getVirtualMachinesObject(azure);
 
         VirtualMachine.DefinitionStages.WithOS osChoosen = virtualMachine
                 .define(virtualMachineName)
@@ -58,26 +53,12 @@ public interface AzureVirtualMachineSDK {
                 .createAsync();
     }
 
-    // This class is used only for test proposes
-    @VisibleForTesting
-    static VirtualMachines getVirtualMachineObject(Azure azure) {
-        return azure.virtualMachines();
-    }
-
-    @VisibleForTesting
-    static boolean constainsWindownsOn(String text) {
-        String regex = ".*windows.*";
-        Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
-        Matcher matcherOffer = pattern.matcher(text);
-        return matcherOffer.find();
-    }
-
-    @VisibleForTesting
     static PagedList<VirtualMachineSize> getVirtualMachineSizes(Azure azure, Region region)
             throws UnexpectedException {
 
         try {
-            VirtualMachineSizes sizes = azure.virtualMachines().sizes();
+            VirtualMachines virtualMachinesObject = getVirtualMachinesObject(azure);
+            VirtualMachineSizes sizes = virtualMachinesObject.sizes();
             return sizes.listByRegion(region);
         } catch (RuntimeException e) {
             throw new UnexpectedException(e.getMessage(), e);
@@ -88,7 +69,8 @@ public interface AzureVirtualMachineSDK {
             throws UnexpectedException {
 
         try {
-            return Optional.ofNullable(azure.virtualMachines().getById(virtualMachineId));
+            VirtualMachines virtualMachinesObject = getVirtualMachinesObject(azure);
+            return Optional.ofNullable(virtualMachinesObject.getById(virtualMachineId));
         } catch (RuntimeException e) {
             throw new UnexpectedException(e.getMessage(), e);
         }
@@ -96,5 +78,24 @@ public interface AzureVirtualMachineSDK {
 
     static Completable buildDeleteVirtualMachineCompletable(Azure azure, String virtualMachineId) {
         return azure.virtualMachines().deleteByIdAsync(virtualMachineId);
+    }
+
+    @VisibleForTesting
+    static boolean isWindowsImage(String imageOffer, String imageSku) {
+        return constainsWindownsOn(imageOffer) || constainsWindownsOn(imageSku);
+    }
+
+    @VisibleForTesting
+    static boolean constainsWindownsOn(String text) {
+        String regex = ".*windows.*";
+        Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+        Matcher matcherOffer = pattern.matcher(text);
+        return matcherOffer.find();
+    }
+
+    // This class is used only for test proposes. It is necessary because was not possible mock the Azure(final class)
+    @VisibleForTesting
+    static VirtualMachines getVirtualMachinesObject(Azure azure) {
+        return azure.virtualMachines();
     }
 }

@@ -6,7 +6,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-public class AzureImageOperationTest {
+public class AzureImageOperationUtilTest {
 
     // test case:
     @Test

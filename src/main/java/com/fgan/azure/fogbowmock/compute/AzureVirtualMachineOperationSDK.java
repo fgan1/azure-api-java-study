@@ -113,13 +113,12 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
     }
 
     @Override
-    public String findVirtualMachineSize(int memoryRequired, int vCpuRequired,
-                                         String regionName, AzureCloudUser azureCloudUser)
+    public String findVirtualMachineSizeName(int memoryRequired, int vCpuRequired,
+                                             String regionName, AzureCloudUser azureCloudUser)
             throws UnauthenticatedUserException, NoAvailableResourcesException,
             UnexpectedException {
 
-        LOGGER.debug(String.format("Trying to find the VM size that fits with memory(%s) and vCpu(%s) at region %s"
-                , memoryRequired, vCpuRequired, regionName));
+        LOGGER.debug(String.format(Messages.SEEK_VIRTUAL_MACHINE_SIZE_NAME, memoryRequired, vCpuRequired, regionName));
         Azure azure = AzureClientCacheManager.getAzure(azureCloudUser);
 
         Region region = Region.findByLabelOrName(regionName);
@@ -172,16 +171,17 @@ public class AzureVirtualMachineOperationSDK implements AzureVirtualMachineOpera
     }
 
     @VisibleForTesting
-    VirtualMachineSize findVirtualMachineSizeByName(String virtualMachineSizeNameWanted, String regionName, Azure azure)
+    VirtualMachineSize findVirtualMachineSizeByName(String virtualMachineSizeNameWanted,
+                                                    String regionName, Azure azure)
             throws NoAvailableResourcesException, UnexpectedException {
 
+        LOGGER.debug(String.format(Messages.SEEK_VIRTUAL_MACHINE_SIZE_BY_NAME, virtualMachineSizeNameWanted, regionName));
         Region region = Region.findByLabelOrName(regionName);
         PagedList<VirtualMachineSize> virtualMachineSizes = AzureVirtualMachineSDK.getVirtualMachineSizes(azure, region);
         return virtualMachineSizes.stream()
                 .filter((virtualMachineSize) -> virtualMachineSizeNameWanted.equals(virtualMachineSize.name()))
                 .findFirst()
-                .orElseThrow(() -> new NoAvailableResourcesException(
-                        "There is no virtual machine that fits with the requirements"));
+                .orElseThrow(() -> new NoAvailableResourcesException());
     }
 
     /**
