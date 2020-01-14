@@ -8,7 +8,7 @@ import com.fgan.azure.fogbowmock.common.AzureCloudUser;
 import com.fgan.azure.fogbowmock.compute.model.AzureCreateVirtualMachineRef;
 import com.fgan.azure.fogbowmock.compute.model.AzureGetVirtualMachineRef;
 
-public interface AzureVirtualMachineOperation<T> {
+public interface AzureVirtualMachineOperation {
 
     void doCreateInstance(AzureCreateVirtualMachineRef azureCreateVirtualMachineRef,
                           AzureCloudUser azureCloudUser)

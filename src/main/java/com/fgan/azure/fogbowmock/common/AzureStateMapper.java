@@ -14,10 +14,9 @@ public class AzureStateMapper {
     public static final String SUCCEEDED_STATE = "Succeeded";
 
     public static InstanceState map(ResourceType type, String state) {
-        state = state.toLowerCase();
         switch (type) {
             case COMPUTE:
-                // cloud state values: [Creating, Succeded]
+                // cloud state values: [sreating, succeded]
                 switch (state) {
                     case CREATING_STATE:
                         return InstanceState.CREATING;

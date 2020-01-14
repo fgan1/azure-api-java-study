@@ -8,7 +8,7 @@ import com.sun.istack.internal.Nullable;
 
 import java.util.function.BiFunction;
 
-public class AzureResourceToInstancePolicy {
+public class AzureInstancePolicy {
 
     /**
      * Generate the Azure Resource Name and check if It's in accordance with the policy.
@@ -45,13 +45,13 @@ public class AzureResourceToInstancePolicy {
         return generateFogbowIstanceId(resourceName, azureCloudUser, builderId);
     }
 
-    public static String generateFogbowInstanceIdBy(ComputeOrder order,
-                                                    AzureCloudUser azureCloudUser,
-                                                    BiFunction<String, AzureCloudUser, String> builderId)
+    public static String generateFogbowInstanceIdBy(ComputeOrder computeOrder, AzureCloudUser azureCloudUser)
             throws InvalidParameterException {
 
-        String resourceName = generateAzureResourceNameBy(order, azureCloudUser);
-        return generateFogbowIstanceId(resourceName, azureCloudUser, builderId);
+        String resourceName = generateAzureResourceNameBy(computeOrder, azureCloudUser);
+        return AzureIdBuilder
+                .configure(azureCloudUser)
+                .buildVirtualMachineId(resourceName);
     }
 
     private static String generateFogbowIstanceId(String resourceName,

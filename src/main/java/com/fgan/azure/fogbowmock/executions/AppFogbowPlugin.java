@@ -2,9 +2,7 @@ package com.fgan.azure.fogbowmock.executions;
 
 import cloud.fogbow.ras.core.models.UserData;
 import cloud.fogbow.ras.core.models.orders.ComputeOrder;
-import com.fgan.azure.fogbowmock.image.AzureImageOperationSDK;
 import com.fgan.azure.fogbowmock.image.AzureImageOperationUtil;
-import com.fgan.azure.fogbowmock.util.AzureResourceToInstancePolicy;
 import com.fgan.azure.util.PropertiesUtil;
 
 import java.util.ArrayList;

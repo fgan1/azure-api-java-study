@@ -13,7 +13,7 @@ import org.mockito.Mockito;
 
 import java.util.function.BiFunction;
 
-public class AzureResourceToInstancePolicyTest {
+public class AzureInstancePolicyTest {
 
     private AzureCloudUser azureCloudUser;
 
@@ -34,7 +34,7 @@ public class AzureResourceToInstancePolicyTest {
         String resourceNameExpected = SystemConstants.FOGBOW_INSTANCE_NAME_PREFIX + orderId;
 
         // exercise
-        String resourceName = AzureResourceToInstancePolicy.generateAzureResourceNameBy(order.getId(),
+        String resourceName = AzureInstancePolicy.generateAzureResourceNameBy(order.getId(),
                 this.azureCloudUser);
 
         // verify
@@ -53,7 +53,8 @@ public class AzureResourceToInstancePolicyTest {
         Mockito.when(computeOrder.getName()).thenReturn(resourceNameExpected);
 
         // exercise
-        String resourceName = AzureResourceToInstancePolicy.generateAzureResourceNameBy(computeOrder, this.azureCloudUser);
+        String resourceName = AzureInstancePolicy.generateAzureResourceNameBy(
+                computeOrder, this.azureCloudUser);
 
         // verify
         Assert.assertEquals(resourceNameExpected, resourceName);
@@ -71,15 +72,13 @@ public class AzureResourceToInstancePolicyTest {
         String orderId = "orderId";
         Mockito.when(computeOrder.getId()).thenReturn(orderId);
         Mockito.when(computeOrder.getName()).thenReturn(resourceName);
-        BiFunction<String, AzureCloudUser, String> builder = (name, cloudUser) ->
-                AzureIdBuilder.configure(cloudUser).buildVirtualMachineId(name);
 
         String instanceIdExpected = AzureIdBuilder.configure(this.azureCloudUser)
                 .buildVirtualMachineId(resourceName);
 
         // exercise
-        String instanceId = AzureResourceToInstancePolicy
-                .generateFogbowInstanceIdBy(computeOrder, this.azureCloudUser, builder);
+        String instanceId = AzureInstancePolicy
+                .generateFogbowInstanceIdBy(computeOrder, this.azureCloudUser);
 
         // verify
         Assert.assertEquals(instanceIdExpected, instanceId);
@@ -104,7 +103,7 @@ public class AzureResourceToInstancePolicyTest {
                 .buildVirtualMachineId(resourceNameExpected);
 
         // exercise
-        String instanceId = AzureResourceToInstancePolicy
+        String instanceId = AzureInstancePolicy
                 .generateFogbowInstanceIdBy(order.getId(), this.azureCloudUser, builder);
 
         // verify

@@ -16,7 +16,7 @@ import com.fgan.azure.fogbowmock.image.AzureImageOperationUtil;
 import com.fgan.azure.fogbowmock.util.AzureConstants;
 import com.fgan.azure.fogbowmock.util.AzureGeneralPolicy;
 import com.fgan.azure.fogbowmock.util.AzureIdBuilder;
-import com.fgan.azure.fogbowmock.util.AzureResourceToInstancePolicy;
+import com.fgan.azure.fogbowmock.util.AzureInstancePolicy;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Properties;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({AzureGeneralPolicy.class, AzureImageOperationUtil.class, AzureResourceToInstancePolicy.class})
+@PrepareForTest({AzureGeneralPolicy.class, AzureImageOperationUtil.class, AzureInstancePolicy.class})
 public class AzureComputePluginTest {
 
     @Rule
@@ -43,7 +43,7 @@ public class AzureComputePluginTest {
     private AzureComputePlugin azureComputePlugin;
     private AzureCloudUser azureCloudUser;
     private String defaultNetworkInterfaceName;
-    private AzureVirtualMachineOperation<AzureVirtualMachineOperationSDK> azureVirtualMachineOperation;
+    private AzureVirtualMachineOperation azureVirtualMachineOperation;
 
     @Before
     public void setUp() {
@@ -220,8 +220,8 @@ public class AzureComputePluginTest {
                 .thenReturn(azureGetImageRef);
 
         String virtualMachineName = "virtualMachineName";
-        PowerMockito.mockStatic(AzureResourceToInstancePolicy.class);
-        PowerMockito.when(AzureResourceToInstancePolicy.
+        PowerMockito.mockStatic(AzureInstancePolicy.class);
+        PowerMockito.when(AzureInstancePolicy.
                 generateAzureResourceNameBy(Mockito.eq(computeOrder), Mockito.eq(this.azureCloudUser)))
                 .thenReturn(virtualMachineName);
 

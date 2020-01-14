@@ -17,7 +17,7 @@ import com.fgan.azure.fogbowmock.image.AzureImageOperationUtil;
 import com.fgan.azure.fogbowmock.util.AzureConstants;
 import com.fgan.azure.fogbowmock.util.AzureGeneralPolicy;
 import com.fgan.azure.fogbowmock.util.AzureIdBuilder;
-import com.fgan.azure.fogbowmock.util.AzureResourceToInstancePolicy;
+import com.fgan.azure.fogbowmock.util.AzureInstancePolicy;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.log4j.Logger;
 
@@ -28,7 +28,7 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
 
     private static final Logger LOGGER = Logger.getLogger(AzureComputePlugin.class);
 
-    private AzureVirtualMachineOperation<AzureVirtualMachineOperationSDK> azureVirtualMachineOperation;
+    private AzureVirtualMachineOperation azureVirtualMachineOperation;
     //    private final DefaultLaunchCommandGenerator launchCommandGenerator;
     private final String defaultNetworkInterfaceName;
 
@@ -61,7 +61,7 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
         int diskSize = AzureGeneralPolicy.getDisk(computeOrder);
         AzureGetImageRef azureVirtualMachineImage = AzureImageOperationUtil
                 .buildAzureVirtualMachineImageBy(computeOrder.getImageId());
-        String virtualMachineName = AzureResourceToInstancePolicy
+        String virtualMachineName = AzureInstancePolicy
                 .generateAzureResourceNameBy(computeOrder, azureCloudUser);
         String userData = getUserData();
         String osUserName = computeOrder.getId();
@@ -102,8 +102,7 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
             throws UnauthenticatedUserException, UnexpectedException, InstanceNotFoundException, InvalidParameterException {
 
         this.azureVirtualMachineOperation.doCreateInstance(azureCreateVirtualMachineRef, azureCloudUser);
-        return AzureResourceToInstancePolicy.generateFogbowInstanceIdBy(computeOrder, azureCloudUser,
-                (name, cloudUser) -> AzureIdBuilder.configure(cloudUser).buildVirtualMachineId(name));
+        return AzureInstancePolicy.generateFogbowInstanceIdBy(computeOrder, azureCloudUser);
     }
 
     @VisibleForTesting
@@ -127,8 +126,7 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
                 throw new FogbowException(com.fgan.azure.fogbowmock.common.Messages.MULTIPLE_NETWORKS_NOT_ALLOWED);
             }
 
-            return networkIds.stream()
-                    .findFirst().get();
+            return networkIds.stream().findFirst().get();
         }
     }
 
@@ -149,17 +147,17 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
     ComputeInstance buildComputeInstance(AzureGetVirtualMachineRef azureGetVirtualMachineRef,
                                          AzureCloudUser azureCloudUser) {
 
-        String name = azureGetVirtualMachineRef.getName();
-        String id = AzureIdBuilder
+        String virtualMachineName = azureGetVirtualMachineRef.getName();
+        String virtualMachineId = AzureIdBuilder
                 .configure(azureCloudUser)
-                .buildVirtualMachineId(name);
+                .buildVirtualMachineId(virtualMachineName);
         String cloudState = azureGetVirtualMachineRef.getCloudState();
         int vCPU = azureGetVirtualMachineRef.getvCPU();
         int memory = azureGetVirtualMachineRef.getMemory();
         int disk = azureGetVirtualMachineRef.getDisk();
         List<String> ipAddresses = azureGetVirtualMachineRef.getIpAddresses();
 
-        return new ComputeInstance(id, cloudState, name, vCPU, memory, disk, ipAddresses);
+        return new ComputeInstance(virtualMachineId, cloudState, virtualMachineName, vCPU, memory, disk, ipAddresses);
     }
 
     @Override
@@ -173,7 +171,7 @@ public class AzureComputePlugin implements ComputePlugin<AzureCloudUser> {
     }
 
     @VisibleForTesting
-    void setAzureVirtualMachineOperation(AzureVirtualMachineOperation<AzureVirtualMachineOperationSDK> azureVirtualMachineOperation) {
+    void setAzureVirtualMachineOperation(AzureVirtualMachineOperation azureVirtualMachineOperation) {
         this.azureVirtualMachineOperation = azureVirtualMachineOperation;
     }
 }
