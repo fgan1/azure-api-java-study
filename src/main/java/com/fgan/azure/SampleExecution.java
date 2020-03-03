@@ -191,4 +191,12 @@ public class SampleExecution {
         return this.instance;
     }
 
+    /**
+     * Image Samples
+     */
+    public SampleExecution removeResourceGroup(Azure azure, String name) {
+        ManagerApi.removeResourceGroup(azure, name);
+        return this.instance;
+    }
+
 }

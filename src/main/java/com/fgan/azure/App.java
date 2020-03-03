@@ -68,6 +68,10 @@ public class App {
                  * Images
                  */
 //                .printImageInformation(azure)
+                /**
+                 * Management
+                 */
+//                .removeResourceGroup(azure, name)
                 .finish();
 
         runningForeverUntilYouStopIt();
