@@ -27,6 +27,14 @@ public class NetworkApi extends ApiAzure {
         }
     }
 
+    public static Network getNetwork(Azure azure, String networkId) throws Exception {
+        try {
+            return azure.networks().getById(networkId);
+        } catch (RuntimeException e) {
+            throw new UnexpectedException(e.getMessage(), e);
+        }
+    }
+
     Network getNetwork(String networkId) {
         return this.azure.networks().getById(networkId);
     }

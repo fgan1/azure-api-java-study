@@ -18,6 +18,7 @@ public class PropertiesUtil {
 
     private static final String SUBSCRIPTION_PROPS = "subscription";
     private static final String NETWORK_INTEFACE_ID_PROPS = "network_interface_id";
+    private static final String NETWORK_ID_PROPS = "network_id";
     private static final String RESOURCE_GROUP_NAME_PROPS = "resource_group_name";
     private static final String CLOUD_INIT_PATH_PROPS = "cloud_init_path";
     private static final String USER_NAME_PROPS = "user_name";
@@ -49,6 +50,10 @@ public class PropertiesUtil {
 
     public static String getNetworkInterfaceIdProp() {
         return getProps(NETWORK_INTEFACE_ID_PROPS);
+    }
+
+    public static String getNetworkIdProp() {
+        return getProps(NETWORK_ID_PROPS);
     }
 
     public static String getClientIdProps() {

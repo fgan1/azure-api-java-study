@@ -12,6 +12,7 @@ import com.microsoft.azure.management.compute.AvailabilitySet;
 import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.compute.VirtualMachineSize;
 import com.microsoft.azure.management.compute.VirtualMachineSizes;
+import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.network.NetworkInterface;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
@@ -31,20 +32,20 @@ public class ComputeApi {
     private static final String IMAGE_PUBLISHER_DEFAULT = "Canonical";
     private static final String IMAGE_OFFER_DEFAULT = "UbuntuServer";
     private static final String IMAGE_SKU_DEFAULT = "18.04-LTS";
-    private static final int DISK_SIZE_DEFAULT = 15;
+    private static final int DISK_SIZE_DEFAULT = 31;
 
     /**
      * Create Virtual Machine.
      * Sample to firts tests.
      */
     public static void runSambleOneSync(Azure azure) throws Exception {
-        String networkInterfaceId = PropertiesUtil.getNetworkInterfaceIdProp();
+        String networkId = PropertiesUtil.getNetworkIdProp();
         String resourceGroupName = PropertiesUtil.getResourceGroupNameProp();
 
-        NetworkInterface networkInterface = new NetworkApi(azure).getNetworkInterface(azure, networkInterfaceId);
+        Network network = new NetworkApi(azure).getNetwork(azure, networkId);
         String userData = PropertiesUtil.getUserData();
         ResourceGroup resourceGroup = ManagerApi.getResourceGroup(azure, resourceGroupName);
-        VirtualMachine virtualMachine = createVirtualMachineSync(azure, networkInterface, userData, resourceGroup.name());
+        VirtualMachine virtualMachine = createVirtualMachineSync(azure, network, userData, resourceGroup.name());
         GeneralPrintUtil.printLines(virtualMachine::id,
                 virtualMachine::vmId,
                 virtualMachine::computerName,
@@ -62,15 +63,16 @@ public class ComputeApi {
      * -- (3) PowerState/running|Succeeded
      */
     public static void createComputeFogbowWithObservebla(Azure azure) throws Exception {
-        String networkInterfaceId = PropertiesUtil.getNetworkInterfaceIdProp();
+        String networkId = PropertiesUtil.getNetworkIdProp();
         String resourceGroupName = PropertiesUtil.getResourceGroupNameProp();
 
-        NetworkInterface networkInterface = new NetworkApi(azure).getNetworkInterface(azure, networkInterfaceId);
+        networkId = AzureIDBuilderGeneral.buildNetworkId(networkId);
+        Network network = new NetworkApi(azure).getNetwork(azure, networkId);
         String userData = PropertiesUtil.getUserData();
         ResourceGroup resourceGroup = ManagerApi.getResourceGroup(azure, resourceGroupName);
 
         Observable<Indexable> virtualMachineAsync =
-                createVirtualMachineAsync(azure, networkInterface, userData, resourceGroup);
+                createVirtualMachineAsync(azure, network, userData, resourceGroup);
         virtualMachineAsync.subscribe(v -> {
             System.out.println("Index" + v.key().toString());
         }, err -> {
@@ -89,7 +91,7 @@ public class ComputeApi {
         while (count < 16) {
             try {
                 VirtualMachine virtualMachine = ComputeApi.getVirtualMachineById(azure, virtualMachineId);
-                System.out.println("VirtualMachine state:");
+                System.out.println(String.format("VirtualMachine state of (%s):", virtualMachineId));
                 GeneralPrintUtil.printLines(virtualMachine::name, virtualMachine::powerState, virtualMachine::provisioningState);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -199,25 +201,25 @@ public class ComputeApi {
     }
 
     private static Observable<Indexable> createVirtualMachineAsync(Azure azure,
-                                                                   NetworkInterface networkInterface,
+                                                                   Network network,
                                                                    String userData,
                                                                    ResourceGroup resourceGroup) {
 
         VirtualMachine.DefinitionStages.WithCreate virtualMachineContextCreation =
-                createVirtualMachineContextCreation(azure, networkInterface, userData, resourceGroup.name());
+                createVirtualMachineContextCreation(azure, network, userData, resourceGroup.name());
         return virtualMachineContextCreation.createAsync();
     }
 
     public static Observable<Indexable> createVirtualMachineAsync(
             Azure azure, String virtualMachineName, Region region,
-            String resourceGroupName, NetworkInterface networkInterface,
+            String resourceGroupName, Network network,
             String imagePublished, String imageOffer, String imageSku,
             String osUserName, String osUserPassword, String osComputeName,
             String userData, int diskSize, String size) {
 
         VirtualMachine.DefinitionStages.WithCreate virtualMachineContextCreation =
                 createVirtualMachineContextCreation(azure, VM_NAME_DEFAULT, Constants.REGION_DEFAULT,
-                        resourceGroupName, networkInterface, IMAGE_PUBLISHER_DEFAULT, IMAGE_OFFER_DEFAULT,
+                        resourceGroupName, network, IMAGE_PUBLISHER_DEFAULT, IMAGE_OFFER_DEFAULT,
                         IMAGE_SKU_DEFAULT, OS_USER_NAME_DEFAULT, OS_USER_PASSWORD_DEFAULT, VM_NAME_DEFAULT,
                         userData, DISK_SIZE_DEFAULT, VIRTUAL_MACHINE_SIZE_FREE_TIER);
         return virtualMachineContextCreation.createAsync();
@@ -228,25 +230,25 @@ public class ComputeApi {
      * Notes: It might spend minutes
      */
     public static VirtualMachine createVirtualMachineSync(Azure azure,
-                                                          NetworkInterface networkInterface,
+                                                          Network network,
                                                           String userData,
                                                           String resourceGroupName) {
 
         VirtualMachine.DefinitionStages.WithCreate virtualMachineContextCreation =
-                createVirtualMachineContextCreation(azure, networkInterface, userData, resourceGroupName);
+                createVirtualMachineContextCreation(azure, network, userData, resourceGroupName);
         return virtualMachineContextCreation.create();
     }
 
     public static VirtualMachine createVirtualMachineSync(
             Azure azure, String virtualMachineName, Region region,
-            String resourceGroupName, NetworkInterface networkInterface,
+            String resourceGroupName, Network network,
             String imagePublished, String imageOffer, String imageSku,
             String osUserName, String osUserPassword, String osComputeName,
             String userData, int diskSize, String size) {
 
         VirtualMachine.DefinitionStages.WithCreate virtualMachineContextCreation =
                 createVirtualMachineContextCreation(azure, VM_NAME_DEFAULT, Constants.REGION_DEFAULT,
-                        resourceGroupName, networkInterface, IMAGE_PUBLISHER_DEFAULT, IMAGE_OFFER_DEFAULT,
+                        resourceGroupName, network, IMAGE_PUBLISHER_DEFAULT, IMAGE_OFFER_DEFAULT,
                         IMAGE_SKU_DEFAULT, OS_USER_NAME_DEFAULT, OS_USER_PASSWORD_DEFAULT, VM_NAME_DEFAULT,
                         userData, DISK_SIZE_DEFAULT, VIRTUAL_MACHINE_SIZE_FREE_TIER);
         return virtualMachineContextCreation.create();
@@ -254,18 +256,18 @@ public class ComputeApi {
 
     public static VirtualMachine.DefinitionStages.WithCreate createVirtualMachineContextCreation(
             Azure azure,
-            NetworkInterface networkInterface,
+            Network network,
             String userData,
             String resourceGroupName) {
 
         return createVirtualMachineContextCreation(azure, VM_NAME_DEFAULT, Constants.REGION_DEFAULT,
-                resourceGroupName, networkInterface, IMAGE_PUBLISHER_DEFAULT, IMAGE_OFFER_DEFAULT, IMAGE_SKU_DEFAULT,
+                resourceGroupName, network, IMAGE_PUBLISHER_DEFAULT, IMAGE_OFFER_DEFAULT, IMAGE_SKU_DEFAULT,
                 OS_USER_NAME_DEFAULT, OS_USER_PASSWORD_DEFAULT, VM_NAME_DEFAULT, userData, DISK_SIZE_DEFAULT, VIRTUAL_MACHINE_SIZE_FREE_TIER);
     }
 
     public static VirtualMachine.DefinitionStages.WithCreate createVirtualMachineContextCreation(
             Azure azure, String virtualMachineName, Region region,
-            String resourceGroupName, NetworkInterface networkInterface,
+            String resourceGroupName, Network network,
             String imagePublished, String imageOffer, String imageSku,
             String osUserName, String osUserPassword, String osComputeName,
             String userData, int diskSize, String size) {
@@ -274,7 +276,10 @@ public class ComputeApi {
                 .define(virtualMachineName)
                 .withRegion(region)
                 .withExistingResourceGroup(resourceGroupName)
-                .withExistingPrimaryNetworkInterface(networkInterface)
+                .withExistingPrimaryNetwork(network)
+                .withSubnet("default")
+                .withPrimaryPrivateIPAddressDynamic()
+                .withoutPrimaryPublicIPAddress()
                 .withLatestLinuxImage(imagePublished, imageOffer, imageSku)
                 .withRootUsername(osUserName)
                 .withRootPassword(osUserPassword)
