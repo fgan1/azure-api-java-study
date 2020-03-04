@@ -85,6 +85,43 @@ public class ComputeApi {
         verifyVMState(azure, id);
     }
 
+    /**
+     * Create compute asynchronously.
+     * Reactive Programming is applied.
+     * <p>
+     * When Running:
+     * - States (powerState / provisioningState):
+     * -- (1) PowerState/starting|Creating
+     * -- (2) PowerState/running|Creating
+     * -- (3) PowerState/running|Succeeded
+     */
+    public static void createComputeFogbowWithObservebleWithResourceGroupCreation(Azure azure) throws Exception {
+        String networkId = PropertiesUtil.getNetworkIdProp();
+        String virtualMachineName = VM_NAME_DEFAULT;
+
+        networkId = AzureIDBuilderGeneral.buildNetworkId(networkId);
+        Network network = new NetworkApi(azure).getNetwork(azure, networkId);
+        String userData = PropertiesUtil.getUserData();
+
+        Observable<Indexable> resourceGroupNameAsync = ManagerApi.createResourceGroupNameAsync(azure, virtualMachineName);
+        resourceGroupNameAsync
+                .flatMap(indexable -> {
+
+                    ResourceGroup resourceGroup = (ResourceGroup) indexable;
+
+                    Observable<Indexable> virtualMachineAsync =
+                            createVirtualMachineAsync(azure, network, userData, resourceGroup);
+
+                    return Observable.merge(Observable.just(indexable), virtualMachineAsync);
+                })
+                .doOnNext(v -> System.out.println("Index" + v.toString()))
+                .doOnError(error -> error.printStackTrace())
+                .subscribe();
+
+        String id = AzureIDBuilderGeneral.buildVirtualMachineId(ComputeApi.VM_NAME_DEFAULT);
+        verifyVMState(azure, id);
+    }
+
     private static void verifyVMState(Azure azure, String virtualMachineId) throws InterruptedException {
         final int SLEEP_TIME = 10000;
         int count = 0;

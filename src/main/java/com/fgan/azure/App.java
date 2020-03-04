@@ -25,6 +25,7 @@ public class App {
                  */
 //                .runComputeSampleOne(azure)
 //                .createComputeStyleFogbow(azure)
+//                  .createComputeStyleFogbowTwo(azure)
 //                .printComputeInformation(azure)
 //                .printVirtualMachineAlreadyCreatedInformation(azure, id)
 //                .deleteVirtualMachineAlreadyCreated(azure, id)
@@ -71,7 +72,8 @@ public class App {
                 /**
                  * Management
                  */
-//                .removeResourceGroup(azure, name)
+//                .removeResourceGroupSync(azure, name)
+//                .removeResourceGroupAsync(azure, name)
                 .finish();
 
         runningForeverUntilYouStopIt();

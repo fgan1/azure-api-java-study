@@ -5,6 +5,7 @@ import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azure.management.resources.fluentcore.model.Creatable;
 import com.microsoft.azure.management.resources.fluentcore.model.Indexable;
+import rx.Completable;
 import rx.Observable;
 
 public class ManagerApi {
@@ -15,6 +16,13 @@ public class ManagerApi {
 
     public static void removeResourceGroup(Azure azure, String name) {
         azure.resourceGroups().deleteByName(name);
+    }
+
+    public static void removeResourceGroupAsync(Azure azure, String name) {
+        azure.resourceGroups().deleteByNameAsync(name)
+                .doOnError(error -> System.out.println("Error: " + error.getMessage()))
+                .doOnCompleted(() -> System.out.println("Complete"))
+                .subscribe();
     }
 
     public static ResourceGroup createResourceGroupName(Azure azure, String name) {

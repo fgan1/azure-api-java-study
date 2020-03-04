@@ -59,6 +59,11 @@ public class SampleExecution {
         return this.instance;
     }
 
+    public SampleExecution createComputeStyleFogbowTwo(Azure azure) throws Exception {
+        ComputeApi.createComputeFogbowWithObservebleWithResourceGroupCreation(azure);
+        return this.instance;
+    }
+
     public SampleExecution printComputeInformation(Azure azure) {
         ComputeApi.printMostInformation(azure);
         return this.instance;
@@ -194,8 +199,13 @@ public class SampleExecution {
     /**
      * Image Samples
      */
-    public SampleExecution removeResourceGroup(Azure azure, String name) {
+    public SampleExecution removeResourceGroupSync(Azure azure, String name) {
         ManagerApi.removeResourceGroup(azure, name);
+        return this.instance;
+    }
+
+    public SampleExecution removeResourceGroupAsync(Azure azure, String name) {
+        ManagerApi.removeResourceGroupAsync(azure, name);
         return this.instance;
     }
 
